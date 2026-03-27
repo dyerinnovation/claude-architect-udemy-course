@@ -1,0 +1,203 @@
+================================================================================
+CLAUDE CERTIFIED ARCHITECT EXAM: QUICK START GUIDE
+================================================================================
+
+14 STUDY MATERIALS CREATED
+
+1. DOMAIN WEIGHTS (Read First)
+   └─ domain-weights.md
+      Domain 1 = 27% (HIGHEST PRIORITY)
+      Study order: Domain 1 → Domains 3&4 → Domains 2&5
+
+2. MUST-KNOW CONCEPTS (Memorize These)
+   └─ 20-things-to-know-cold.md
+      20 rapid-fire concepts you'll be tested on
+      Review morning of exam
+
+3. OFFICIAL EXAM STRUCTURE
+   └─ exam-guide-reference.md
+      Domains, scenarios, task types, question count
+      Understand what you're walking into
+
+4. CORE SKILLS (Master These)
+   ├─ stop-reason-flow.md
+   │  The agentic loop: send → check stop_reason → tool_use/end_turn
+   │  Domain 1 depends on this
+   │
+   ├─ escalation-flowchart.md
+   │  When to escalate (policy gap, explicit request, stuck)
+   │  When NOT to escalate (frustration, length, confidence)
+   │
+   └─ tool-choice-reference.md
+      "auto" vs "any" vs {"type":"tool","name":"X"}
+
+5. TECHNICAL REFERENCE
+   ├─ error-response-checklist.md
+   │  errorCategory, isRetryable, description
+   │  Four categories: transient, validation, business, permission
+   │
+   ├─ claude-md-hierarchy.md
+   │  Three-level .claude/rules/ priority
+   │  Glob patterns, @import, /memory command
+   │
+   └─ batch-vs-sync-api.md
+      Batch: 50% savings, 24hr latency, no multi-turn tools
+      Sync: real-time, blocking workflows
+
+6. FRAMEWORKS & SYSTEMS
+   ├─ scenario-domain-mapping.md
+   │  All 6 scenarios + which domains they test
+   │  Quick reference for exam day
+   │
+   ├─ intervention-hierarchy.md
+   │  4 levels: explicit criteria → examples → code → architecture
+   │  Fix at lowest level first
+   │
+   ├─ built-in-tools-guide.md
+   │  Glob, Grep, Read, Write, Edit
+   │  When to use each one
+   │
+   └─ out-of-scope-topics.md
+      What NOT to study (fine-tuning, auth, embeddings, vision, etc.)
+
+7. STUDY ROADMAP
+   └─ README.md
+      Complete study plans and tips for test day
+
+================================================================================
+
+STUDY STRATEGY
+
+WEEK 1: FOUNDATIONS
+├─ Read: exam-guide-reference.md
+├─ Read: domain-weights.md
+├─ Study: stop-reason-flow.md (THIS IS CRITICAL)
+└─ Memorize: 20-things-to-know-cold.md
+
+WEEK 2: DECISION-MAKING
+├─ Study: escalation-flowchart.md
+├─ Study: tool-choice-reference.md
+├─ Study: scenario-domain-mapping.md
+└─ Practice: First scenario
+
+WEEK 3: DEEP DIVES
+├─ Study: error-response-checklist.md
+├─ Study: claude-md-hierarchy.md
+├─ Study: batch-vs-sync-api.md
+└─ Practice: Remaining scenarios
+
+WEEK 4: POLISH
+├─ Study: intervention-hierarchy.md
+├─ Study: built-in-tools-guide.md
+├─ Review: out-of-scope-topics.md
+└─ Practice exam
+
+DAYS BEFORE EXAM
+└─ Memorize: 20-things-to-know-cold.md (again)
+
+EXAM DAY
+├─ Review: domain-weights.md (3 minutes)
+├─ Review: scenario-domain-mapping.md (2 minutes)
+└─ Trust your preparation
+
+================================================================================
+
+CRITICAL CONCEPTS (Must Know Cold)
+
+1. stop_reason = "tool_use" → execute tool + loop
+2. stop_reason = "end_turn" → return to user + stop
+3. Domain 1 = 27% (agentic architecture, tool loops)
+4. Escalate on: policy gap, explicit request, or stuck
+5. Do NOT escalate on: frustration, length, confidence
+6. tool_choice = "auto": model chooses
+7. tool_choice = "any": model MUST call a tool
+8. tool_choice = {"type":"tool","name":"X"}: must call THIS tool
+9. Error fields: errorCategory + isRetryable + description
+10. Batch API: 50% savings, up to 24hr, no multi-turn tools
+11. Sync API: real-time, for blocking workflows
+12. .claude/rules/ hierarchy: path-specific > shared > personal
+13. Intervention Level 1: explicit criteria (fix vague prompts)
+14. Intervention Level 4: architectural redesign
+15. GLOB: find files by name/pattern
+16. GREP: search file contents
+17. READ: load a known file
+18. WRITE: new file or complete replacement
+19. EDIT: targeted modifications to existing file
+20. Master these and you can answer 70%+ of exam questions
+
+================================================================================
+
+EXAM STRUCTURE
+
+Duration: 90 minutes
+Questions: 50-60 total
+Passing: ~70%
+
+Domain Distribution:
+- Domain 1 (Agentic): 27% (~13-14 questions)
+- Domain 2 (Tools/MCP): 18% (~9-10 questions)
+- Domain 3 (Code Config): 20% (~10-12 questions)
+- Domain 4 (Prompting): 20% (~10-12 questions)
+- Domain 5 (Context): 15% (~7-9 questions)
+
+Scenarios: 6 total, with 6-8 questions each
+
+================================================================================
+
+FILES AT A GLANCE
+
+Size  Type          File
+────  ────────────  ────────────────────────────────
+1.7K  Concept       domain-weights.md
+4.0K  Reference     scenario-domain-mapping.md
+3.5K  Reference     tool-choice-reference.md
+4.5K  Reference     claude-md-hierarchy.md
+4.6K  Checklist     error-response-checklist.md
+6.6K  Flowchart     escalation-flowchart.md
+5.1K  Decision      batch-vs-sync-api.md
+7.4K  Flowchart     stop-reason-flow.md
+6.3K  Guide         built-in-tools-guide.md
+5.5K  Memorize      20-things-to-know-cold.md
+11K   Framework     intervention-hierarchy.md
+5.8K  Scope         out-of-scope-topics.md
+9.2K  Official      exam-guide-reference.md
+────────────────────────────────────────────────────
+32pg  Total         ~79K of study materials
+
+================================================================================
+
+YOUR WINNING STRATEGY
+
+1. MASTER DOMAIN 1 (27%)
+   └─ Read stop-reason-flow.md repeatedly
+   └─ Practice tracing agentic loops
+   └─ Study all 6 scenarios with this lens
+
+2. BALANCE DOMAINS 3 & 4 (40%)
+   └─ Prompt engineering + configuration
+   └─ These are straightforward if you understand basics
+
+3. HANDLE DOMAINS 2 & 5 (33%)
+   └─ Tool design = error responses + tool_choice
+   └─ Context = token budgeting + prioritization
+
+4. STUDY THE SCENARIOS
+   └─ Use scenario-domain-mapping.md
+   └─ Know which domain each tests
+
+5. TRUST YOUR PREPARATION
+   └─ You've reviewed everything
+   └─ You know the patterns
+   └─ You can apply judgment
+
+================================================================================
+
+GOOD LUCK!
+
+You've got this. Study smart, focus on the 20 concepts, master stop_reason,
+understand escalation logic, and know your scenarios.
+
+The exam tests JUDGMENT, not trivia.
+
+PRINT THIS FILE IF ALLOWED DURING EXAM REVIEW TIME.
+================================================================================
