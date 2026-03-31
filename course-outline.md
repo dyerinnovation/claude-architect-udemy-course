@@ -32,7 +32,52 @@
 
 ---
 
-## Section 2: Domain 1 — Agentic Architecture & Orchestration (27%)
+## Section 2: Claude API Fundamentals Bootcamp
+
+*Bridges the gap between "I've called Claude once" and "I can design agentic systems." Covers the API mechanics the exam tests at the hands-on level.*
+
+**Estimated Duration**: ~90 minutes
+
+### Lectures
+2.1 The Messages API: Anatomy of a Request and Response
+2.2 System Prompts: Where Instructions Live
+2.3 Temperature, top_p, and top_k: Controlling Randomness
+2.4 Prefilled Assistant Messages: Shaping Output from the Start
+2.5 Stop Sequences: Teaching Claude Exactly When to Stop
+2.6 Response Streaming: Real-Time Output
+2.7 Structured Output via the API
+2.8 XML Tags in Prompts: Structure Claude Understands
+2.9 Multimodal Inputs: Images in the Messages API
+2.10 Tool Use Fundamentals: Your First Function Call
+2.11 The Complete Tool Use Loop (Hands-On)
+
+### Hands-On Lab: API Fundamentals Playground
+- Jupyter notebook with real API calls for each feature covered
+- Exercises: basic message, system prompt, temperature experiments, streaming, prefilled messages, stop sequences, tool call
+- Downloadable as a lab resource
+
+### Quiz: Claude API Fundamentals
+- System prompt placement and behavior across turns
+- Temperature effects on output determinism
+- When to use prefilled assistant messages vs system prompts
+- Stop sequence matching rules and common gotchas
+- Streaming event types and their order
+- Tool use request/response format
+- XML tag best practices
+- Structured output approaches (tool_use vs JSON mode)
+- Correct format for sending an image to Claude
+- Role assignment: system prompt vs user message for persistent instructions
+
+### Downloadable Resources
+- API Quick Reference Card — Messages format, parameters, response structure
+- XML Tag Patterns Cheat Sheet — Common tag structures with examples
+- Tool Use Flow Diagram — Visual: define → call → execute → result → response
+- Temperature Decision Guide — Use case → recommended temperature range
+- Streaming Events Timeline — Visual sequence of SSE events
+
+---
+
+## Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
 
 *The highest-weighted domain. Master this section first.*
 
@@ -73,7 +118,7 @@
 
 ---
 
-## Section 3: Domain 2 — Tool Design & MCP Integration (18%)
+## Section 4: Domain 2 — Tool Design & MCP Integration (18%)
 
 ### Lectures
 3.1 Why Tool Descriptions Are the Most Important Thing You Write
@@ -107,7 +152,7 @@
 
 ---
 
-## Section 4: Domain 3 — Claude Code Configuration & Workflows (20%)
+## Section 5: Domain 3 — Claude Code Configuration & Workflows (20%)
 
 ### Lectures
 4.1 The CLAUDE.md Configuration Hierarchy (user / project / directory)
@@ -148,7 +193,7 @@
 
 ---
 
-## Section 5: Domain 4 — Prompt Engineering & Structured Output (20%)
+## Section 6: Domain 4 — Prompt Engineering & Structured Output (20%)
 
 ### Lectures
 5.1 Explicit Criteria vs Vague Instructions — Why It Matters
@@ -189,7 +234,7 @@
 
 ---
 
-## Section 6: Domain 5 — Context Management & Reliability (15%)
+## Section 7: Domain 5 — Context Management & Reliability (15%)
 
 ### Lectures
 6.1 The "Lost in the Middle" Effect — What It Means and How to Counter It
@@ -231,7 +276,7 @@
 
 ---
 
-## Section 7: Scenario Deep Dives
+## Section 8: Scenario Deep Dives
 
 *Scenario-by-scenario analysis of likely question patterns.*
 
@@ -249,7 +294,7 @@ Full breakdown of which task statements are most likely per scenario.
 
 ---
 
-## Section 8: Practice Exam & Answer Review
+## Section 9: Practice Exam & Answer Review
 
 ### Lectures
 8.1 Practice Exam Walkthrough — All 12 Sample Questions from Exam Guide
@@ -264,7 +309,7 @@ Full breakdown of which task statements are most likely per scenario.
 
 ---
 
-## Section 9: Quick Reference & Final Review
+## Section 10: Quick Reference & Final Review
 
 ### Lectures
 9.1 The 20 Things You Must Know Cold
@@ -312,17 +357,18 @@ Students will need:
 ## Course Completion Path
 
 ```
-Section 1 (30 min) → Domain overview, exam strategy
-Section 2 (3 hr)   → Domain 1: Agentic Architecture [HIGHEST WEIGHT - start here]
-Section 3 (2 hr)   → Domain 2: Tool Design & MCP
-Section 4 (2.5 hr) → Domain 3: Claude Code Config
-Section 5 (2.5 hr) → Domain 4: Prompt Engineering
-Section 6 (2 hr)   → Domain 5: Context & Reliability
-Section 7 (1.5 hr) → Scenario deep dives
-Section 8 (2 hr)   → Practice exam + review
-Section 9 (30 min) → Final review + cheat sheets
+Section 1  (30 min)  → Course overview, exam strategy
+Section 2  (90 min)  → Claude API Fundamentals Bootcamp [NEW — build hands-on foundation]
+Section 3  (3 hr)    → Domain 1: Agentic Architecture [HIGHEST WEIGHT - start here]
+Section 4  (2 hr)    → Domain 2: Tool Design & MCP
+Section 5  (2.5 hr)  → Domain 3: Claude Code Config
+Section 6  (2.5 hr)  → Domain 4: Prompt Engineering
+Section 7  (2 hr)    → Domain 5: Context & Reliability
+Section 8  (1.5 hr)  → Scenario deep dives
+Section 9  (2 hr)    → Practice exam + review
+Section 10 (30 min)  → Final review + cheat sheets
 ```
 
-**Total: ~16.5 hours of instruction + labs**
+**Total: ~18.5 hours of instruction + labs** (up from ~16.5 hours)
 
-For exam-day cramming: Sections 9 → 8 → domain section for your weakest area.
+For exam-day cramming: Sections 10 → 9 → domain section for your weakest area.
