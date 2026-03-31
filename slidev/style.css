@@ -1,0 +1,400 @@
+/* ─── Dyer Innovation Brand Design System ─────────────────────────────────── */
+
+/* Brand Colors
+   Leaf Green (Primary) : #3CAF50
+   Deep Green           : #1B8A5A
+   Teal Accent          : #0D7377
+   Dark Navy            : #1A3A4A
+   Light Mint           : #E8F5EB
+   Amber                : #E3A008
+   Code Dark            : #1E2D3D
+   Code Light           : #A8D5C2
+*/
+
+/* Base typography */
+.slidev-layout {
+  font-family: 'Calibri', 'Trebuchet MS', Arial, sans-serif;
+}
+
+/* ─── Cover / Title slide ────────────────────────────────────────────────── */
+.slidev-layout.cover {
+  background: #1A3A4A !important;
+  color: white;
+  position: relative;
+}
+
+.di-cover-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #3CAF50;
+}
+
+.di-course-label {
+  font-size: 0.95rem;
+  color: #A8D5C2;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.04em;
+}
+
+.di-cover-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+
+.di-cover-subtitle {
+  font-size: 1.2rem;
+  color: #E8F5EB;
+  opacity: 0.85;
+}
+
+.di-logo-centered {
+  position: absolute;
+  bottom: 1.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  opacity: 0.95;
+}
+
+/* ─── Section divider ────────────────────────────────────────────────────── */
+.di-section-bg {
+  background: linear-gradient(135deg, #3CAF50 0%, #1B8A5A 100%) !important;
+  color: white;
+}
+
+/* ─── Content slide ──────────────────────────────────────────────────────── */
+.slidev-layout.default {
+  background: #E8F5EB;
+  position: relative;
+}
+
+.di-header {
+  background: #1A3A4A;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 0.55rem 1.2rem;
+  margin: -1.5rem -2rem 1rem -2rem;
+  border-bottom: 3px solid #3CAF50;
+}
+
+.di-body {
+  color: #111928;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  padding: 0 0.5rem;
+}
+
+.di-body li {
+  margin-bottom: 0.45rem;
+}
+
+.di-body li::marker {
+  color: #3CAF50;
+}
+
+.di-logo {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.2rem;
+  width: 55px;
+  opacity: 0.9;
+}
+
+/* ─── Code slide ─────────────────────────────────────────────────────────── */
+.di-code-slide {
+  background: #E8F5EB !important;
+  color: #111928;
+  position: relative;
+}
+
+.di-code-header {
+  background: #1A3A4A;
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 0.55rem 1.2rem;
+  margin: -1.5rem -2rem 0.75rem -2rem;
+  border-bottom: 3px solid #3CAF50;
+}
+
+.di-code-slide .shiki,
+.di-code-slide pre {
+  background: #374151 !important;
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
+/* ─── Global code block override (non-code slides) ──────────────────────── */
+.slidev-layout .shiki,
+.slidev-layout pre:has(code) {
+  background: #374151 !important;
+  border-radius: 6px;
+}
+
+/* ─── Two-col comparison ─────────────────────────────────────────────────── */
+.slidev-layout.two-cols,
+.two-cols,
+[layout="two-cols"] {
+  background: white !important;
+  color: #111928 !important;
+  position: relative;
+}
+
+/* Catch-all: ensure no slide has an unreadable black background */
+.slidev-layout {
+  background: #E8F5EB;
+}
+
+.di-col-left-label {
+  color: #3CAF50;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid #3CAF50;
+}
+
+.di-col-right-label {
+  color: #0D7377;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid #0D7377;
+}
+
+.di-col-body {
+  color: #111928;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.di-col-body li {
+  margin-bottom: 0.35rem;
+}
+
+.di-col-body li::marker {
+  color: #3CAF50;
+}
+
+.di-col-warning {
+  background: #FFF8E6;
+  border-left: 3px solid #E3A008;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  border-radius: 3px;
+}
+
+/* ─── Exam Tip slide ─────────────────────────────────────────────────────── */
+.di-exam-slide {
+  background: white !important;
+  position: relative;
+}
+
+.di-exam-banner {
+  background: #E3A008;
+  color: white;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  padding: 0.6rem 1rem;
+  margin: -1.5rem -2rem 1.2rem -2rem;
+  letter-spacing: 0.06em;
+}
+
+.di-exam-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1A3A4A;
+  margin-bottom: 1rem;
+}
+
+.di-trap-box {
+  background: #FFF0F0;
+  border-left: 4px solid #E53E3E;
+  padding: 0.7rem 1rem;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #111928;
+}
+
+.di-trap-label {
+  font-weight: 700;
+  color: #E53E3E;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.di-correct-box {
+  background: #F0FFF4;
+  border-left: 4px solid #3CAF50;
+  padding: 0.7rem 1rem;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #111928;
+}
+
+.di-correct-label {
+  font-weight: 700;
+  color: #1B8A5A;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.di-exam-body {
+  font-size: 0.95rem;
+  color: #1A3A4A;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Takeaway slide ─────────────────────────────────────────────────────── */
+.di-takeaway-slide {
+  background: linear-gradient(150deg, #1A3A4A 0%, #0D7377 100%) !important;
+  color: white !important;
+  position: relative;
+}
+
+.di-takeaway-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #3CAF50;
+  padding-bottom: 0.4rem;
+}
+
+.di-takeaway-list {
+  list-style: none;
+  padding: 0;
+}
+
+.di-takeaway-list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+  font-size: 0.95rem;
+  color: white;
+  line-height: 1.5;
+}
+
+.di-takeaway-list li::before {
+  content: '●';
+  color: #3CAF50;
+  font-size: 0.6rem;
+  margin-right: 0.6rem;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+}
+
+/* ─── Global inline code override ───────────────────────────────────────── */
+.slidev-layout code:not(.shiki code) {
+  background: #D1D5DB !important;
+  color: #1A3A4A !important;
+  padding: 0.1em 0.35em !important;
+  border-radius: 3px !important;
+  font-size: 0.9em;
+}
+
+/* Inline code on dark slides (cover, takeaway) — lighter style */
+.slidev-layout.cover code:not(.shiki code),
+.di-takeaway-slide code:not(.shiki code) {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #A8D5C2 !important;
+}
+
+/* ─── Inline code / keywords ────────────────────────────────────────────── */
+.di-kw {
+  color: #3CAF50;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  background: rgba(60, 175, 80, 0.08);
+  padding: 0.05em 0.3em;
+  border-radius: 3px;
+}
+
+.di-code-inline {
+  font-family: 'Courier New', monospace;
+  background: rgba(13, 115, 119, 0.1);
+  color: #0D7377;
+  padding: 0.05em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* ─── Step cards ─────────────────────────────────────────────────────────── */
+.di-step-card {
+  background: white;
+  border: 1px solid #c8e6d0;
+  border-left: 4px solid #3CAF50;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #111928;
+}
+
+.di-step-num {
+  font-weight: 700;
+  color: #1B8A5A;
+  margin-right: 0.4rem;
+}
+
+/* ─── Flow diagram helpers ───────────────────────────────────────────────── */
+.di-flow-box {
+  background: #1A3A4A;
+  color: white;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.di-flow-tool {
+  background: #E3A008;
+  color: white;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.di-flow-stop {
+  background: #1B8A5A;
+  color: white;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.di-arrow {
+  text-align: center;
+  color: #0D7377;
+  font-size: 1.2rem;
+  line-height: 1;
+  margin: 0.15rem 0;
+}
