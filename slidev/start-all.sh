@@ -4,7 +4,7 @@
 #   ./start-all.sh        → launch all sections
 #   ./start-all.sh 1      → launch section 1 only (ports 3030-3035)
 #   ./start-all.sh 2      → launch section 2 only (ports 3040-3050)
-#   ./start-all.sh 3      → launch section 3 only (ports 3050-3063)
+#   ./start-all.sh 3      → launch section 3 only (ports 3051-3064)
 
 SECTION=${1:-"all"}
 
@@ -58,20 +58,20 @@ fi
 if [[ "$SECTION" == "all" || "$SECTION" == "3" ]]; then
   echo ""
   echo "Section 3: Domain 1 — Agentic Architecture & Orchestration"
-  launch "lecture-3.1.md"  3050
-  launch "lecture-3.2.md"  3051
-  launch "lecture-3.3.md"  3052
-  launch "lecture-3.4.md"  3053
-  launch "lecture-3.5.md"  3054
-  launch "lecture-3.6.md"  3055
-  launch "lecture-3.7.md"  3056
-  launch "lecture-3.8.md"  3057
-  launch "lecture-3.9.md"  3058
-  launch "lecture-3.10.md" 3059
-  launch "lecture-3.11.md" 3060
-  launch "lecture-3.12.md" 3061
-  launch "lecture-3.13.md" 3062
-  launch "lecture-3.14.md" 3063
+  launch "lecture-3.1.md"  3051
+  launch "lecture-3.2.md"  3052
+  launch "lecture-3.3.md"  3053
+  launch "lecture-3.4.md"  3054
+  launch "lecture-3.5.md"  3055
+  launch "lecture-3.6.md"  3056
+  launch "lecture-3.7.md"  3057
+  launch "lecture-3.8.md"  3058
+  launch "lecture-3.9.md"  3059
+  launch "lecture-3.10.md" 3060
+  launch "lecture-3.11.md" 3061
+  launch "lecture-3.12.md" 3062
+  launch "lecture-3.13.md" 3063
+  launch "lecture-3.14.md" 3064
 fi
 
 echo ""
