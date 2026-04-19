@@ -88,7 +88,7 @@
 ```
 Request:
 {
-  "model": "claude-3-5-sonnet-20241022",
+  "model": "claude-sonnet-4-6",
   "messages": [{"role": "user", "content": "What is MCP?"}],
   "tools": [{"name": "search_documents", ...}]
 }
@@ -110,7 +110,7 @@ Action: Execute search → find results
 ```
 Request:
 {
-  "model": "claude-3-5-sonnet-20241022",
+  "model": "claude-sonnet-4-6",
   "messages": [
     {"role": "user", "content": "What is MCP?"},
     {"role": "assistant", "content": [{"type": "tool_use", "name": "search_documents", ...}]},
@@ -253,7 +253,7 @@ def agentic_loop(user_query, tools):
     while True:
         # Step 1: Send to Claude
         response = claude_api.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-6",
             max_tokens=2048,
             messages=messages,
             tools=tools
