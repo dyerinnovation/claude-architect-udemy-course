@@ -3,6 +3,7 @@
 # Usage: ./start-all.sh [section]
 #   ./start-all.sh        → launch all sections
 #   ./start-all.sh 1      → launch section 1 only (ports 3030-3035)
+#   ./start-all.sh 2      → launch section 2 only (ports 3040-3050)
 #   ./start-all.sh 3      → launch section 3 only (ports 3050-3063)
 
 SECTION=${1:-"all"}
@@ -36,6 +37,22 @@ if [[ "$SECTION" == "all" || "$SECTION" == "1" ]]; then
   launch "lecture-1.4.md" 3033
   launch "lecture-1.5.md" 3034
   launch "lecture-1.6.md" 3035
+fi
+
+if [[ "$SECTION" == "all" || "$SECTION" == "2" ]]; then
+  echo ""
+  echo "Section 2: Claude API Fundamentals Bootcamp"
+  launch "lecture-2.1.md"  3040
+  launch "lecture-2.2.md"  3041
+  launch "lecture-2.3.md"  3042
+  launch "lecture-2.4.md"  3043
+  launch "lecture-2.5.md"  3044
+  launch "lecture-2.6.md"  3045
+  launch "lecture-2.7.md"  3046
+  launch "lecture-2.8.md"  3047
+  launch "lecture-2.9.md"  3048
+  launch "lecture-2.10.md" 3049
+  launch "lecture-2.11.md" 3050
 fi
 
 if [[ "$SECTION" == "all" || "$SECTION" == "3" ]]; then
