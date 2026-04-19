@@ -191,7 +191,7 @@ import anthropic
 client = anthropic.Anthropic()
 
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=1024,
     tools=[get_weather_tool],          # Pass your tool definitions here
     messages=[
@@ -322,7 +322,7 @@ result = get_current_weather(**tool_use_block.input)
 
 # Step 3: send the result back as a user message with a tool_result block
 followup = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=1024,
     tools=[get_weather_tool],
     messages=[

@@ -211,7 +211,7 @@ def generate_handoff_summary(data: HandoffSummary) -> str:
     Be concise. Every sentence must be actionable for the human agent.
     """
     response = client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         messages=[{"role": "user", "content": prompt}]
     )
     return response.content[0].text

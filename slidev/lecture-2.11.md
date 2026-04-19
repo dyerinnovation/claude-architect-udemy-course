@@ -330,7 +330,7 @@ def run_agent(user_message: str) -> str:
 
     while True:
         response = client.messages.create(
-            model="claude-opus-4-5",
+            model="claude-opus-4-7",
             max_tokens=1024,
             tools=tools,
             messages=messages,

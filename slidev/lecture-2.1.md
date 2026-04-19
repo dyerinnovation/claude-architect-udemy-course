@@ -57,7 +57,7 @@ layout: default
   <v-click>
   <div class="di-step-card">
     <span class="di-step-num">model</span>
-    Which Claude to use — e.g. <code class="di-code-inline">claude-3-5-sonnet-20241022</code>
+    Which Claude to use — e.g. <code class="di-code-inline">claude-sonnet-4-6</code>
   </div>
   </v-click>
   <v-click>
@@ -95,7 +95,7 @@ Every call to client.messages.create() shares the same skeleton.
 
 There are five parameters you need to know cold.
 
-model tells the API which Claude to use — claude-3-5-sonnet-20241022, for example.
+model tells the API which Claude to use — claude-sonnet-4-6, for example.
 
 max_tokens sets the hard ceiling on how many tokens Claude can generate in the response.
 
@@ -127,7 +127,7 @@ import anthropic
 client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment
 
 response = client.messages.create(
-    model="claude-3-5-sonnet-20241022",    # Which Claude model to use
+    model="claude-sonnet-4-6",    # Which Claude model to use
     max_tokens=1024,                        # Max tokens in the response
     system="You are a helpful assistant.",  # Top-level system prompt
     messages=[
@@ -189,7 +189,7 @@ class: di-code-slide
   "content": [
     { "type": "text", "text": "The population of Paris..." }
   ],
-  "model": "claude-3-5-sonnet-20241022",
+  "model": "claude-sonnet-4-6",
   "stop_reason": "end_turn",
   "stop_sequence": null,
   "usage": { "input_tokens": 42, "output_tokens": 31 }

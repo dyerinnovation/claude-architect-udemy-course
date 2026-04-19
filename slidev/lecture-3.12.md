@@ -178,7 +178,7 @@ def run_code_review_pipeline(file_paths: list[str]) -> dict:
     per_file_results = []
     for path in file_paths:
         result = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-opus-4-7",
             system="You are a code reviewer. Analyze this file for bugs, style, and security issues.",
             messages=[{"role": "user", "content": f"File: {path}\n\n{read_file(path)}"}]
         )
@@ -187,7 +187,7 @@ def run_code_review_pipeline(file_paths: list[str]) -> dict:
     # Step 2: Cross-file integration pass — depends on Step 1
     integration_context = format_per_file_results(per_file_results)
     integration_result = client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         system="You are a senior engineer. Identify cross-file issues: import cycles, interface mismatches, architectural concerns.",
         messages=[{"role": "user", "content": f"Per-file analyses:\n\n{integration_context}\n\nIdentify cross-cutting issues."}]
     )
@@ -239,7 +239,7 @@ def run_investigation(initial_query: str, max_steps: int = 10) -> str:
 
     while step_count < max_steps:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-opus-4-7",
             tools=investigation_tools,   # search, read_file, query_db, check_logs
             messages=messages
         )

@@ -183,7 +183,7 @@ client = anthropic.Anthropic()
 user_data = "Name: Alice Chen, Role: Staff Engineer, Team: Platform"
 
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=256,
     messages=[
         {
@@ -302,7 +302,7 @@ class: di-code-slide
 
 ```python
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=512,
     stop_sequences=["</answer>"],
     messages=[

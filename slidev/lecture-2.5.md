@@ -260,7 +260,7 @@ import anthropic
 client = anthropic.Anthropic()
 
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=512,
     stop_sequences=["</answer>"],  # halt on this exact string
     messages=[{
@@ -405,7 +405,7 @@ class: di-code-slide
 
 ```python
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=256,
     stop_sequences=["</answer>"],   # stop at closing tag
     messages=[

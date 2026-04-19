@@ -301,7 +301,7 @@ QUERY: [specific question for this agent about integrating findings]
 
         try:
             response = client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-sonnet-4-6",
                 max_tokens=1500,
                 system=agent_def.instructions,
                 messages=[
@@ -865,7 +865,7 @@ def run_research_pipeline(research_question: str, recover_session: str = None) -
     # Step 1: Get coordinator delegation instructions
     print("Step 1: Coordinator parsing research question...\n")
     response = client.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-6",
         max_tokens=1000,
         messages=[
             {"role": "user", "content": coordinator.create_coordinator_prompt()}

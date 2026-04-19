@@ -107,7 +107,7 @@ class: di-code-slide
 ```python
 # LOW temperature — accuracy and consistency
 code_review = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-4-6",
     max_tokens=1024,
     temperature=0,        # Deterministic: same input → same output
     messages=[{
@@ -118,7 +118,7 @@ code_review = client.messages.create(
 
 # HIGH temperature — creativity and variation
 creative = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-4-6",
     max_tokens=1024,
     temperature=1.0,      # Creative: varied, unexpected output
     messages=[{

@@ -26,7 +26,7 @@ By completing this lab, you will demonstrate the ability to:
 ## Prerequisites
 
 ### Tools & APIs
-- **Claude API** with tools support (models: claude-3-5-sonnet or later)
+- **Claude API** with tools support (models: claude-sonnet-4-6 or later)
 - **Python 3.8+** with the Anthropic SDK
 - **Mock APIs** or local simulation functions (no external services required)
 
@@ -397,7 +397,7 @@ def run_customer_support_agent(customer_request: str):
     while True:
         # Call Claude with tools
         response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-6",
             max_tokens=2048,
             system=create_system_prompt(),
             tools=tools,

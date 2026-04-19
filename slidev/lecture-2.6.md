@@ -270,7 +270,7 @@ client = anthropic.Anthropic()
 
 # The SDK's stream() context manager handles SSE for you
 with client.messages.stream(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Explain REST APIs in plain English."}]
 ) as stream:
@@ -327,7 +327,7 @@ client = anthropic.Anthropic()
 
 # Use raw event iteration when you need to handle every event type
 with client.messages.stream(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=1024,
     messages=[{"role": "user", "content": "List three benefits of microservices."}]
 ) as stream:

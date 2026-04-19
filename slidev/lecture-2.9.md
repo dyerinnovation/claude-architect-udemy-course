@@ -212,7 +212,7 @@ with open("diagram.png", "rb") as image_file:
     image_data = base64.standard_b64encode(image_file.read()).decode("utf-8")
 
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=1024,
     messages=[
         {

@@ -552,7 +552,7 @@ class ExtractionValidator:
 
         # Call Claude with tool
         response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-6",
             max_tokens=1500,
             tools=EXTRACTION_TOOLS,
             messages=[
@@ -633,7 +633,7 @@ Focus on fixing the errors above.
         })
 
         response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-6",
             max_tokens=1500,
             tools=EXTRACTION_TOOLS,
             messages=[
@@ -763,7 +763,7 @@ class BatchExtractionProcessor:
             request = {
                 "custom_id": custom_id,
                 "params": {
-                    "model": "claude-3-5-sonnet-20241022",
+                    "model": "claude-sonnet-4-6",
                     "max_tokens": 1500,
                     "tools": EXTRACTION_TOOLS,
                     "messages": [

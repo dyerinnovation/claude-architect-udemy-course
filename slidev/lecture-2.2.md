@@ -124,7 +124,7 @@ You only answer questions about flights, baggage, and reservations.
 If asked about anything else, politely redirect the customer."""
 
 response = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-4-6",
     max_tokens=1024,
     system=SYSTEM_PROMPT,       # Top-level parameter — NOT in messages array
     messages=[
@@ -171,7 +171,7 @@ class: di-code-slide
 ```python
 # WRONG: Embedding instructions inside the first user message
 response = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-4-6",
     max_tokens=1024,
     # No system parameter
     messages=[
@@ -231,7 +231,7 @@ def chat(user_message):
     conversation_history.append({"role": "user", "content": user_message})
 
     response = client.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-6",
         max_tokens=1024,
         system="You are Aria, SkyLine Airlines support. Only discuss flights.",
         messages=conversation_history   # Full history sent every call

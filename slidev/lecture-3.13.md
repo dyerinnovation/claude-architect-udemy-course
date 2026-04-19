@@ -295,7 +295,7 @@ class: di-code-slide
 def build_session_summary(prior_session_messages: list) -> str:
     """Ask Claude to synthesize what was learned — not replay raw history."""
     summary_response = client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         messages=[
             *prior_session_messages,
             {"role": "user", "content":
@@ -313,7 +313,7 @@ def build_session_summary(prior_session_messages: list) -> str:
 def start_fresh_with_summary(summary: str, next_task: str) -> list:
     """New session — clean context, no stale tool results."""
     return client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         system="You are a research analyst continuing a prior investigation.",
         messages=[
             {"role": "user", "content":

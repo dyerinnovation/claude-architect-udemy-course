@@ -190,7 +190,7 @@ extraction_tool = {
 }
 
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=1024,
     tools=[extraction_tool],
     tool_choice={"type": "any"},   # Force Claude to call a tool
@@ -294,7 +294,7 @@ class: di-code-slide
 ```python
 # APPROACH 2: response_format parameter — valid JSON, but no schema check
 response = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-opus-4-7",
     max_tokens=1024,
     messages=[{
         "role": "user",
@@ -309,7 +309,7 @@ system = """You are a data extractor. Always respond with valid JSON matching:
 Never include any text outside the JSON object."""
 
 response = client.messages.create(
-    model="claude-opus-4-5", max_tokens=1024, system=system,
+    model="claude-opus-4-7", max_tokens=1024, system=system,
     messages=[{"role": "user", "content": "Order #C789, Sara Kim, $99.50, delivered."}]
 )
 # Usually works. But Claude could add a markdown fence or a preamble sentence.

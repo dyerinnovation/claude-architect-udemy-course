@@ -232,7 +232,7 @@ class: di-code-slide
 ```python {all|4-6|7-9|11-14}
 # Coordinator spawning a research subagent
 response = client.messages.create(
-    model="claude-opus-4-6",
+    model="claude-opus-4-7",
     tools=[{
         "type": "computer_use",
         "name": "Task",

@@ -194,7 +194,7 @@ def synthesize_with_context(claims_payload):
         for c in claims_payload
     ])
     return client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         messages=[{"role": "user", "content": f"Synthesize the following verified claims:\n\n{context_block}"}]
     )
 ```
