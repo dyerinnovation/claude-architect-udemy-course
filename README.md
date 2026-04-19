@@ -35,14 +35,15 @@ By the end of this course, you will be able to:
 | Section | Domain/Topic | Weight | Duration |
 |---------|-------------|--------|----------|
 | 1 | Course Intro & Exam Strategy | — | 30 min |
-| 2 | Agentic Architecture & Orchestration | 27% | 3 hr |
-| 3 | Tool Design & MCP Integration | 18% | 2 hr |
-| 4 | Claude Code Configuration & Workflows | 20% | 2.5 hr |
-| 5 | Prompt Engineering & Structured Output | 20% | 2.5 hr |
-| 6 | Context Management & Reliability | 15% | 2 hr |
-| 7 | Scenario Deep Dives | — | 1.5 hr |
-| 8 | Practice Exam & Answer Review | — | 2 hr |
-| 9 | Quick Reference & Final Review | — | 30 min |
+| 2 | Claude API Fundamentals Bootcamp | — | 2 hr |
+| 3 | Agentic Architecture & Orchestration | 27% | 3 hr |
+| 4 | Tool Design & MCP Integration | 18% | 2 hr |
+| 5 | Claude Code Configuration & Workflows | 20% | 2.5 hr |
+| 6 | Prompt Engineering & Structured Output | 20% | 2.5 hr |
+| 7 | Context Management & Reliability | 15% | 2 hr |
+| 8 | Scenario Deep Dives | — | 1.5 hr |
+| 9 | Practice Exam & Answer Review | — | 2 hr |
+| 10 | Quick Reference & Final Review | — | 30 min |
 
 **Total: ~16.5 hours of instruction + labs**
 
