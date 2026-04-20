@@ -1,6 +1,5 @@
 <script setup>
 import { computed } from 'vue'
-import LogoMark from './LogoMark.vue'
 
 const props = defineProps({
   part: { type: String, required: true },
@@ -29,9 +28,12 @@ const dark = computed(() => props.bg === 'var(--forest-900)' || props.bg === '#1
       >
         {{ blurb }}
       </div>
-      <div class="section-break__logo" :style="{ opacity: dark ? 0.95 : 1 }">
-        <LogoMark :size="88" />
-      </div>
+      <img
+        src="/assets/logo-mark.png"
+        alt=""
+        class="section-break__logo"
+        :style="{ opacity: dark ? 0.95 : 1 }"
+      />
     </div>
   </div>
 </template>
@@ -85,5 +87,7 @@ const dark = computed(() => props.bg === 'var(--forest-900)' || props.bg === '#1
   position: absolute;
   bottom: 80px;
   right: 96px;
+  width: 88px;
+  height: auto;
 }
 </style>
