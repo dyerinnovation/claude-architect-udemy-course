@@ -2,7 +2,7 @@
 # Launch all Slidev presentations for Claude Certified Architect course
 # Usage: ./start-all.sh [section]
 #   ./start-all.sh        → launch all sections
-#   ./start-all.sh 1      → launch section 1 only (ports 3030-3035)
+#   ./start-all.sh 1      → launch section 1 only (port 3030)
 #   ./start-all.sh 2      → launch section 2 only (ports 3040-3050)
 #   ./start-all.sh 3      → launch section 3 only (ports 3051-3064)
 
@@ -30,13 +30,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 if [[ "$SECTION" == "all" || "$SECTION" == "1" ]]; then
   echo ""
-  echo "Section 1: Course Introduction & Exam Strategy"
+  echo "Section 1: Course Introduction (1 combined deck)"
   launch "lecture-1.1.md" 3030
-  launch "lecture-1.2.md" 3031
-  launch "lecture-1.3.md" 3032
-  launch "lecture-1.4.md" 3033
-  launch "lecture-1.5.md" 3034
-  launch "lecture-1.6.md" 3035
 fi
 
 if [[ "$SECTION" == "all" || "$SECTION" == "2" ]]; then
