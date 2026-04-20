@@ -231,7 +231,7 @@ Covers (in one combined walkthrough):
 
 ## Section 8: Demo 1 — Multi-Tool Agent with Escalation Logic
 
-*Reinforces Domains 1, 2, 5. Content lives in `labs/demos/demo-1-multi-tool-agent/`.*
+*Reinforces Domains 1, 2, 5. Content lives in `labs/demos/demo-1-multi-tool-agent-escalation/`.*
 
 **Estimated Duration**: ~15 minutes
 
@@ -250,7 +250,7 @@ Covers (in one combined walkthrough):
 
 ## Section 9: Demo 2 — Claude Code for a Team Dev Workflow
 
-*Reinforces Domains 3, 2. Content lives in `labs/demos/demo-2-team-dev-workflow/`.*
+*Reinforces Domains 3, 2. Content lives in `labs/demos/demo-2-claude-code-team-workflow/`.*
 
 **Estimated Duration**: ~15 minutes
 
@@ -269,7 +269,7 @@ Covers (in one combined walkthrough):
 
 ## Section 10: Demo 3 — Structured Data Extraction Pipeline
 
-*Reinforces Domains 4, 5. Content lives in `labs/demos/demo-3-extraction-pipeline/`.*
+*Reinforces Domains 4, 5. Content lives in `labs/demos/demo-3-structured-data-extraction/`.*
 
 **Estimated Duration**: ~15 minutes
 
@@ -288,7 +288,7 @@ Covers (in one combined walkthrough):
 
 ## Section 11: Demo 4 — Multi-Agent Research Pipeline
 
-*Reinforces Domains 1, 2, 5. Content lives in `labs/demos/demo-4-research-pipeline/`.*
+*Reinforces Domains 1, 2, 5. Content lives in `labs/demos/demo-4-multi-agent-research-pipeline/`.*
 
 **Estimated Duration**: ~15 minutes
 
