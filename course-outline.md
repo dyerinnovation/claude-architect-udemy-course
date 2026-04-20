@@ -6,18 +6,28 @@
 **Target audience**: Solution architects, senior engineers building production AI applications with Claude
 **Prerequisites**: Basic familiarity with LLM APIs; some Python or TypeScript
 **Exam alignment**: Covers all 5 domains per the official Anthropic exam guide (v0.1, Feb 2025)
+**Structure**: 11 sections, ~18.5 hours of instruction + demo walkthroughs
+
+> The only official practice exam is the sample question set inside `resources/anthropic-exam-guide.md`. There is no additional "Practice Exam" or "Final Review" section — Sections 8–11 replace that with four hands-on Preparation Exercise demos drawn directly from the exam guide.
 
 ---
 
 ## Section 1: Course Introduction & Exam Strategy
 
+*One combined introduction lecture covering everything a student needs before Domain 1.*
+
+**Estimated Duration**: ~15 minutes
+
 ### Lectures
-1.1 Welcome & What You'll Learn
-1.2 Exam Format Deep Dive — Multiple Choice, Scoring, Passing Threshold (720/1000)
-1.3 The 5 Domains & Their Weights (Domain 1 = 27% — your biggest lever)
-1.4 How to Use the 6 Scenarios — 4 Will Appear, Know All 6
-1.5 Study Strategy for Tomorrow vs 2 Weeks Out
-1.6 How to Navigate the Official Exam Guide
+1.1 Welcome, Exam Format, Domains, Scenarios, Study Strategy & Exam-Guide Navigation
+
+Covers (in one combined walkthrough):
+- Course welcome and what you'll learn
+- Exam format: multiple choice, scaled scoring, passing threshold (720/1000)
+- The 5 domains and their weights (Domain 1 = 27% — highest-leverage)
+- The 6 scenarios (4 of 6 will appear on any given exam)
+- Study strategy for "tomorrow" vs "2 weeks out"
+- How to navigate the official Anthropic exam guide
 
 ### Quiz: Exam Mechanics Check
 - What is the passing score?
@@ -82,32 +92,20 @@
 *The highest-weighted domain. Master this section first.*
 
 ### Lectures
-2.1 The Agentic Loop: `stop_reason` Is Everything
-2.2 `"tool_use"` vs `"end_turn"` — Control Flow Patterns
-2.3 Anti-Patterns: What NOT to Do in Agentic Loops
-2.4 Multi-Agent Hub-and-Spoke Architecture
-2.5 The Coordinator's Role: Decompose, Delegate, Aggregate
-2.6 Subagent Context Isolation — Why They Don't Inherit History
-2.7 The `Task` Tool: Spawning Subagents + `allowedTools` Requirement
-2.8 Parallel Subagent Execution — Single Response, Multiple Task Calls
-2.9 Explicit Context Passing Between Agents
-2.10 Programmatic Enforcement vs Prompt-Based Guidance
-2.11 Agent SDK Hooks: `PostToolUse` and Tool Call Interception
-2.12 Task Decomposition: Prompt Chaining vs Dynamic Adaptive
-2.13 Session Management: `--resume`, `fork_session`, When to Start Fresh
-2.14 Structured Handoff Summaries for Human Escalation
-
-### Scenario Lab: Customer Support Resolution Agent
-- Build: coordinator agent + `get_customer`, `lookup_order`, `process_refund`, `escalate_to_human` tools
-- Implement programmatic prerequisite blocking `process_refund` until `get_customer` resolves
-- Add `PostToolUse` hook to normalize heterogeneous tool response formats
-- Test: multi-concern customer request → parallel investigation → unified resolution
-
-### Scenario Lab: Multi-Agent Research Pipeline
-- Build: coordinator + web search + document analysis + synthesis + report generation subagents
-- Implement parallel subagent spawning (single coordinator response)
-- Design structured claim-source mappings in subagent outputs
-- Debug: overly narrow task decomposition
+3.1 The Agentic Loop: `stop_reason` Is Everything
+3.2 `"tool_use"` vs `"end_turn"` — Control Flow Patterns
+3.3 Anti-Patterns: What NOT to Do in Agentic Loops
+3.4 Multi-Agent Hub-and-Spoke Architecture
+3.5 The Coordinator's Role: Decompose, Delegate, Aggregate
+3.6 Subagent Context Isolation — Why They Don't Inherit History
+3.7 The `Task` Tool: Spawning Subagents + `allowedTools` Requirement
+3.8 Parallel Subagent Execution — Single Response, Multiple Task Calls
+3.9 Explicit Context Passing Between Agents
+3.10 Programmatic Enforcement vs Prompt-Based Guidance
+3.11 Agent SDK Hooks: `PostToolUse` and Tool Call Interception
+3.12 Task Decomposition: Prompt Chaining vs Dynamic Adaptive
+3.13 Session Management: `--resume`, `fork_session`, When to Start Fresh
+3.14 Structured Handoff Summaries for Human Escalation
 
 ### Quiz: Domain 1
 - What does `allowedTools` need to include for a coordinator to spawn subagents?
@@ -118,41 +116,7 @@
 
 ---
 
-## Section 4: Domain 2 — Tool Design & MCP Integration (18%)
-
-### Lectures
-3.1 Why Tool Descriptions Are the Most Important Thing You Write
-3.2 What Makes a Great Tool Description (inputs, examples, boundaries)
-3.3 Diagnosing and Fixing Tool Selection Failures
-3.4 Splitting Generic Tools vs Consolidating — When to Do Each
-3.5 MCP Error Response Design: Categories, `isError`, `isRetryable`
-3.6 Transient vs Validation vs Business vs Permission Errors
-3.7 Local Recovery vs Propagating to Coordinator
-3.8 Tool Distribution: How Many Tools Per Agent?
-3.9 `tool_choice`: `"auto"`, `"any"`, Forced Selection
-3.10 MCP Server Configuration: Project vs User Scope
-3.11 `.mcp.json` with Environment Variable Expansion
-3.12 MCP Resources vs MCP Tools — When to Use Each
-3.13 Built-in Tool Selection: Grep vs Glob vs Read vs Edit
-3.14 Incremental Codebase Exploration Pattern
-
-### Hands-on Lab: MCP Tool Design Workshop
-- Write descriptions for three similar tools; identify and eliminate overlap
-- Implement structured error responses with all required fields
-- Configure a shared MCP server in `.mcp.json` with `${API_TOKEN}` expansion
-- Configure a personal MCP server in `~/.claude.json`
-- Test tool selection reliability with ambiguous queries
-
-### Quiz: Domain 2
-- What are the `tool_choice` options and when do you use each?
-- What fields must a structured MCP error response include?
-- What's the difference between project-scoped and user-scoped MCP server config?
-- When should you use Grep vs Glob?
-- What is the correct scope for shared team MCP servers?
-
----
-
-## Section 5: Domain 3 — Claude Code Configuration & Workflows (20%)
+## Section 4: Domain 3 — Claude Code Configuration & Workflows (20%)
 
 ### Lectures
 4.1 The CLAUDE.md Configuration Hierarchy (user / project / directory)
@@ -171,19 +135,6 @@
 4.14 Session Context Isolation for Independent Code Review
 4.15 The `/memory` and `/compact` Commands
 
-### Scenario Lab: Team Workflow Configuration
-- Create project-level CLAUDE.md with testing conventions
-- Create `.claude/rules/` file with glob-pattern scoping for test files (`**/*.test.tsx`)
-- Create a project-scoped `/review` slash command
-- Build a skill with `context: fork` and `allowed-tools` restriction
-- Configure MCP server integration
-
-### Scenario Lab: CI/CD Pipeline Integration
-- Run Claude Code with `-p` flag in a simulated CI job
-- Output structured JSON findings with `--output-format json --json-schema`
-- Handle deduplication when re-running after new commits
-- Configure CLAUDE.md for test generation context
-
 ### Quiz: Domain 3
 - Where do project-scoped slash commands live?
 - What does `context: fork` do in a SKILL.md file?
@@ -193,7 +144,7 @@
 
 ---
 
-## Section 6: Domain 4 — Prompt Engineering & Structured Output (20%)
+## Section 5: Domain 4 — Prompt Engineering & Structured Output (20%)
 
 ### Lectures
 5.1 Explicit Criteria vs Vague Instructions — Why It Matters
@@ -212,19 +163,6 @@
 5.14 Multi-Instance Review Architecture
 5.15 Multi-Pass Review: Per-File + Cross-File Integration Pass
 
-### Scenario Lab: Structured Data Extraction Pipeline
-- Define extraction tool with JSON schema (required, optional, nullable fields)
-- Use `tool_choice: "any"` for unknown document types
-- Implement validation-retry loop with error feedback
-- Add few-shot examples for varied document structures
-- Batch 20 documents using Message Batches API; handle failures by `custom_id`
-
-### Scenario Lab: CI Code Review Prompt Engineering
-- Write explicit criteria (which issues to flag vs skip)
-- Create 3 few-shot examples for ambiguous code patterns
-- Define severity levels with concrete code examples
-- Design multi-pass review: per-file + integration pass
-
 ### Quiz: Domain 4
 - What does `tool_choice: "any"` guarantee?
 - When should you use the Message Batches API vs synchronous API?
@@ -234,38 +172,53 @@
 
 ---
 
+## Section 6: Domain 2 — Tool Design & MCP Integration (18%)
+
+### Lectures
+6.1 Why Tool Descriptions Are the Most Important Thing You Write
+6.2 What Makes a Great Tool Description (inputs, examples, boundaries)
+6.3 Diagnosing and Fixing Tool Selection Failures
+6.4 Splitting Generic Tools vs Consolidating — When to Do Each
+6.5 MCP Error Response Design: Categories, `isError`, `isRetryable`
+6.6 Transient vs Validation vs Business vs Permission Errors
+6.7 Local Recovery vs Propagating to Coordinator
+6.8 Tool Distribution: How Many Tools Per Agent?
+6.9 `tool_choice`: `"auto"`, `"any"`, Forced Selection
+6.10 MCP Server Configuration: Project vs User Scope
+6.11 `.mcp.json` with Environment Variable Expansion
+6.12 MCP Resources vs MCP Tools — When to Use Each
+6.13 Built-in Tool Selection: Grep vs Glob vs Read vs Edit
+6.14 Incremental Codebase Exploration Pattern
+
+### Quiz: Domain 2
+- What are the `tool_choice` options and when do you use each?
+- What fields must a structured MCP error response include?
+- What's the difference between project-scoped and user-scoped MCP server config?
+- When should you use Grep vs Glob?
+- What is the correct scope for shared team MCP servers?
+
+---
+
 ## Section 7: Domain 5 — Context Management & Reliability (15%)
 
 ### Lectures
-6.1 The "Lost in the Middle" Effect — What It Means and How to Counter It
-6.2 Progressive Summarization Risks — What Gets Lost
-6.3 Trimming Verbose Tool Outputs
-6.4 The Persistent "Case Facts" Block Pattern
-6.5 Escalation Decision Framework — When to Escalate vs Resolve
-6.6 Honoring Explicit Customer Requests for Human Agents
-6.7 Sentiment vs Complexity — Why They're Not the Same
-6.8 Structured Error Propagation Across Multi-Agent Systems
-6.9 Access Failure vs Valid Empty Result
-6.10 Coverage Annotations in Synthesis Output
-6.11 Context Degradation in Long Sessions
-6.12 Scratchpad Files for Cross-Context Persistence
-6.13 Crash Recovery with Structured Agent State Manifests
-6.14 Human Review Workflows and Confidence Calibration
-6.15 Stratified Sampling for Accuracy Measurement
-6.16 Information Provenance: Claim-Source Mappings
-6.17 Handling Conflicting Sources — Annotate, Don't Arbitrarily Choose
-
-### Scenario Lab: Customer Support Context Management
-- Implement persistent "case facts" block extracted from tool outputs
-- Add escalation criteria with few-shot examples
-- Handle multiple customer matches requiring clarification
-- Test policy ambiguity escalation trigger
-
-### Scenario Lab: Research Pipeline Reliability
-- Implement structured error propagation from failing subagent
-- Add coverage gap annotations to synthesis output
-- Design crash recovery using agent state manifests
-- Require claim-source mappings in subagent outputs
+7.1 The "Lost in the Middle" Effect — What It Means and How to Counter It
+7.2 Progressive Summarization Risks — What Gets Lost
+7.3 Trimming Verbose Tool Outputs
+7.4 The Persistent "Case Facts" Block Pattern
+7.5 Escalation Decision Framework — When to Escalate vs Resolve
+7.6 Honoring Explicit Customer Requests for Human Agents
+7.7 Sentiment vs Complexity — Why They're Not the Same
+7.8 Structured Error Propagation Across Multi-Agent Systems
+7.9 Access Failure vs Valid Empty Result
+7.10 Coverage Annotations in Synthesis Output
+7.11 Context Degradation in Long Sessions
+7.12 Scratchpad Files for Cross-Context Persistence
+7.13 Crash Recovery with Structured Agent State Manifests
+7.14 Human Review Workflows and Confidence Calibration
+7.15 Stratified Sampling for Accuracy Measurement
+7.16 Information Provenance: Claim-Source Mappings
+7.17 Handling Conflicting Sources — Annotate, Don't Arbitrarily Choose
 
 ### Quiz: Domain 5
 - What is the "lost in the middle" effect?
@@ -276,55 +229,79 @@
 
 ---
 
-## Section 8: Scenario Deep Dives
+## Section 8: Demo 1 — Multi-Tool Agent with Escalation Logic
 
-*Scenario-by-scenario analysis of likely question patterns.*
+*Reinforces Domains 1, 2, 5. Content lives in `labs/demos/demo-1-multi-tool-agent/`.*
 
-### Lectures
-7.1 Scenario 1: Customer Support Resolution Agent — Common Question Traps
-7.2 Scenario 2: Code Generation with Claude Code — Key Decisions
-7.3 Scenario 3: Multi-Agent Research System — Coordination Pitfalls
-7.4 Scenario 4: Developer Productivity with Claude — Tool Design Focus
-7.5 Scenario 5: Claude Code for CI/CD — Prompt Engineering Focus
-7.6 Scenario 6: Structured Data Extraction — Schema & Batch Design
-7.7 Cross-Domain Question Patterns — When Multiple Domains Overlap
+**Estimated Duration**: ~15 minutes
 
-### Resource: Scenario-to-Domain Matrix
-Full breakdown of which task statements are most likely per scenario.
+**Objective**: Walk through designing an agentic loop with tool integration, structured error handling, and escalation patterns.
 
----
+**Walkthrough covers:**
+1. Defining 3–4 MCP tools with carefully differentiated descriptions (including two tools with similar functionality that require careful boundaries to avoid selection confusion)
+2. Implementing an agentic loop that branches on `stop_reason` — handling both `"tool_use"` and `"end_turn"` correctly
+3. Adding structured error responses: `errorCategory` (transient / validation / permission), `isRetryable` boolean, human-readable descriptions — and demonstrating how the agent retries transient errors vs explains business errors to the user
+4. Implementing a programmatic hook that intercepts tool calls to enforce a business rule (e.g., block operations above a threshold amount) and redirects to escalation
+5. Testing with multi-concern messages and verifying the agent decomposes, handles each concern, and synthesizes a unified response
 
-## Section 9: Practice Exam & Answer Review
-
-### Lectures
-8.1 Practice Exam Walkthrough — All 12 Sample Questions from Exam Guide
-8.2 Understanding Why Distractors Are Wrong (not just why the answer is right)
-8.3 Common Trap Patterns — Prompt vs Programmatic, Over-Engineering, Missing Root Cause
-8.4 Final Exam Strategy: Time Management, Elimination Technique
-
-### Full Practice Quiz
-- 40 questions covering all 5 domains, scenario-weighted
-- Detailed explanations for all answer choices
-- Domain tagging for each question
+**Domains reinforced**: Domain 1 (Agentic Architecture), Domain 2 (Tool Design & MCP), Domain 5 (Context Management & Reliability)
 
 ---
 
-## Section 10: Quick Reference & Final Review
+## Section 9: Demo 2 — Claude Code for a Team Dev Workflow
 
-### Lectures
-9.1 The 20 Things You Must Know Cold
-9.2 Out-of-Scope Topics — What to Ignore
-9.3 Last-Hour Review Guide
+*Reinforces Domains 3, 2. Content lives in `labs/demos/demo-2-team-dev-workflow/`.*
 
-### Downloadable Cheat Sheets
-- `tool_choice` options quick reference
-- CLAUDE.md hierarchy diagram
-- Error response required fields checklist
-- Escalation decision flowchart
-- Batch API vs synchronous API decision table
-- Domain weight breakdown
-- `stop_reason` loop control flow diagram
-- Built-in tool selection guide (Grep vs Glob vs Read vs Edit)
+**Estimated Duration**: ~15 minutes
+
+**Objective**: Configure CLAUDE.md hierarchies, custom slash commands, path-specific rules, skills, and MCP servers for a multi-developer project.
+
+**Walkthrough covers:**
+1. Project-level CLAUDE.md with universal coding standards and testing conventions
+2. `.claude/rules/` files with YAML frontmatter glob patterns (e.g., `paths: ["src/api/**/*"]`, `paths: ["**/*.test.*"]`) — rules load only when editing matching files
+3. Project-scoped skill in `.claude/skills/` with `context: fork` and `allowed-tools` restriction — skill runs in isolation without polluting main conversation context
+4. MCP server configuration: `.mcp.json` with environment variable expansion for credentials, plus a personal experimental server in `~/.claude.json`
+5. Plan mode vs direct execution comparison across three tasks: single-file bug fix, multi-file library migration, new feature with multiple valid approaches
+
+**Domains reinforced**: Domain 3 (Claude Code), Domain 2 (Tool Design & MCP)
+
+---
+
+## Section 10: Demo 3 — Structured Data Extraction Pipeline
+
+*Reinforces Domains 4, 5. Content lives in `labs/demos/demo-3-extraction-pipeline/`.*
+
+**Estimated Duration**: ~15 minutes
+
+**Objective**: Design JSON schemas, use `tool_use` for structured output, implement validation-retry loops, and run batch processing.
+
+**Walkthrough covers:**
+1. Extraction tool with a JSON schema containing required + optional fields, enum with `"other"` + detail string, and nullable fields — demonstrating the model returning `null` instead of fabricating values
+2. Validation-retry loop: when Pydantic/JSON schema validation fails, send a follow-up with document + failed extraction + specific validation error; distinguish format-mismatch retries (resolvable) from information-absent retries (not resolvable)
+3. Few-shot examples for documents with varied formats (inline citations vs bibliographies, narrative vs tables)
+4. Batch processing: 100 documents via Message Batches API, failure handling by `custom_id`, resubmission with chunking, SLA math
+5. Human review routing: field-level confidence scores, low-confidence routing, accuracy analysis by document type and field
+
+**Domains reinforced**: Domain 4 (Prompt Engineering & Structured Output), Domain 5 (Context Management & Reliability)
+
+---
+
+## Section 11: Demo 4 — Multi-Agent Research Pipeline
+
+*Reinforces Domains 1, 2, 5. Content lives in `labs/demos/demo-4-research-pipeline/`.*
+
+**Estimated Duration**: ~15 minutes
+
+**Objective**: Orchestrate subagents, manage context passing, implement error propagation, and handle synthesis with provenance tracking.
+
+**Walkthrough covers:**
+1. Coordinator delegating to at least two subagents (web search, document analysis) with `allowedTools` including `"Task"` and explicit context passing in each subagent prompt
+2. Parallel subagent execution via multiple `Task` tool calls in a single coordinator response — measuring latency improvement vs sequential
+3. Structured subagent output separating content from metadata: claim, evidence excerpt, source URL/document name, publication date — preserving attribution through synthesis
+4. Error propagation: simulated subagent timeout producing structured error context (failure type, attempted query, partial results); coordinator proceeds with partial results + annotates coverage gaps
+5. Conflicting source data: synthesis preserves both values with source attribution rather than arbitrarily choosing, and distinguishes well-established from contested findings
+
+**Domains reinforced**: Domain 1 (Agentic Architecture), Domain 2 (Tool Design & MCP), Domain 5 (Context Management & Reliability)
 
 ---
 
@@ -357,18 +334,35 @@ Students will need:
 ## Course Completion Path
 
 ```
-Section 1  (30 min)  → Course overview, exam strategy
-Section 2  (90 min)  → Claude API Fundamentals Bootcamp [NEW — build hands-on foundation]
-Section 3  (3 hr)    → Domain 1: Agentic Architecture [HIGHEST WEIGHT - start here]
-Section 4  (2 hr)    → Domain 2: Tool Design & MCP
-Section 5  (2.5 hr)  → Domain 3: Claude Code Config
-Section 6  (2.5 hr)  → Domain 4: Prompt Engineering
-Section 7  (2 hr)    → Domain 5: Context & Reliability
-Section 8  (1.5 hr)  → Scenario deep dives
-Section 9  (2 hr)    → Practice exam + review
-Section 10 (30 min)  → Final review + cheat sheets
+Section 1   (15 min)  → Course intro, exam format, domains, scenarios, study strategy (combined)
+Section 2   (90 min)  → Claude API Fundamentals Bootcamp
+Section 3   (3 hr)    → Domain 1: Agentic Architecture & Orchestration (27%) [HIGHEST WEIGHT]
+Section 4   (2.5 hr)  → Domain 3: Claude Code Configuration & Workflows (20%)
+Section 5   (2.5 hr)  → Domain 4: Prompt Engineering & Structured Output (20%)
+Section 6   (2 hr)    → Domain 2: Tool Design & MCP Integration (18%)
+Section 7   (2 hr)    → Domain 5: Context Management & Reliability (15%)
+Section 8   (15 min)  → Demo 1: Multi-Tool Agent with Escalation Logic
+Section 9   (15 min)  → Demo 2: Claude Code for a Team Dev Workflow
+Section 10  (15 min)  → Demo 3: Structured Data Extraction Pipeline
+Section 11  (15 min)  → Demo 4: Multi-Agent Research Pipeline
 ```
 
-**Total: ~18.5 hours of instruction + labs** (up from ~16.5 hours)
+**Total: ~18.5 hours of instruction + demo walkthroughs**
 
-For exam-day cramming: Sections 10 → 9 → domain section for your weakest area.
+For exam-day cramming: watch the Section 1 recap, then jump to your weakest domain section (3/4/5/6/7) and its matching demo (8/9/10/11).
+
+---
+
+## Filesystem Note
+
+The section ordering in this outline is **by exam-domain weight** (Domain 1 → Domain 3 → Domain 4 → Domain 2 → Domain 5), which does **not** match the current physical folder names under `scripts/`. The script folders were created before the domain re-ordering and still carry their legacy names:
+
+| Outline section | Exam domain | Current filesystem folder |
+|----------------|-------------|---------------------------|
+| Section 3 | Domain 1 | `scripts/section-03-agentic-architecture/` |
+| Section 4 | Domain 3 | `scripts/section-05-claude-code-config/` |
+| Section 5 | Domain 4 | `scripts/section-06-prompt-engineering/` |
+| Section 6 | Domain 2 | `scripts/section-04-tool-design-mcp/` |
+| Section 7 | Domain 5 | `scripts/section-07-context-reliability/` |
+
+Folders will be renamed to match outline order in a follow-up rename sweep. Sections 8–11 have no `scripts/` folder — their content lives in `labs/demos/demo-N-*/` (README + recording script).
