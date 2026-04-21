@@ -1,8 +1,25 @@
 <script setup>
 // Cover slide — port of Cover() in slides.jsx (lines 130–191).
 // Forest radial gradient background, logo + brand row at top,
-// Section/Lecture eyebrow, "Claude Certified Architect Foundations" hero,
-// "Course & Exam Introduction" subtitle, and bottom stats row.
+// Section/Lecture eyebrow, hero title, subtitle, and bottom stats row.
+//
+// Defaults render the Section 1 / Lecture 1 welcome cover.
+// Later decks pass `title` + `subtitle` + `eyebrow` to swap the hero.
+
+defineProps({
+  title: { type: String, default: '' },
+  subtitle: { type: String, default: '' },
+  eyebrow: { type: String, default: '' },
+  stats: {
+    type: Array,
+    default: () => [
+      '720 / 1000 to pass',
+      '5 domains',
+      '6 scenarios',
+      '12 sample questions',
+    ],
+  },
+})
 </script>
 
 <template>
@@ -19,24 +36,22 @@
 
       <!-- hero block -->
       <div>
-        <div class="cover__section">Section 1 &middot; Lecture 1</div>
+        <div class="cover__section">{{ eyebrow || 'Section 1 · Lecture 1' }}</div>
 
-        <h1 class="cover__title">
+        <h1 v-if="title" class="cover__title cover__title--custom">{{ title }}</h1>
+        <h1 v-else class="cover__title">
           Claude Certified<br />Architect <span class="cover__sprout">Foundations</span>
         </h1>
 
-        <div class="cover__subtitle">Course &amp; Exam Introduction</div>
+        <div class="cover__subtitle">{{ subtitle || 'Course & Exam Introduction' }}</div>
       </div>
 
       <!-- bottom stats -->
       <div class="cover__stats">
-        <span>720 / 1000 to pass</span>
-        <span class="cover__dot">&middot;</span>
-        <span>5 domains</span>
-        <span class="cover__dot">&middot;</span>
-        <span>6 scenarios</span>
-        <span class="cover__dot">&middot;</span>
-        <span>12 sample questions</span>
+        <template v-for="(stat, i) in stats" :key="i">
+          <span>{{ stat }}</span>
+          <span v-if="i < stats.length - 1" class="cover__dot">&middot;</span>
+        </template>
       </div>
     </div>
   </Frame>
@@ -94,6 +109,10 @@
   color: var(--paper-0);
   margin: 0;
   max-width: 1500px;
+}
+.cover__title--custom {
+  font-size: 104px;
+  line-height: 1.05;
 }
 .cover__sprout {
   color: var(--sprout-500);
