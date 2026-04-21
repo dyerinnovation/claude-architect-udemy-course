@@ -1,440 +1,237 @@
 ---
 theme: default
-title: "Lecture 3.13: Session Management: resume, fork_session, When to Start Fresh"
+title: "Lecture 3.13: Session Management — resume, fork_session, When to Start Fresh"
 info: |
   Claude Certified Architect – Foundations
-  Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-cover-accent"></div>
-
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Claude Certified Architect – Foundations</div>
-  <div class="di-cover-title">Session Management:<br><span style="color: #3CAF50;">resume</span>, <span style="color: #A8D5C2;">fork_session</span>,<br>When to Start Fresh</div>
-  <div class="di-cover-subtitle">Lecture 3.13 · Domain 1 — Agentic Architecture & Orchestration (27%)</div>
-</div>
-
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-An agentic session represents a conversation history — the accumulated context of everything Claude has seen and done.
-
-Managing that session correctly is the difference between a system that builds on prior work efficiently and one that either wastes tokens on stale context or loses valuable context by starting over unnecessarily.
-
-This lecture covers the three session management decisions you'll face: when to resume a session, when to fork it into divergent paths, and when the right move is to start fresh with an injected summary.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — The Three Session Management Decisions
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The Three Session Management Decisions</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>Every time an agentic task is interrupted, completes a phase, or needs to explore multiple paths, you face one of three decisions:</p>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.55rem; margin-top: 0.6rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Resume (<code>--resume</code>)</span> Continue from exactly where the session left off. The full conversation history — all prior tool calls, results, and reasoning — is available to Claude.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Fork (<code>fork_session</code>)</span> Duplicate the current session context and start two independent branches from the same baseline. Use to explore divergent approaches without contaminating either branch with the other's results.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">Start Fresh</span> Create a new session with no prior history. Inject a structured summary of what was learned in the prior session. Use when the prior session's raw context is stale or too expensive to carry forward.
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-There are three decisions you'll face when managing agentic sessions.
-
-[click] Resume: continue from exactly where you left off. The full conversation history is intact — all prior tool calls, results, and reasoning are available to Claude. Use when the context is still valid and relevant.
-
-[click] Fork: duplicate the current session and start two independent branches from the same baseline. Use when you need to explore divergent approaches — different algorithms, different strategies, different hypotheses — and you don't want the results of one branch to influence the other.
-
-[click] Start fresh: create a new session with no prior history, but inject a structured summary of what was learned. Use when the prior session's raw context has gone stale — tool results that reference data that has since changed — or when carrying the full history forward would waste context window and tokens.
-
-Each of these is the right choice in a specific scenario. The exam tests whether you can match the scenario to the right decision.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — When to Resume
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">When to Resume a Session</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p><code class="di-code-inline">--resume</code> is the right choice when the prior session's context is <strong>still valid, relevant, and worth carrying forward</strong>.</p>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.6rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Interrupted task</span> The session was cut off mid-execution — network failure, timeout, or graceful pause for human review. Context is still accurate. Resume.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Multi-phase work</span> Phase 1 completed and the results are stable. Phase 2 builds directly on Phase 1 output. Resume and continue — no need to re-establish context.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">Tool result reuse</span> Claude has already retrieved and processed data that is still current. Resuming avoids redundant tool calls — saving latency and cost.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: #FFF0F0; border-left: 3px solid #E53E3E; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.25rem;">
-    <strong>Do NOT resume when:</strong> tool results reference live data that has changed since the session ran. Claude will reason against stale context — this causes incorrect decisions, not just suboptimal ones.
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Resume is appropriate when the prior session's context is still valid and worth carrying forward.
-
-[click] If a task was interrupted — by a network failure, a timeout, or a deliberate human review pause — the context is accurate. Resume from where you left off.
-
-[click] If phase one of a multi-phase task completed and the results are stable, resuming for phase two avoids re-establishing all of that context.
-
-[click] If Claude already retrieved data that is still current, resuming avoids redundant tool calls — saving both latency and cost.
-
-[click] The key "do not resume" condition: if the session contains tool results that referenced live data that has since changed. A tool call from yesterday that fetched a customer's account balance is stale. If you resume, Claude may reason about that balance as if it's current. That's not just inefficient — it's incorrect. In that scenario, start fresh with an injected summary.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — When to Fork a Session
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">When to Fork a Session</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p><code class="di-code-inline">fork_session</code> duplicates the current session state and creates two independent branches. Both branches start from the same baseline but evolve independently.</p>
-</v-click>
-
-<v-click>
-<div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.6rem;">
-  <div style="flex: 1; background: white; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.25rem;">Shared baseline</div>
-    Same research findings, same document context, same task history
-  </div>
-  <div style="font-size: 1.5rem; color: #0D7377;">→</div>
-  <div style="flex: 1.8; display: flex; flex-direction: column; gap: 0.4rem;">
-    <div style="background: #E8F5EB; border-left: 3px solid #3CAF50; border-radius: 4px; padding: 0.45rem 0.7rem; font-size: 0.88rem;"><strong>Branch A:</strong> Draft with approach 1</div>
-    <div style="background: #E8F5EB; border-left: 3px solid #0D7377; border-radius: 4px; padding: 0.45rem 0.7rem; font-size: 0.88rem;"><strong>Branch B:</strong> Draft with approach 2</div>
-  </div>
-</div>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.6rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">A/B evaluation</span> Generate two candidate outputs from the same context — for human review or automated scoring. Fork prevents cross-contamination between branches.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">Hypothesis testing</span> Explore two distinct investigative paths from the same starting evidence. If one branch reaches a dead end, the other is unaffected.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.25rem;">
-    <strong>Key property:</strong> forking is cheaper than running two fully independent sessions from scratch — the shared baseline context is not re-established twice.
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Fork creates two independent branches from a shared baseline.
-
-[click] Both branches start with the same conversation history — the same research findings, the same document context, the same prior reasoning. But from the fork point forward, each branch evolves independently. What Branch A does does not appear in Branch B's context.
-
-[click] The primary use case is A/B evaluation: generate two candidate outputs from the same starting context and then compare them — either by a human reviewer or an automated scoring pass.
-
-[click] The second use case is hypothesis testing in investigation tasks. You have evidence pointing in two directions. Fork and pursue both. If one branch reaches a dead end, the other is unaffected.
-
-[click] The efficiency advantage: forking is cheaper than running two independent sessions from scratch. The shared baseline doesn't need to be re-established twice. The cost savings scale with how much shared context exists before the fork point.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — When to Start Fresh
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">When to Start Fresh with an Injected Summary</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>Sometimes the prior session's raw context is a liability, not an asset. Starting fresh — with a structured summary injected into the new session — is the right move.</p>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.6rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Stale tool results</span> The session contains tool outputs that referenced live data which has since changed. Carrying them forward causes incorrect reasoning. Summarize what was <em>learned</em> (conclusions), discard the raw results.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Context window pressure</span> The session history is large and approaching limits. Use <code class="di-code-inline">/compact</code> for in-session reduction, or start fresh with a synthesized summary for a clean slate.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">Phase boundary with different tools</span> Phase 2 requires a different tool set and a different system prompt. Rather than continuing in the same session, start fresh and inject the phase 1 conclusions as structured input.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: #E8F5EB; border-left: 3px solid #3CAF50; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.25rem;">
-    <strong>The injected summary pattern:</strong> extract only the <em>conclusions and validated facts</em> from the prior session — not the raw tool outputs. The new session starts clean, with accurate structured context.
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Starting fresh is the right move when the prior session's raw context is a liability.
-
-[click] The primary trigger: stale tool results. If the session contains tool outputs that referenced live data — account balances, inventory levels, API responses — and that data has since changed, carrying those results forward causes Claude to reason on incorrect information. The fix: extract what was learned (the conclusions, the validated facts) and discard the raw results. Start a new session and inject the summary.
-
-[click] Context window pressure is another trigger. When a session history grows large, you can use the /compact command for in-session reduction. But for a true clean slate, starting fresh with a synthesized summary is cleaner and more predictable.
-
-[click] Phase boundaries with different tool sets: if Phase 2 of a workflow needs a fundamentally different system prompt and tool configuration, it's cleaner to start a new session than to continue in the old one. Inject the Phase 1 conclusions as structured input.
-
-[click] The key principle: the injected summary carries conclusions and validated facts — not raw tool outputs. It's a synthesis, not a history dump.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — The Injected Summary Pattern
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">The Fresh Start + Injected Summary Pattern</div>
-
-<v-click>
-
-```python {all|3-15|18-30|all}
-# Step 1: Extract conclusions from the prior session
-def build_session_summary(prior_session_messages: list) -> str:
-    """Ask Claude to synthesize what was learned — not replay raw history."""
-    summary_response = client.messages.create(
-        model="claude-opus-4-7",
-        messages=[
-            *prior_session_messages,
-            {"role": "user", "content":
-                "Summarize: (1) what we established as fact, "
-                "(2) what tools retrieved and their validated conclusions, "
-                "(3) open questions that remain, "
-                "(4) recommended next steps. "
-                "Do NOT include raw tool output — only validated findings."}
-        ]
+<script setup>
+const decisions = [
+  { label: 'Resume (--resume)', detail: "Continue from exactly where the session left off. Full history — tool calls, results, reasoning — available to Claude." },
+  { label: 'Fork (fork_session)', detail: 'Duplicate the current context and start two independent branches from the same baseline. Explore divergent approaches without cross-contamination.' },
+  { label: 'Start Fresh', detail: 'New session with no prior history. Inject a structured summary of what was learned. Use when prior raw context is stale or too expensive.' },
+]
+
+const resumeSteps = [
+  { title: 'Interrupted task', body: 'Session cut off mid-execution — network failure, timeout, graceful pause. Context still accurate. Resume.' },
+  { title: 'Multi-phase work', body: 'Phase 1 completed with stable results. Phase 2 builds directly on Phase 1 output. Resume and continue.' },
+  { title: 'Tool result reuse', body: 'Claude already retrieved data that is still current. Resuming avoids redundant tool calls — saves latency and cost.' },
+]
+
+const forkBaseline = 'Same research findings, same document context, same task history → Branch A: approach 1 · Branch B: approach 2. Both branches evolve independently.'
+const forkUses = [
+  { label: 'A/B evaluation', detail: 'Generate two candidate outputs from the same context for human review or automated scoring. Forking prevents cross-contamination.' },
+  { label: 'Hypothesis testing', detail: 'Explore two investigative paths from the same starting evidence. A dead-end in one branch leaves the other unaffected.' },
+]
+
+const freshSteps = [
+  { title: 'Stale tool results', body: 'Session has tool outputs referencing live data that has changed. Carrying forward causes incorrect reasoning. Summarize what was LEARNED (conclusions), discard raw results.' },
+  { title: 'Context window pressure', body: 'Session history is large and approaching limits. Use /compact for in-session reduction, or start fresh for a clean slate.' },
+  { title: 'Phase boundary with different tools', body: 'Phase 2 needs a different tool set and system prompt. Start fresh and inject Phase 1 conclusions as structured input.' },
+]
+
+const takeaways = [
+  { label: 'Resume when context is still valid', detail: 'Interrupted tasks, stable multi-phase work, reuse of still-current tool results.' },
+  { label: 'Fork for divergent branches from a shared baseline', detail: 'A/B evaluation and hypothesis testing — both branches start from the same trusted context.' },
+  { label: 'Start fresh when results are stale or window is full', detail: 'Inject a structured summary of conclusions; never carry raw stale tool outputs.' },
+  { label: 'Stale tool results cause INCORRECT reasoning', detail: 'Not just inefficiency — Claude will make wrong decisions on data that has since changed.' },
+  { label: '/compact reduces size without discarding accuracy', detail: 'In-session compaction is right when the history is large but still current.' },
+  { label: 'Injected summaries carry conclusions, never raw history', detail: 'Validated facts and decisions only — no tool-result snapshots, no transcripts.' },
+]
+
+const freshCode = `def build_session_summary(prior_session_messages: list[dict]) -> str:
+    """Extract validated conclusions from a completed session."""
+
+    prompt = (
+        "Review the conversation below and produce a structured summary "
+        "containing ONLY:\\n"
+        "  - Validated findings (facts confirmed by tool results)\\n"
+        "  - Decisions made and their rationale\\n"
+        "  - Open questions that remain\\n\\n"
+        "Do NOT include raw tool outputs, timestamps, or step-by-step history.\\n\\n"
+        f"<conversation>\\n{format_messages(prior_session_messages)}\\n</conversation>"
     )
-    return summary_response.content[0].text
+
+    response = client.messages.create(
+        model="claude-opus-4-7",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text
 
 
-# Step 2: Start a fresh session with the summary injected
-def start_fresh_with_summary(summary: str, next_task: str) -> list:
-    """New session — clean context, no stale tool results."""
+def start_fresh_with_summary(prior_summary: str, next_task_prompt: str):
+    """Begin a new session with injected conclusions — no stale tool results."""
+
     return client.messages.create(
         model="claude-opus-4-7",
-        system="You are a research analyst continuing a prior investigation.",
-        messages=[
-            {"role": "user", "content":
-                f"PRIOR INVESTIGATION SUMMARY:\n{summary}\n\n"
-                f"CURRENT TASK:\n{next_task}"}
-        ]
-    )
-```
+        system=PHASE_2_SYSTEM_PROMPT,
+        messages=[{
+            "role": "user",
+            "content": (
+                f"<prior_summary>\\n{prior_summary}\\n</prior_summary>\\n\\n"
+                f"{next_task_prompt}"
+            ),
+        }],
+    )`
+</script>
 
-</v-click>
-
-<v-click>
-<div style="background: white; padding: 0.4rem 0.75rem; border-radius: 4px; border-left: 2px solid #3CAF50; font-size: 0.82rem; margin-top: 0.4rem;">
-  <strong style="color: #1B8A5A;">Result:</strong> the new session has accurate, current context — without any stale tool results from the prior session. The summary carries conclusions, not raw history.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);"></div>
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Lecture 3.13 &middot; Domain 1</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1600px;">Session <span style="color: var(--sprout-500);">Management</span></h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1300px; line-height:1.3;">Resume, fork_session, and when to start fresh.</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Domain 1 · 27%</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Path C — Agent Architect</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Context lifecycle</span>
+    </div>
+  </div>
+</Frame>
 
 <!--
-Here's the fresh start with injected summary pattern in code.
-
-Step one: extract conclusions from the prior session. Ask Claude to synthesize what was actually learned — validated facts, tool result conclusions, open questions, and next steps. Critically: instruct it not to include raw tool outputs, only validated findings.
-
-[click] Step two: start a new session and inject that summary as structured input. The system prompt gives the new Claude instance its role. The first user message contains both the prior investigation summary and the current task.
-
-[click] The result: the new session starts with accurate, current context. No stale tool results. No outdated API responses. Claude reasons on what was concluded — not on raw historical data that may no longer be true.
-
-This pattern is the correct response to stale context. Summary in, history out.
+Welcome to Lecture 3.13 — Session Management: resume, fork_session, and when to start fresh. A non-trivial agentic workflow almost always lives across more than one session. Sometimes a session gets interrupted. Sometimes you need two parallel branches from the same starting point. Sometimes the context you've accumulated is actively wrong and needs to be discarded. The Agent SDK gives you three primitives — resume, fork, and start-fresh-with-summary — and each has a specific situation where it is the right call. This lecture is about recognising the signals that pick which one.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">Matching the Scenario to the Session Strategy</div>
-
-<div class="di-exam-body">
-  The exam will describe a session state and ask which management action is appropriate. Look for these signals in the scenario.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Traps to Watch For</div>
-  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem;">
-    <li>Resuming a session whose tool results reference live data that has since changed — this causes incorrect reasoning</li>
-    <li>Using <code>fork_session</code> when you just need to restart — a fork preserves history; it doesn't clean it</li>
-    <li>Starting fresh without injecting context — the new session has no knowledge of prior findings</li>
-  </ul>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ The Decision Signals</div>
-  <strong>Resume:</strong> context is still valid and accurate<br>
-  <strong>Fork:</strong> need divergent branches from a shared baseline<br>
-  <strong>Start fresh:</strong> stale tool results OR context window pressure → inject a structured summary of conclusions<br>
-  <strong>/compact:</strong> context is getting large but still valid — reduce without discarding
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<BulletReveal
+  eyebrow="Three decisions"
+  title="The Three Session Management Decisions"
+  :bullets="decisions"
+  :footerNum="2"
+  :footerTotal="8"
+/>
 
 <!--
-The exam will give you a session state description and ask what to do.
-
-[click] Three traps to watch for.
-
-Trap one: resuming a session with stale tool results. If the scenario mentions that the prior session ran yesterday and involves live data — account balances, inventory, pricing — resuming is wrong. Start fresh with an injected summary.
-
-Trap two: using fork_session when you need a clean restart. Fork creates two branches from the current history. It doesn't clean the history. If the goal is to escape stale context, fork doesn't help.
-
-Trap three: starting fresh without injecting context. The new session has no knowledge of what was found previously. Always inject a structured summary of conclusions.
-
-[click] The decision signals: resume when context is valid. Fork when you need divergent branches from a shared baseline. Start fresh when tool results are stale or context window pressure is severe — and always inject a summary. Use /compact for in-session context reduction when history is large but still accurate.
+Here are the three primitives at a glance. Resume, with the --resume flag, continues from exactly where the session left off — the full history, tool calls, results, and reasoning are all available to Claude. Fork, with fork_session, duplicates the current context and starts two independent branches from the same baseline — letting you explore divergent approaches without cross-contamination. Start fresh is a new session with no prior history, where you inject a structured summary of what was learned instead of carrying the raw history forward. That's the full menu. The rest of this lecture is about when each is appropriate.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-takeaway-title">Session Management — What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li><strong>Resume (<code style="color: #A8D5C2;">--resume</code>)</strong> when context is still valid — interrupted tasks, multi-phase work with stable prior results</li></v-click>
-  <v-click><li><strong>Fork (<code style="color: #A8D5C2;">fork_session</code>)</strong> when you need divergent branches from a shared baseline — A/B evaluation, hypothesis testing</li></v-click>
-  <v-click><li><strong>Start fresh</strong> when tool results are stale or context window is under pressure — always inject a structured summary of conclusions</li></v-click>
-  <v-click><li>Stale tool results cause <em>incorrect</em> reasoning — not just inefficiency. Start fresh + inject summary.</li></v-click>
-  <v-click><li><strong><code style="color: #A8D5C2;">/compact</code></strong> reduces context size in-session when history is large but still accurate</li></v-click>
-  <v-click><li>The injected summary carries conclusions and validated facts — never raw tool output</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<StepSequence
+  eyebrow="Resume path"
+  title="When to Resume a Session"
+  :steps="resumeSteps"
+  footerLabel="Do NOT resume when tool results reference live data that has changed"
+  :footerNum="3"
+  :footerTotal="8"
+/>
 
 <!--
-What to remember cold from this lecture:
+Three situations where resume is the right choice. First, an interrupted task: the session was cut off mid-execution because of a network failure, a timeout, or a graceful pause. The context is still accurate — nothing has changed. Resume. Second, multi-phase work: phase one completed with stable results, and phase two builds directly on phase one's output. Resume and continue. Third, tool result reuse: Claude already retrieved data that is still current. Resuming avoids redundant tool calls and saves latency and cost. The important contra-rule: do NOT resume when tool results reference live data that has since changed. Resuming in that case means Claude reasons on stale context — and that causes incorrect decisions, not just suboptimal ones. We'll come back to this on the next two slides.
+-->
 
-Resume when context is still valid — interrupted tasks, stable multi-phase work.
+---
 
-Fork when you need divergent branches from a shared baseline — A/B drafting, hypothesis testing.
+<TwoColSlide
+  variant="compare"
+  title="When to Fork a Session"
+  eyebrow="Branch from a shared baseline"
+  leftLabel="Shared baseline"
+  rightLabel="Use cases"
+  :footerNum="4"
+  :footerTotal="8"
+>
+  <template #left>
+    <p>{{ forkBaseline }}</p>
+    <p>Forking is cheaper than running two independent sessions from scratch — the shared baseline is only established once.</p>
+  </template>
+  <template #right>
+    <ul>
+      <li v-for="(u, i) in forkUses" :key="i"><strong>{{ u.label }}.</strong> {{ u.detail }}</li>
+    </ul>
+  </template>
+</TwoColSlide>
 
-Start fresh when tool results are stale — always inject a structured summary of conclusions, not raw history.
+<!--
+Fork is the right primitive when you need divergent branches from the same trusted starting point. Picture a research session that has established a solid baseline — the same research findings, the same document context, the same task history. You want branch A to pursue one approach and branch B to pursue another. Both need to evolve independently, without cross-contamination. Two classic use cases. A/B evaluation: generate two candidate outputs from the same context for human review or automated scoring — forking prevents one branch's output from influencing the other. Hypothesis testing: explore two investigative paths from the same starting evidence, so that a dead-end in one branch leaves the other unaffected. Key property: forking is cheaper than running two independent sessions from scratch, because the baseline doesn't have to be re-established twice.
+-->
 
-Critical distinction: stale tool results cause incorrect reasoning, not just inefficiency. This is why resuming a session with stale data is dangerous.
+---
 
-Use /compact to reduce context size in-session when history is large but still accurate.
+<StepSequence
+  eyebrow="Fresh start path"
+  title="When to Start Fresh with an Injected Summary"
+  :steps="freshSteps"
+  footerLabel="Summary = conclusions and validated facts only — never raw tool outputs"
+  :footerNum="5"
+  :footerTotal="8"
+/>
 
-The injected summary carries conclusions and validated facts. Never dump raw tool output into the new session — it defeats the purpose of starting fresh.
+<!--
+Start-fresh is the right primitive in three situations. First, stale tool results: the session has tool outputs that reference live data — stock prices, inventory, user status — that has since changed. Carrying the old outputs forward causes Claude to reason on incorrect data. Start fresh. Summarize what was LEARNED — the conclusions — and discard the raw results. Second, context-window pressure: the session history is large and approaching limits. Use /compact for in-session reduction when the history is still current, or start fresh for a clean slate. Third, phase boundary with different tools: phase two needs a different tool set and a different system prompt than phase one. Don't pollute the new system prompt with the old history — start fresh and inject phase one's conclusions as structured input. In all three cases, the injected summary carries conclusions and validated facts — never raw tool outputs.
+-->
+
+---
+
+<CodeBlockSlide
+  eyebrow="Code pattern"
+  title="The Fresh Start + Injected Summary Pattern"
+  lang="python"
+  :code="freshCode"
+  annotation="The new session has accurate, current context — no stale tool results. The summary carries conclusions, not raw history."
+  :footerNum="6"
+  :footerTotal="8"
+/>
+
+<!--
+Here's the pattern in code. build_session_summary takes the prior session's messages and produces a structured summary using a specific prompt: include validated findings, decisions, and open questions; exclude raw tool outputs, timestamps, and step-by-step history. That constraint is the whole point — you're extracting conclusions, not compressing the transcript. Then start_fresh_with_summary opens a brand-new session with the phase-two system prompt and injects the prior summary inside a clearly tagged block in the first user message. The new session now has accurate, current context — no stale tool results dragging it into wrong conclusions. This is the pattern that makes long-horizon multi-session work viable: conclusions carry forward, raw history does not.
+-->
+
+---
+
+<Frame>
+  <Eyebrow>⚡ Exam tip</Eyebrow>
+  <SlideTitle>Matching the Scenario to the Session Strategy</SlideTitle>
+  <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; flex: 1; min-height: 0;">
+    <CalloutBox variant="dont" title="Traps to watch for">
+      <p>Resuming a session whose tool results reference live data that has since changed — causes <strong>incorrect</strong> reasoning, not just inefficiency.</p>
+      <p>Using fork_session when you just need to restart — fork preserves history, it doesn't clean it.</p>
+      <p>Starting fresh without injecting context — the new session has no knowledge of prior findings.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Decision signals">
+      <p><strong>Resume:</strong> context still valid.</p>
+      <p><strong>Fork:</strong> divergent branches from a shared baseline.</p>
+      <p><strong>Start fresh:</strong> stale results OR context-window pressure → inject a structured summary.</p>
+      <p><strong>/compact:</strong> context large but still valid — reduce without discarding.</p>
+    </CalloutBox>
+  </div>
+  <SlideFooter label="Domain 1 · Session strategy" :num="7" :total="8" />
+</Frame>
+
+<!--
+The exam-tested traps in this area. Trap one: resuming a session whose tool results reference live data that has since changed. This is worse than it sounds — Claude doesn't know the data is stale, so it reasons confidently on wrong context. That produces incorrect outputs, not just inefficient ones. Trap two: using fork_session when what you actually need is a restart. Fork preserves history; if that history is the problem, forking just duplicates it. Trap three: starting fresh without injecting a summary — the new session has zero knowledge of prior findings, so anything you learned is gone. The decision signals: resume when context is still valid; fork for divergent branches from a shared baseline; start fresh with an injected summary when results are stale or the window is under pressure; use /compact when the context is large but still valid.
+-->
+
+---
+
+<BulletReveal
+  eyebrow="Takeaways"
+  title="Session Management — What to Remember"
+  :bullets="takeaways"
+  :footerNum="8"
+  :footerTotal="8"
+/>
+
+<!--
+Six takeaways. One — resume when context is still valid: interrupted tasks, stable multi-phase work. Two — fork when you need divergent branches from a shared baseline: A/B evaluation, hypothesis testing. Three — start fresh with an injected summary when tool results are stale or the context window is under pressure. Four — stale tool results cause INCORRECT reasoning, not just inefficiency; always start fresh and inject a summary in that case. Five — /compact reduces context size in-session when the history is still accurate. And six — the injected summary carries conclusions and validated facts; it never carries raw tool output. Lecture 3.14 closes this section with the final decision in the agentic loop: when you have to escalate to a human, how do you hand off structured context so the human isn't starting from scratch?
 -->

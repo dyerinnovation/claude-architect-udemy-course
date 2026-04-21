@@ -3,430 +3,246 @@ theme: default
 title: "Lecture 3.9: Explicit Context Passing Between Agents"
 info: |
   Claude Certified Architect – Foundations
-  Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const narrativeLeft = "Agent A finds three claims. Passes: 'Here is a summary of findings.' Agent B has no idea where the claims came from, how recent they are, or whether they were primary sources."
+const explicitRight = 'Agent A passes a structured payload: claim text, source URL, document name, page number, publication date, confidence level. Agent B can reason about the claims AND their provenance.'
 
-<div class="di-cover-accent"></div>
+const narrativeBullets = [
+  'Fast to produce — just ask the first agent to summarise',
+  'Easy to read — easy to misinterpret',
+  'Loses source attribution',
+  'Loses publication dates and page references',
+  "Embeds the first agent's paraphrase bias",
+]
+const structuredBullets = [
+  'More design effort — preserves all provenance',
+  'Claim text is verbatim — no interpretation loss',
+  'All metadata intact: URL, date, page, confidence',
+  'Downstream agents evaluate freshness and credibility',
+  'Audit trail survives across the entire pipeline',
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Claude Certified Architect – Foundations</div>
-  <div class="di-cover-title">Explicit Context Passing<br>Between Agents</div>
-  <div class="di-cover-subtitle">Lecture 3.9 · Domain 1 — Agentic Architecture & Orchestration (27%)</div>
-</div>
+const injectionSteps = [
+  { title: 'System prompt injection', body: "Stable, reusable context — agent's role, domain rules, output schema. Doesn't change per request." },
+  { title: 'First user message injection', body: "Per-request context — structured claim payload, task state, prior agent's output. Format clearly inside the first user turn." },
+  { title: 'Tool result injection', body: 'Dynamic context fetched mid-task — retrieved documents, DB lookups. Arrives via the tool result loop, appended to history.' },
+]
 
-<img src="/logo.png" class="di-logo-centered" />
+const takeaways = [
+  { label: 'Each agent has only what you give it', detail: 'No ambient shared memory — everything must be passed explicitly in system prompt, first user message, or tool result.' },
+  { label: 'Structured payloads beat narrative summaries', detail: 'Always pass structured payloads whenever attribution or accuracy matters downstream.' },
+  { label: 'Full claim payload has five fields', detail: 'Verbatim text, source URL, document name, page number, publication date, confidence level.' },
+  { label: 'Never paraphrase when passing claims', detail: 'Verbatim preserves precision; paraphrase introduces drift the downstream agent cannot detect.' },
+  { label: 'Match channel to context lifecycle', detail: 'Known context → system prompt or first user. Dynamic context → tool results. Never conflate.' },
+  { label: 'Summaries without provenance cause citation fabrication', detail: 'Downstream will invent plausible-looking sources to fill the gap — a pipeline-design failure.' },
+]
 
-<!--
-When multiple agents collaborate on a task, they cannot read each other's minds.
-
-Each agent starts with only what you give it. If you pass a vague summary, it gets vague context. If you pass structured, attributed, complete information — it can reason on it precisely.
-
-This lecture is about the discipline of explicit context passing: what to include, how to structure it, and why attribution metadata is non-negotiable.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — The Problem: Context Doesn't Flow Automatically
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The Problem: Context Doesn't Flow Automatically</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>In a multi-agent system, each agent runs in its <strong>own conversation context</strong>. There is no shared memory, no ambient awareness — only what you explicitly put in each agent's messages.</p>
-</v-click>
-
-<v-click>
-<div style="display: flex; align-items: stretch; gap: 1.2rem; margin-top: 0.75rem;">
-  <div style="flex: 1; background: #FFF0F0; border-left: 4px solid #E53E3E; border-radius: 6px; padding: 0.65rem 1rem; font-size: 0.92rem;">
-    <div style="font-weight: 700; color: #E53E3E; margin-bottom: 0.3rem;">Implicit Handoff (Anti-Pattern)</div>
-    Agent A finds three claims from research. It passes: <em>"Here is a summary of findings."</em><br>
-    Agent B has no idea where the claims came from, how recent they are, or whether they were primary sources.
-  </div>
-</div>
-</v-click>
-
-<v-click>
-<div style="display: flex; align-items: stretch; gap: 1.2rem; margin-top: 0.5rem;">
-  <div style="flex: 1; background: #E8F5EB; border-left: 4px solid #3CAF50; border-radius: 6px; padding: 0.65rem 1rem; font-size: 0.92rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.3rem;">Explicit Handoff (Correct Pattern)</div>
-    Agent A passes a structured payload: claim text, source URL, document name, page number, publication date, and confidence level. Agent B can reason about the claims <em>and their provenance</em>.
-  </div>
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Here's the core problem.
-
-In a multi-agent system, each agent runs in its own isolated conversation context. There is no shared memory between them — not unless you create it explicitly.
-
-[click] The anti-pattern is implicit handoff: Agent A finishes its work and passes "a summary of findings." That sounds reasonable, but Agent B now has no idea where anything came from. It can't evaluate credibility. It can't cite sources. It can't flag when a claim might be outdated.
-
-[click] The correct pattern is explicit handoff: Agent A packages its work as a structured payload with all the metadata Agent B will need. Claim text, source URL, document name, page number, publication date. Agent B can now reason precisely — including about provenance, not just content.
-
-The discipline of explicit context passing is what separates agentic systems that are reliable from ones that hallucinate or lose track of information.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — What Must Be in a Context Payload
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">What Must Be in a Context Payload</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>A context payload is the structured block of information passed from one agent to the next. For research or claim-based workflows, it must include:</p>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.6rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Claim text</span> The verbatim extracted statement — not a paraphrase. Paraphrases lose precision.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Source URL / Document name</span> Where this claim came from. Required for downstream agents to retrieve context or verify.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">Page / Section</span> Granular location within the source. Without this, verification is impractical.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #1B8A5A;">
-    <span class="di-step-num" style="color: #1B8A5A;">Publication date</span> Required for freshness evaluation. A claim from 2019 may be outdated — the downstream agent must know to check.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E53E3E;">
-    <span class="di-step-num" style="color: #E53E3E;">Confidence / Extraction quality</span> Was this directly stated or inferred? Agent B needs to know how much weight to give it.
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-A context payload for a research workflow must carry five categories of information.
-
-[click] The claim text should be verbatim — not paraphrased. Paraphrasing introduces the extractor's interpretation, which may be wrong.
-
-[click] Source attribution — URL or document name — tells the downstream agent where to find this claim if it needs to verify or expand on it.
-
-[click] Page or section gives granular location. "Document name" alone is not sufficient when documents are long.
-
-[click] Publication date enables freshness evaluation. A regulatory claim from five years ago may be superseded. The downstream agent can only know this if you tell it when the source was published.
-
-[click] Confidence level — whether the claim was directly stated, implied, or inferred — tells the downstream agent how much weight to give it. If you're not surfacing confidence, the agent has no way to be appropriately skeptical.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — Structured Payload in Code
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Structured Context Payload — Code Pattern</div>
-
-<v-click>
-
-```python {all|3-14|17-29|all}
-# Agent A: research agent builds a structured claim payload
+const payloadCode = `# Build a structured context payload — not a narrative summary.
 def build_claim_payload(extracted_claims):
     return [
         {
-            "claim": claim["verbatim_text"],
-            "source_url": claim["url"],
-            "document_name": claim["doc_title"],
-            "page": claim["page_number"],
-            "publication_date": claim["pub_date"],   # ISO 8601
-            "confidence": claim["confidence"],        # "direct" | "inferred"
-            "extracted_at": datetime.utcnow().isoformat()
+            "claim": c["verbatim_text"],        # never paraphrase
+            "source_url": c["url"],
+            "document_name": c["doc"],
+            "page": c["page"],
+            "publication_date": c["date"],      # ISO 8601
+            "confidence": c["confidence"],      # 'direct' | 'inferred'
         }
-        for claim in extracted_claims
+        for c in extracted_claims
     ]
 
-# Agent B: synthesis agent receives structured payload
-def synthesize_with_context(claims_payload):
-    context_block = "\n".join([
-        f"CLAIM: {c['claim']}\n"
-        f"  Source: {c['document_name']} (p.{c['page']})\n"
-        f"  URL: {c['source_url']}\n"
-        f"  Published: {c['publication_date']}\n"
-        f"  Confidence: {c['confidence']}\n"
-        for c in claims_payload
-    ])
+# Inject that payload into the synthesis agent via the first user message.
+def synthesize_with_context(claim_payload):
+    context_block = "\\n".join(
+        f"- [{c['confidence']}] {c['claim']}  "
+        f"({c['document_name']}, p.{c['page']}, {c['publication_date']})  "
+        f"<{c['source_url']}>"
+        for c in claim_payload
+    )
     return client.messages.create(
         model="claude-opus-4-7",
-        messages=[{"role": "user", "content": f"Synthesize the following verified claims:\n\n{context_block}"}]
-    )
-```
+        system=SYNTHESIS_SYSTEM_PROMPT,
+        messages=[{
+            "role": "user",
+            "content": (
+                "Here are the verified claims with full provenance:\\n\\n"
+                f"{context_block}\\n\\n"
+                "Synthesize a report; cite each claim by source and page."
+            ),
+        }],
+    )`
+</script>
 
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">Do:</strong> pass the full structured payload — Agent B should never have to ask "where did this come from?"
-  </div>
-  <div style="flex: 1; background: white; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 2px solid #E53E3E;">
-    <strong style="color: #E53E3E;">Don't:</strong> pass narrative summaries — they discard provenance and introduce the first agent's interpretive bias
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Here's what this looks like in code.
-
-Agent A builds a structured claim payload — a list of dicts with every field the downstream agent will need. Verbatim claim text, source URL, document name, page number, publication date in ISO 8601, confidence level, and an extraction timestamp.
-
-[click] Agent B receives that payload and formats it into a structured context block before passing it to Claude. Notice the prompt contains structured, labeled information — not a prose summary. Claude can reason on labeled data far more reliably than on prose.
-
-The rule: Agent B should never have to ask "where did this come from?" If the payload is complete, it never will.
--->
-
----
-layout: two-cols
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Summary vs Structured: The Tradeoff
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header" style="margin: -1.5rem -1rem 1rem -2rem; padding-right: 1rem;">Narrative Summary vs Structured Payload</div>
-
-<v-click>
-<div style="padding-right: 1.2rem;">
-  <div class="di-col-left-label">Narrative Summary</div>
-  <div class="di-col-body">
-    <ul>
-      <li>Fast to produce — just ask the first agent to summarize</li>
-      <li>Easy to read — but easy to misinterpret</li>
-      <li>Loses source attribution</li>
-      <li>Loses publication dates and page references</li>
-      <li>Embeds the first agent's paraphrase bias</li>
-    </ul>
-    <div class="di-col-warning">
-      <strong>Consequence:</strong> downstream agents hallucinate citations or report wrong facts with false confidence
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);"></div>
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Lecture 3.9 &middot; Domain 1</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1600px;">Explicit Context<br /><span style="color: var(--sprout-500);">Passing</span> Between Agents</h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1300px; line-height:1.3;">Structured payloads, not narrative summaries.</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Domain 1 · 27%</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Scenario 3 — Multi-Agent Research</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Provenance-preserving</span>
     </div>
   </div>
-</div>
-</v-click>
+</Frame>
 
-::right::
+<!--
+Welcome to Lecture 3.9 — Explicit Context Passing Between Agents. In the last lecture we saw how to spawn subagents in parallel. Now we tackle the question that trips up most multi-agent designs: how does information actually move from one agent to the next? Subagents share no ambient memory. Whatever downstream agents need to know, you have to pass in explicitly. And the way you pass it — narrative summary versus structured payload — decides whether your pipeline preserves truth or fabricates it.
+-->
 
-<v-click>
-<div style="padding-left: 1.2rem; padding-top: 5rem;">
-  <div class="di-col-right-label">Structured Payload</div>
-  <div class="di-col-body">
+---
+
+<TwoColSlide
+  variant="antipattern-fix"
+  title="Context Doesn't Flow Automatically"
+  eyebrow="Implicit vs explicit handoff"
+  leftLabel="❌ Implicit Handoff"
+  rightLabel="✓ Explicit Handoff"
+  :footerNum="2"
+  :footerTotal="8"
+>
+  <template #left>
+    <p>{{ narrativeLeft }}</p>
+  </template>
+  <template #right>
+    <p>{{ explicitRight }}</p>
+  </template>
+</TwoColSlide>
+
+<!--
+The mental model is simple. Agent A runs, produces findings, and hands off to Agent B. Implicit handoff: Agent A writes a summary — "here is what I found" — and Agent B inherits only that. Explicit handoff: Agent A passes a structured payload that carries the findings AND every piece of metadata the downstream agent needs to reason about them. The implicit version looks more natural in English. The explicit version is what production systems require. Everything from here on in this lecture is about making that explicit version routine.
+-->
+
+---
+
+<Frame>
+  <Eyebrow>Required payload fields</Eyebrow>
+  <SlideTitle>What Must Be in a Context Payload</SlideTitle>
+  <div style="margin-top: 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+    <SchemaField name="claim" type="string (verbatim)" :required="true" description="The extracted statement — not a paraphrase. Paraphrases lose precision." />
+    <SchemaField name="source_url / document_name" type="string" :required="true" description="Where the claim came from — required for downstream agents to verify." />
+    <SchemaField name="page / section" type="string" :required="true" description="Granular location inside the source. Without it, verification is impractical." />
+    <SchemaField name="publication_date" type="ISO 8601" :required="true" description="Required for freshness evaluation. A 2019 claim may now be outdated." />
+    <SchemaField name="confidence" type="'direct' | 'inferred'" :required="true" description="Was this directly stated or inferred? How much weight to give it." />
+  </div>
+  <SlideFooter label="Structured-payload contract" :num="3" :total="8" />
+</Frame>
+
+<!--
+The contract. A claim payload that survives a multi-agent pipeline has five required fields. Claim text: verbatim, not paraphrased — paraphrase introduces drift the downstream cannot detect. Source URL or document name: the location the claim came from — required for verification. Page or section: granular location inside that source — without it, a verifier would have to re-read the entire document. Publication date in ISO 8601: required for freshness reasoning — a 2019 claim about model benchmarks may be worse than useless now. Confidence: was this stated directly in the source, or inferred from context — the downstream agent needs to know how much weight to give it. Five fields. Non-negotiable for anything where accuracy matters.
+-->
+
+---
+
+<CodeBlockSlide
+  eyebrow="Code pattern"
+  title="Structured Context Payload"
+  lang="python"
+  :code="payloadCode"
+  annotation="Do: pass the full structured payload — Agent B never asks 'where did this come from?' Don't: narrative summaries — they discard provenance and embed the first agent's bias."
+  :footerNum="4"
+  :footerTotal="8"
+/>
+
+<!--
+Here's the implementation. build_claim_payload takes a list of extracted claims and returns a list of dicts with the five required fields. The claim text is copied verbatim — never paraphrased. Then synthesize_with_context takes that payload, formats each claim into a line that preserves confidence, document name, page, date, and URL, and injects it into the first user message for the synthesis agent. The synthesis agent now has everything it needs to cite by source and page — and a human reviewer has everything they need to audit. Compare that to the alternative: ask the first agent to "summarize the findings." The summary looks fine, reads well, and is structurally useless.
+-->
+
+---
+
+<TwoColSlide
+  variant="compare"
+  title="Narrative Summary vs Structured Payload"
+  eyebrow="The real cost of summaries"
+  leftLabel="Narrative Summary"
+  rightLabel="Structured Payload"
+  :footerNum="5"
+  :footerTotal="8"
+>
+  <template #left>
     <ul>
-      <li>More effort to design — but preserves all provenance</li>
-      <li>Claim text is verbatim — no interpretation loss</li>
-      <li>All metadata intact: URL, date, page, confidence</li>
-      <li>Downstream agents can evaluate freshness and credibility</li>
-      <li>Audit trail survives across the entire pipeline</li>
+      <li v-for="(b, i) in narrativeBullets" :key="i">{{ b }}</li>
     </ul>
-    <div style="margin-top: 0.5rem; background: #E8F5EB; padding: 0.5rem 0.7rem; border-radius: 5px; font-size: 0.88rem;">
-      <strong>Use for:</strong> any multi-agent workflow where attribution, accuracy, or compliance matters
-    </div>
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+  </template>
+  <template #right>
+    <ul>
+      <li v-for="(b, i) in structuredBullets" :key="i">{{ b }}</li>
+    </ul>
+  </template>
+</TwoColSlide>
 
 <!--
-Let's make the tradeoff explicit.
-
-A narrative summary is easy to produce and easy to read. But it loses everything except the content. By the time Agent B gets it, there are no sources, no dates, no page numbers. If Agent B then produces a report that cites specific documents, it's manufacturing citations — because that information was discarded upstream.
-
-[click] A structured payload takes more design effort — you have to decide what fields matter and make sure Agent A populates them. But all provenance is preserved. Downstream agents can evaluate freshness, verify credibility, and carry the audit trail all the way to the output.
-
-The choice is clear: for any workflow where accuracy, attribution, or compliance matters, use structured payloads. Narrative summaries are only acceptable for informal internal routing where stakes are low.
+Here's the real cost of the two approaches. A narrative summary is fast, easy to produce, easy to read — and easy to misinterpret. It loses source attribution. It loses publication dates and page references. And it embeds the first agent's paraphrase bias, which the downstream agent has no way to detect. A structured payload takes more design effort, but it preserves every piece of provenance. Claim text is verbatim. All metadata is intact. Downstream agents can evaluate freshness, credibility, and relevance independently. And the audit trail survives end-to-end. The rule: use structured payloads for any workflow where attribution, accuracy, or compliance matters. Summaries are only acceptable when downstream does not need to attribute, cite, or verify anything.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Context Injection Patterns
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">How to Inject Context Into the Next Agent</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>There are three injection patterns. The choice depends on the volume of context and the agent's role.</p>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.5rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">System prompt injection</span> Stable, reusable context — the agent's role, domain rules, output schema. Put it in the system prompt. It doesn't change per-request.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">First user message injection</span> Per-request context — the structured claim payload, the task state, the prior agent's output. Format it clearly inside the first user turn.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #1B8A5A;">
-    <span class="di-step-num" style="color: #1B8A5A;">Tool result injection</span> Dynamic context fetched mid-task — retrieved documents, database lookups. This arrives via the tool result loop and is appended to the conversation history.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.55rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.25rem;">
-    <strong>Rule of thumb:</strong> Context that is known before the agent call → inject via system prompt or first user message. Context that depends on tool execution → inject via tool results. Never conflate these.
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
+<StepSequence
+  eyebrow="Three injection patterns"
+  title="How to Inject Context Into the Next Agent"
+  :steps="injectionSteps"
+  footerLabel="Match channel to lifecycle"
+  :footerNum="6"
+  :footerTotal="8"
+/>
 
 <!--
-There are three places to inject context into an agent, and the choice matters.
-
-[click] System prompt injection is for stable context: the agent's role, the domain rules it must follow, the output format it should produce. This doesn't change per request — put it in the system prompt once.
-
-[click] First user message injection is for per-request context: the structured payload from the prior agent, the current task state, any inputs specific to this invocation.
-
-[click] Tool result injection is for dynamic context: information the agent retrieves during execution. This arrives through the normal tool result loop and gets appended to the conversation history.
-
-[click] The rule: if you know it before the agent call, inject it upfront. If it depends on what the agent does during execution, let it arrive as tool results. Mixing these up leads to context that's either stale or never seen.
+Three ways to inject context, and choosing the right one matters. Pattern one: system prompt injection. Put stable, reusable context there — the agent's role, domain rules, output schema. Things that don't change per request. Pattern two: first user message injection. Put per-request context there — the structured claim payload, the task state, prior agent output. This is the most common channel for multi-agent handoff. Pattern three: tool result injection. Dynamic context fetched mid-task — retrieved documents, database lookups — arrives through the tool-result loop and is appended to conversation history. The rule: context known before the call goes in system prompt or first user message. Context that depends on tool execution arrives via tool results. Never conflate the two — mixing them causes the agent to lose track of which context is stable and which is derived.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">Context Passing in Multi-Agent Pipelines</div>
-
-<div class="di-exam-body">
-  The exam will present a multi-agent scenario and ask what information must be included in the handoff. The trap is always that a "summary" seems sufficient — it never is when attribution matters.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ The Trap</div>
-  A research agent finishes and passes a narrative summary to a synthesis agent. The synthesis agent produces a report with source citations.
-  <br><br>
-  <em>Question: Where do the citations come from?</em> They can't come from the summary — they were discarded. The synthesis agent will fabricate them. This is the anti-pattern.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ The Right Answer</div>
-  Attribution metadata — source URL, document name, page number, publication date — must be included in the structured context payload. Summaries are acceptable only when downstream agents do <strong>not</strong> need to attribute, cite, or verify.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<Frame>
+  <Eyebrow>⚡ Exam tip</Eyebrow>
+  <SlideTitle>Context Passing in Multi-Agent Pipelines</SlideTitle>
+  <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; flex: 1; min-height: 0;">
+    <CalloutBox variant="dont" title="The trap">
+      <p>A research agent passes a narrative summary to a synthesis agent. The synthesis agent then produces a report with source citations.</p>
+      <p>Where do the citations come from? They can't come from the summary — attribution was discarded upstream. The synthesis agent will <strong>fabricate</strong> them.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Right answer">
+      <p>Attribution metadata — source URL, document name, page number, publication date — <strong>must</strong> be in the structured payload.</p>
+      <p>Summaries are only acceptable when the downstream agent does not need to attribute, cite, or verify.</p>
+    </CalloutBox>
+  </div>
+  <SlideFooter label="Domain 1 · Multi-agent traps" :num="7" :total="8" />
+</Frame>
 
 <!--
-The exam will test your understanding of what belongs in a multi-agent handoff.
-
-The trap question goes like this: a research agent finishes and passes a summary to a synthesis agent. The synthesis agent is supposed to produce a cited report. Where do the citations come from?
-
-The answer is: they can't come from the summary, because the summary discarded them. If the synthesis agent produces citations, it's fabricating them. This is the anti-pattern.
-
-[click] The correct answer: attribution metadata must be included in the structured payload. Source URL, document name, page number, publication date — all of it. Summaries are acceptable only in workflows where the downstream agent has no need to cite, attribute, or verify the information it receives.
-
-On the exam, if you see a multi-agent pipeline that requires accurate attribution and the handoff is described as a "summary," that is the wrong answer. The right answer involves structured, attributed context.
+The exam-tested trap. Scenario: a research agent extracts claims, summarizes them, and hands off to a synthesis agent that produces a report with citations. Question: what's the most likely failure mode? Wrong answers describe tone problems or prompt-engineering issues. The right answer: the synthesis agent will fabricate citations. The summary discarded attribution metadata upstream, so when the synthesis agent is asked to cite sources, it has no choice but to invent plausible-looking ones. This is a pipeline-design failure, not a prompt problem — and no amount of prompt engineering in the synthesis agent will fix it. The fix is structural: push attribution metadata into the handoff payload. Summaries are acceptable only when the downstream agent doesn't need to attribute or verify anything — and in multi-agent research, that's almost never the case.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-takeaway-title">Explicit Context Passing — What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>Each agent has <strong>only what you give it</strong> — there is no ambient shared memory between agents</li></v-click>
-  <v-click><li>Always pass <strong>structured payloads</strong>, not narrative summaries, when attribution or accuracy matters</li></v-click>
-  <v-click><li>A claim payload must include: verbatim text, source URL, document name, page, publication date, and confidence level</li></v-click>
-  <v-click><li><strong>Never paraphrase</strong> when passing claims — verbatim preserves precision; paraphrase embeds the first agent's interpretation</li></v-click>
-  <v-click><li>Inject known context via system prompt or first user message; dynamic context arrives via tool results</li></v-click>
-  <v-click><li>Summaries that discard provenance cause downstream agents to fabricate citations — this is a pipeline design failure, not a model failure</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaways"
+  title="Explicit Context Passing — What to Remember"
+  :bullets="takeaways"
+  :footerNum="8"
+  :footerTotal="8"
+/>
 
 <!--
-To summarize what you must remember from this lecture:
-
-Each agent has only what you give it. There is no shared memory, no ambient awareness between agents.
-
-Always pass structured payloads when attribution or accuracy matters. Narrative summaries discard provenance.
-
-A complete claim payload includes verbatim text, source URL, document name, page number, publication date, and confidence level.
-
-Never paraphrase when passing claims. Verbatim text preserves precision. Paraphrase embeds the first agent's interpretation.
-
-Known context goes in upfront — system prompt or first user message. Dynamic context arrives via tool results.
-
-And the most important exam-facing rule: if a pipeline discards provenance through a summary handoff, any downstream citations are fabricated. That's a pipeline design failure. The fix is explicit, structured context passing.
+Six things to carry forward. One — each agent has only what you give it; there's no ambient shared memory in a multi-agent system. Two — always pass structured payloads, never narrative summaries, when attribution or accuracy matters. Three — the full claim payload has five fields: verbatim text, source URL, document name, page or section, publication date, and confidence. Four — never paraphrase when passing claims; verbatim preserves precision. Five — match the injection channel to the context's lifecycle: known before the call goes in system prompt or first user message; dynamic context comes through tool results. And six — summaries that discard provenance cause downstream to fabricate citations, which is a pipeline-design failure, not a prompt problem. In Lecture 3.10 we shift from "what to pass" to "what to enforce": programmatic guarantees versus prompt-based guidance.
 -->

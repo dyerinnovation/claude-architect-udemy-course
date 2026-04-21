@@ -1,407 +1,229 @@
 ---
 theme: default
-title: "Lecture 3.11: Agent SDK Hooks: PostToolUse and Tool Call Interception"
+title: "Lecture 3.11: Agent SDK Hooks — PostToolUse and Tool Call Interception"
 info: |
   Claude Certified Architect – Foundations
-  Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const flowContent = 'Claude emits tool_use block → [PreToolUse hook: inspect / block / modify] → Tool executes → [PostToolUse hook: inspect / normalize / enrich] → Result returned to Claude.'
 
-<div class="di-cover-accent"></div>
+const useCases = [
+  { label: 'PreToolUse — Validation', detail: 'Check inputs before execution. Validate formats, required fields, data types.' },
+  { label: 'PreToolUse — Authorization', detail: 'Verify the user is allowed to invoke this tool with these inputs. Block unauthorized calls before any side effect.' },
+  { label: 'PreToolUse — Limit Enforcement', detail: 'Financial thresholds, rate limits, quota checks. Block with an explanatory error before execution.' },
+  { label: 'PostToolUse — Normalization', detail: 'Convert formats (Unix → ISO 8601), normalize units, standardize field names.' },
+  { label: 'PostToolUse — Enrichment', detail: 'Add derived fields, resolve IDs to readable names, append metadata.' },
+  { label: 'PostToolUse — Audit Logging', detail: 'Log every tool invocation — inputs, outputs, timestamps, user context.' },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Claude Certified Architect – Foundations</div>
-  <div class="di-cover-title">Agent SDK Hooks:<br><span style="color: #3CAF50;">PostToolUse</span> and Tool Call Interception</div>
-  <div class="di-cover-subtitle">Lecture 3.11 · Domain 1 — Agentic Architecture & Orchestration (27%)</div>
-</div>
+const takeaways = [
+  { label: 'PreToolUse runs before execution', detail: 'Intercept, validate, authorize, or block the call before the tool side effect.' },
+  { label: 'PostToolUse runs after execution', detail: 'Normalize, enrich, or log the result before Claude sees it.' },
+  { label: 'Classic PostToolUse: Unix → ISO 8601', detail: 'Converting timestamps so Claude reasons about dates unambiguously across every tool.' },
+  { label: 'Classic PreToolUse: refund threshold block', detail: 'Block any refund above the financial limit before the tool executes.' },
+  { label: 'Hooks are centralized, deterministic guarantees', detail: 'One hook applies to every matching tool call — no per-tool drift.' },
+  { label: 'Hooks are the mechanism for programmatic enforcement', detail: 'They are HOW you implement the deterministic guarantees from Lecture 3.10.' },
+]
 
-<img src="/logo.png" class="di-logo-centered" />
+const mechanics = [
+  { label: 'PreToolUse', detail: 'Runs before the tool executes. Validate, enforce limits, or block unauthorized actions entirely.' },
+  { label: 'PostToolUse', detail: 'Runs after the tool executes, before the result is returned to Claude. Normalize, enrich, or validate the output.' },
+  { label: 'Key property', detail: 'Both are synchronous interception points — stop the flow, modify data, or pass through.' },
+]
 
-<!--
-In the previous lecture, we established that programmatic enforcement must happen in code — not in the prompt.
-
-But where exactly does that code run in an agentic system?
-
-The Claude Agent SDK gives you two specific interception points: hooks that run after a tool executes, and hooks that run before a tool executes. These are the architectural mechanisms that make deterministic enforcement possible in agentic systems.
-
-This lecture covers both — what they do, when to use each one, and the code patterns that implement them.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — Two Hook Points in the Agentic Loop
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Two Hook Points in the Agentic Loop</div>
-
-<v-click>
-<div style="display: flex; align-items: stretch; gap: 1.5rem; margin-top: 0.75rem;">
-
-  <!-- Flow diagram -->
-  <div style="flex: 0 0 44%; display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-    <div class="di-flow-box" style="width: 100%;">Claude emits tool_use block</div>
-    <div class="di-arrow">↓</div>
-    <v-click at="2">
-    <div class="di-flow-tool" style="width: 100%; background: #E3A008;">PreToolUse Hook<br><span style="font-size: 0.75rem; font-weight: 400;">inspect / block / modify call</span></div>
-    <div class="di-arrow">↓</div>
-    </v-click>
-    <div class="di-flow-box" style="width: 100%; background: #0D7377;">Tool executes</div>
-    <div class="di-arrow">↓</div>
-    <v-click at="3">
-    <div class="di-flow-stop" style="width: 100%; background: #1B8A5A;">PostToolUse Hook<br><span style="font-size: 0.75rem; font-weight: 400;">inspect / normalize / enrich result</span></div>
-    <div class="di-arrow">↓</div>
-    </v-click>
-    <div class="di-flow-box" style="width: 100%;">Result returned to Claude</div>
-  </div>
-
-  <!-- Explanation -->
-  <div style="flex: 1; font-size: 0.92rem; color: #111928; line-height: 1.65;">
-    <p>The Agent SDK wraps the tool execution step with two programmable interception points.</p>
-    <v-click at="2">
-    <div class="di-step-card" style="margin-top: 0.5rem; border-left-color: #E3A008;">
-      <span class="di-step-num" style="color: #E3A008;">PreToolUse</span> Runs before the tool executes. Use to validate the call, enforce limits, or block unauthorized actions entirely.
-    </div>
-    </v-click>
-    <v-click at="3">
-    <div class="di-step-card" style="margin-top: 0.5rem; border-left-color: #1B8A5A;">
-      <span class="di-step-num" style="color: #1B8A5A;">PostToolUse</span> Runs after the tool executes but before the result is returned to Claude. Use to normalize, enrich, or validate the output.
-    </div>
-    </v-click>
-    <v-click at="4">
-    <p style="margin-top: 0.6rem; font-size: 0.88rem; color: #1A3A4A;">Both hooks are <strong>synchronous interception points</strong> — they can stop the flow, modify data, or let it pass through.</p>
-    </v-click>
-  </div>
-
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The Agent SDK provides two programmable hook points that wrap the tool execution step.
-
-[click] The PreToolUse hook runs before the tool executes. Claude has decided to call a tool and emitted a tool_use block. Your hook intercepts the call before it reaches the actual function. You can validate the inputs, check authorization, enforce limits, or block the call entirely.
-
-[click] The PostToolUse hook runs after the tool executes but before the result is returned to Claude. The tool has finished. You can inspect, normalize, enrich, or transform the output before Claude sees it.
-
-[click] Both hooks are synchronous interception points. They can halt the flow with an error, modify the data in transit, or let it pass through unchanged. They give you deterministic control at exactly the right moments in the loop.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — PostToolUse: Normalizing Tool Results
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">PostToolUse Hook — Normalizing Tool Results</div>
-
-<v-click>
-
-```python {all|4-7|10-19|22-26|all}
-from claude_agent_sdk import AgentLoop, PostToolUseHook
-
-# PostToolUse hook: normalize timestamps before Claude sees the result
-class TimestampNormalizationHook(PostToolUseHook):
+const postCode = `class TimestampNormalizationHook(PostToolUseHook):
+    """Convert any Unix timestamps in tool results to ISO 8601."""
 
     def on_tool_result(self, tool_name: str, result: dict) -> dict:
-        """Intercept result; return the (possibly modified) result."""
-
-        # Normalize Unix timestamps to ISO 8601 across all result fields
-        normalized = {}
-        for key, value in result.items():
-            if key.endswith("_at") or key.endswith("_date") or key == "timestamp":
-                if isinstance(value, (int, float)):
-                    # Unix epoch → ISO 8601
-                    normalized[key] = datetime.utcfromtimestamp(value).isoformat() + "Z"
-                else:
-                    normalized[key] = value
-            else:
-                normalized[key] = value
-        return normalized
+        for key, value in list(result.items()):
+            if key.endswith("_at") and isinstance(value, (int, float)):
+                result[key] = datetime.fromtimestamp(
+                    value, tz=timezone.utc
+                ).isoformat()
+        return result
 
 
-# Register the hook with the agent loop
+# Register the hook with the agent loop so it applies to every tool.
 agent = AgentLoop(
-    tools=[get_order, get_customer, process_refund],
-    hooks=[TimestampNormalizationHook()]
-)
-```
+    model="claude-opus-4-7",
+    tools=ALL_TOOLS,
+    hooks=[TimestampNormalizationHook()],
+)`
 
-</v-click>
+const preCode = `class RefundGuardHook(PreToolUseHook):
+    """Block refunds above the auto-approval limit before execution."""
 
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">Why this matters:</strong> Claude reasons about dates in natural language. Unix timestamps like <code>1711929600</code> are ambiguous. ISO 8601 (<code>2024-04-01T00:00:00Z</code>) is unambiguous.
+    max_refund_cents = 50_000  # $500
+
+    def on_tool_call(self, tool_name: str, tool_input: dict, user):
+        if tool_name != "process_refund":
+            return  # pass through
+
+        # Authorization gate
+        order = db.orders.get(tool_input["order_id"])
+        if order.customer_id != user.id:
+            raise BlockToolCall(
+                errorCategory="authorization",
+                isRetryable=False,
+                description=f"Order {order.id} not owned by user {user.id}.",
+            )
+
+        # Financial limit gate
+        if tool_input["amount_cents"] > self.max_refund_cents:
+            raise BlockToolCall(
+                errorCategory="limit_exceeded",
+                isRetryable=False,
+                description=(
+                    f"Refund of \${tool_input['amount_cents']/100:.2f} "
+                    f"exceeds auto-approval limit of $500. "
+                    f"Escalate to human agent."
+                ),
+            )`
+</script>
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);"></div>
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Lecture 3.11 &middot; Domain 1</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1600px;">Agent SDK <span style="color: var(--sprout-500);">Hooks</span></h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1300px; line-height:1.3;">PostToolUse and tool call interception.</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Domain 1 · 27%</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Implements 3.10</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Deterministic guarantees</span>
+    </div>
   </div>
-  <div style="flex: 1; background: white; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 2px solid #0D7377;">
-    <strong style="color: #0D7377;">Hook scope:</strong> this normalization happens for every tool — no changes needed in individual tool functions
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+</Frame>
 
 <!--
-Here's the PostToolUse hook in practice.
-
-The hook intercepts every tool result before Claude sees it. It iterates over the result dictionary looking for timestamp fields — anything ending in _at, _date, or called "timestamp." If the value is a Unix integer, it converts it to ISO 8601 before returning it.
-
-[click] Why does this matter? Claude reasons about dates in natural language. A Unix timestamp like 1711929600 is a raw integer — Claude might interpret it as a count, a price, or miscompute relative dates. ISO 8601 format — 2024-04-01T00:00:00Z — is unambiguous. Claude handles it correctly.
-
-[click] The architectural benefit: this normalization is centralized in the hook. Every tool in the system benefits automatically. You don't need to change individual tool functions. Consistency is guaranteed across the entire pipeline.
-
-This is the PostToolUse pattern: take the raw output from the tool, clean or enrich it in the hook, return the improved version to Claude.
+Welcome to Lecture 3.11 — Agent SDK Hooks: PostToolUse and Tool Call Interception. In the previous lecture we drew the line between programmatic enforcement and prompt-based guidance. Hooks are the specific mechanism the Agent SDK gives you to implement the programmatic side of that line. They're also exam-tested in their own right. By the end of this lecture you will know when to reach for PreToolUse, when to reach for PostToolUse, and how each delivers a centralized, deterministic guarantee that an individual tool function cannot.
 -->
 
 ---
-layout: default
-class: di-code-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — PreToolUse: Blocking Unauthorized Calls
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">PreToolUse Hook — Blocking Unauthorized Tool Calls</div>
-
-<v-click>
-
-```python {all|4-8|11-21|24-29|all}
-from claude_agent_sdk import AgentLoop, PreToolUseHook, BlockToolCall
-
-class RefundGuardHook(PreToolUseHook):
-
-    def __init__(self, max_refund_amount: float):
-        self.max_refund_amount = max_refund_amount
-
-    def on_tool_call(self, tool_name: str, tool_input: dict) -> None:
-        """Raise BlockToolCall to prevent execution; return None to allow."""
-
-        if tool_name == "process_refund":
-            amount = tool_input.get("amount", 0)
-
-            # Hard financial limit — deterministic enforcement
-            if amount > self.max_refund_amount:
-                raise BlockToolCall(
-                    f"Refund of ${amount:.2f} exceeds the ${self.max_refund_amount:.2f} "
-                    f"auto-approval limit. Escalate to supervisor."
-                )
-
-            # Authorization: verify user owns the order
-            order_id = tool_input.get("order_id")
-            user_id = tool_input.get("user_id")
-            if not db.order_belongs_to_user(order_id, user_id):
-                raise BlockToolCall("Unauthorized: order does not belong to requesting user.")
-
-# Register the guard hook
-agent = AgentLoop(
-    tools=[get_order, process_refund],
-    hooks=[RefundGuardHook(max_refund_amount=500.00)]
-)
-```
-
-</v-click>
-
-<v-click>
-<div style="background: white; padding: 0.4rem 0.75rem; border-radius: 4px; border-left: 2px solid #E53E3E; font-size: 0.82rem; margin-top: 0.4rem;">
-  <strong style="color: #E53E3E;">Key:</strong> <code>BlockToolCall</code> stops execution before the tool function runs. The error message becomes the tool result Claude sees — it can explain the situation to the user.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<TwoColSlide
+  variant="compare"
+  title="Two Hook Points in the Agentic Loop"
+  eyebrow="Where hooks run"
+  leftLabel="Flow"
+  rightLabel="Mechanics"
+  :footerNum="2"
+  :footerTotal="8"
+>
+  <template #left>
+    <p>{{ flowContent }}</p>
+    <p><strong>PreToolUse</strong> sits between Claude's tool_use block and the tool function. <strong>PostToolUse</strong> sits between the tool function's return and the result Claude sees.</p>
+  </template>
+  <template #right>
+    <ul>
+      <li v-for="(m, i) in mechanics" :key="i"><strong>{{ m.label }}.</strong> {{ m.detail }}</li>
+    </ul>
+  </template>
+</TwoColSlide>
 
 <!--
-Now the PreToolUse hook.
-
-The RefundGuardHook intercepts every call to the process_refund tool before it executes. It checks two things.
-
-First, the financial limit: if the refund amount exceeds the configured maximum, it raises BlockToolCall with an explanation. The tool never runs.
-
-[click] Second, authorization: it verifies that the order belongs to the requesting user — checked against the database, not inferred from context.
-
-[click] When BlockToolCall is raised, the error message becomes the tool result that Claude sees in its context. Claude reads "Refund exceeds auto-approval limit. Escalate to supervisor." — and it can convey that to the customer intelligently.
-
-This is the architectural pattern: the hook is the enforcement layer. The tool function itself can focus purely on its logic. The guard runs before execution — always, unconditionally.
+Here's where hooks fit in the agentic loop. Claude emits a tool_use block. Before the tool function runs, PreToolUse hooks get a chance to inspect the call, enforce limits, or block the execution entirely. The tool function then runs. Before the result is returned to Claude, PostToolUse hooks get a chance to normalize the data, enrich it, or validate it. Both are synchronous interception points — you can stop the flow, modify the data, or pass through unchanged. That's the structural picture. PreToolUse is for enforcement before side effects. PostToolUse is for data quality after execution. They are NOT the same hook in different coats — each has a specific job, and the exam will test which job belongs where.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Hook Use Cases at a Glance
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Hook Use Cases at a Glance</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 0.75rem;">
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-top: 3px solid #E3A008; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #E3A008; margin-bottom: 0.3rem;">PreToolUse — Validation</div>
-    Check inputs before execution. Validate formats, required fields, data types. Return a clear error if the call is malformed.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-top: 3px solid #E53E3E; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #E53E3E; margin-bottom: 0.3rem;">PreToolUse — Authorization</div>
-    Verify the calling user is allowed to invoke this tool with these inputs. Block unauthorized calls before any side effects occur.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-top: 3px solid #E53E3E; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #E53E3E; margin-bottom: 0.3rem;">PreToolUse — Limit Enforcement</div>
-    Financial thresholds, rate limits, quota checks. If the call exceeds a limit, block it with an explanatory error — before execution.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-top: 3px solid #1B8A5A; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.3rem;">PostToolUse — Normalization</div>
-    Convert formats (Unix → ISO 8601), normalize units, standardize field names. Claude receives clean, consistent data.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-top: 3px solid #1B8A5A; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.3rem;">PostToolUse — Enrichment</div>
-    Add derived fields, resolve IDs to human-readable names, append metadata. Reduces the reasoning burden on Claude.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-top: 3px solid #1B8A5A; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.3rem;">PostToolUse — Audit Logging</div>
-    Log every tool result for observability. Capture inputs, outputs, timestamps, and user context before the result enters Claude's context.
-  </div>
-  </v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
+<CodeBlockSlide
+  eyebrow="PostToolUse"
+  title="Normalizing Tool Results"
+  lang="python"
+  :code="postCode"
+  annotation="Claude reasons about dates in natural language; Unix 1711929600 is ambiguous, ISO 8601 is unambiguous. Register once — normalization applies to every tool, no per-tool changes."
+  :footerNum="3"
+  :footerTotal="8"
+/>
 
 <!--
-Here's the full map of hook use cases.
-
-[click] PreToolUse for validation: check that the inputs are well-formed before the tool runs.
-
-[click] PreToolUse for authorization: verify the user is allowed to invoke this tool with these specific inputs.
-
-[click] PreToolUse for limit enforcement: financial thresholds, rate limits, quota checks — block before execution if any limit is exceeded.
-
-[click] PostToolUse for normalization: convert formats, standardize fields, clean up data before Claude reasons on it.
-
-[click] PostToolUse for enrichment: add derived fields, resolve IDs to readable names, append metadata that reduces Claude's reasoning burden.
-
-[click] PostToolUse for audit logging: capture every tool invocation — inputs, outputs, timestamp, user context — for observability and compliance.
-
-PreToolUse is your enforcement layer. PostToolUse is your data quality layer. Together, they give you deterministic control over both directions of every tool interaction.
+Here's a canonical PostToolUse example: converting Unix timestamps to ISO 8601. The hook class overrides on_tool_result. For every tool that returns, it scans for fields ending in _at — a common naming convention for timestamps — and if the value is a number, it converts it to ISO 8601. The hook is registered once with the agent loop, and it applies to every tool call. Why it matters: Claude reasons about dates in natural language. The integer 1,711,929,600 is ambiguous — Claude might say "late March," but it can also miscount. ISO 8601 is unambiguous: 2024-04-01T00:00:00Z. Hook scope is centralized: you don't modify every tool function. One hook, one registration, applies globally.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">Hooks vs Tool Logic vs Prompt Instructions</div>
-
-<div class="di-exam-body">
-  The exam will present scenarios where a candidate needs to enforce a constraint or normalize data in an agentic pipeline. Three mechanisms are offered: add logic to the tool function, use a prompt instruction, or use a hook. Know when each is correct.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Trap Answers</div>
-  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem;">
-    <li>Using a prompt instruction to enforce a financial limit — probabilistic, not guaranteed</li>
-    <li>Adding normalization logic to every individual tool function — not centralized, breaks DRY principle</li>
-    <li>Putting authorization checks inside the tool function — too late if the tool has side effects before the check</li>
-  </ul>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ The Hook Rule</div>
-  <strong>PreToolUse</strong> = enforcement before execution (limits, authorization, validation)<br>
-  <strong>PostToolUse</strong> = data quality after execution (normalization, enrichment, logging)<br>
-  Hooks provide centralized, deterministic guarantees — neither prompts nor individual tool functions can.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<CodeBlockSlide
+  eyebrow="PreToolUse"
+  title="Blocking Unauthorized Tool Calls"
+  lang="python"
+  :code="preCode"
+  annotation="BlockToolCall stops execution before the tool runs. The structured error becomes the tool_result Claude sees — it can explain the situation to the user."
+  :footerNum="4"
+  :footerTotal="8"
+/>
 
 <!--
-The exam will present a scenario — a financial limit to enforce, timestamps to normalize — and give you three options: use a prompt instruction, add logic to the individual tool function, or use a hook.
-
-[click] The trap answers are: prompt instructions for financial limits (probabilistic), adding normalization to every tool function (not centralized), and putting authorization inside the tool function after side effects have already started.
-
-[click] The hook rule: PreToolUse for enforcement before execution — limits, authorization, validation. PostToolUse for data quality after execution — normalization, enrichment, logging.
-
-Hooks are centralized and deterministic. That's what neither prompts nor individual tool functions can provide. When the exam asks about enforcing constraints or normalizing data across all tools consistently, hooks are the answer.
+And here's a canonical PreToolUse example: the RefundGuardHook. Two gates. First, authorization: the hook checks that the authenticated user actually owns the order the refund is being issued against. If not, it raises BlockToolCall with a structured error — errorCategory, isRetryable, description. Second, financial limit: if the refund amount exceeds $500, the hook raises BlockToolCall with errorCategory limit_exceeded. The critical property: BlockToolCall stops execution BEFORE the tool function runs. No partial refund. No side effect. The structured error becomes the tool_result Claude sees, which means Claude can explain the situation to the user — "I can't process refunds over $500 without a human's approval" — instead of silently failing. This is exactly the programmatic enforcement from Lecture 3.10, implemented cleanly as a hook.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-takeaway-title">Agent SDK Hooks — What to Know Cold</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li><strong>PreToolUse hook</strong> runs before tool execution — intercept, validate, authorize, or block the call</li></v-click>
-  <v-click><li><strong>PostToolUse hook</strong> runs after tool execution — normalize, enrich, or log the result before Claude sees it</li></v-click>
-  <v-click><li>Classic PostToolUse use case: converting Unix timestamps to ISO 8601 for consistent date reasoning</li></v-click>
-  <v-click><li>Classic PreToolUse use case: blocking refunds over a financial threshold before the tool executes</li></v-click>
-  <v-click><li>Hooks = <strong>centralized, deterministic guarantees</strong> — one hook applies to every matching tool call across the pipeline</li></v-click>
-  <v-click><li>Hooks are the implementation mechanism for programmatic enforcement — not prompts, not individual tool functions</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Use cases"
+  title="Hook Use Cases at a Glance"
+  :bullets="useCases"
+  :footerNum="5"
+  :footerTotal="8"
+/>
 
 <!--
-What you need to know cold from this lecture:
+Six common hook use cases. PreToolUse validation: check inputs before execution — formats, required fields, data types. PreToolUse authorization: verify the user is allowed to invoke this tool with these inputs, and block unauthorized calls before any side effect. PreToolUse limit enforcement: financial thresholds, rate limits, quota checks — all blocked with an explanatory error before execution. PostToolUse normalization: Unix to ISO 8601, unit conversion, field-name standardization. PostToolUse enrichment: resolving IDs to readable names, adding derived fields, appending metadata. PostToolUse audit logging: log every tool invocation with inputs, outputs, timestamps, and user context. The pattern: PreToolUse is for enforcement before execution. PostToolUse is for data quality after execution. Hold that dividing line in your head.
+-->
 
-PreToolUse hook runs before tool execution. Use it to intercept, validate, authorize, or block.
+---
 
-PostToolUse hook runs after tool execution. Use it to normalize, enrich, or log before Claude sees the result.
+<Frame>
+  <Eyebrow>⚡ Exam tip</Eyebrow>
+  <SlideTitle>Hooks vs Tool Logic vs Prompt Instructions</SlideTitle>
+  <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; flex: 1; min-height: 0;">
+    <CalloutBox variant="dont" title="Trap answers">
+      <p>Using a prompt instruction to enforce a financial limit — probabilistic, not guaranteed.</p>
+      <p>Adding normalization logic inside every individual tool function — decentralized, breaks DRY, drifts over time.</p>
+      <p>Putting authorization checks inside the tool function — too late if the tool has side effects before the check.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Hook rule">
+      <p><strong>PreToolUse</strong> = enforcement before execution (limits, authorization, validation).</p>
+      <p><strong>PostToolUse</strong> = data quality after execution (normalization, enrichment, logging).</p>
+      <p>Hooks give centralized, deterministic guarantees — one registration, every matching tool call.</p>
+    </CalloutBox>
+  </div>
+  <SlideFooter label="Domain 1 · Hook traps" :num="6" :total="8" />
+</Frame>
 
-The canonical PostToolUse use case: Unix timestamps to ISO 8601.
+<!--
+Three traps the exam reliably tests. First: using a prompt instruction to enforce a financial limit. Probabilistic. Wrong. Hooks or tool-level code are the right answer. Second: adding normalization logic to every individual tool function. Works the first time, drifts over time, breaks DRY — a PostToolUse hook is centralized and consistent. Third: putting authorization checks inside the tool function rather than in a PreToolUse hook. If the tool does any work before the check, the check is too late — side effects may already have happened. The hook rule: PreToolUse is for enforcement before execution; PostToolUse is for data quality after execution; hooks are centralized and deterministic. One registration applies to every matching tool call — and that centralization is what turns a best-effort guideline into an actual guarantee.
+-->
 
-The canonical PreToolUse use case: blocking refunds over a financial limit.
+---
 
-Hooks are centralized and deterministic. One hook applies to every matching tool call across the entire pipeline.
+<BulletReveal
+  eyebrow="Takeaways"
+  title="Agent SDK Hooks — What to Know Cold"
+  :bullets="takeaways"
+  :footerNum="8"
+  :footerTotal="8"
+/>
 
-And the architectural connection: hooks are the implementation mechanism for programmatic enforcement. When the previous lecture said "enforce in code, not in the prompt" — this is where that code lives.
+<!--
+Six takeaways to carry forward. One — PreToolUse runs before tool execution: intercept, validate, authorize, or block the call. Two — PostToolUse runs after tool execution: normalize, enrich, or log before Claude sees the result. Three — the classic PostToolUse example is converting Unix timestamps to ISO 8601 so Claude can reason about dates consistently. Four — the classic PreToolUse example is blocking a refund above the financial threshold before the tool executes. Five — hooks are centralized, deterministic guarantees: one hook registration applies to every matching tool call. And six — hooks are THE implementation mechanism for programmatic enforcement. When Lecture 3.10 said "enforce in code, not in the prompt," this is the code. In Lecture 3.12 we shift from runtime interception to task structure: how to decompose complex requests into sub-tasks, and when to choose a fixed chain versus a dynamic loop.
 -->

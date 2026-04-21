@@ -3,444 +3,251 @@ theme: default
 title: "Lecture 3.10: Programmatic Enforcement vs Prompt-Based Guidance"
 info: |
   Claude Certified Architect – Foundations
-  Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-cover-accent"></div>
-
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Claude Certified Architect – Foundations</div>
-  <div class="di-cover-title">Programmatic Enforcement<br>vs Prompt-Based Guidance</div>
-  <div class="di-cover-subtitle">Lecture 3.10 · Domain 1 — Agentic Architecture & Orchestration (27%)</div>
-</div>
-
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-Here is the most consequential architectural decision you will make in any agentic system:
-
-When something must not happen — ever — do you trust a prompt to prevent it, or do you enforce it in code?
-
-These are not equivalent. They have fundamentally different reliability guarantees. And the exam tests this distinction repeatedly — because getting it wrong in production has serious consequences.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — The Fundamental Fork
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The Fundamental Fork: Deterministic vs Probabilistic</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>Every constraint in an agentic system falls into one of two categories:</p>
-</v-click>
-
-<div style="display: flex; gap: 1.2rem; margin-top: 0.75rem;">
-
-  <v-click>
-  <div style="flex: 1; background: white; border: 1px solid #c8e6d0; border-top: 4px solid #3CAF50; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.92rem;">
-    <div style="font-weight: 700; color: #1B8A5A; font-size: 1rem; margin-bottom: 0.4rem;">Programmatic Enforcement</div>
-    <div style="color: #111928; line-height: 1.6;">Your code prevents it — unconditionally. The model never gets the opportunity to make a different choice.</div>
-    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #1A3A4A; font-style: italic; border-top: 1px solid #c8e6d0; padding-top: 0.4rem;">
-      Reliability: <strong>deterministic</strong><br>
-      Example: block any refund &gt; $500 in the tool execution layer
-    </div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="flex: 1; background: white; border: 1px solid #ffd5a0; border-top: 4px solid #E3A008; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.92rem;">
-    <div style="font-weight: 700; color: #E3A008; font-size: 1rem; margin-bottom: 0.4rem;">Prompt-Based Guidance</div>
-    <div style="color: #111928; line-height: 1.6;">You instruct the model in the system prompt to follow a rule. The model generally will — but it is a statistical outcome, not a guarantee.</div>
-    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #1A3A4A; font-style: italic; border-top: 1px solid #ffd5a0; padding-top: 0.4rem;">
-      Reliability: <strong>probabilistic</strong><br>
-      Example: "Always use a professional tone when responding to customers"
-    </div>
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The fundamental fork in agentic system design.
-
-[click] Programmatic enforcement means your code prevents something — unconditionally. The model never gets the opportunity to do otherwise. It's deterministic. If the rule says "no refund over five hundred dollars," your code blocks the tool call before it executes. Full stop.
-
-[click] Prompt-based guidance means you instruct the model in the system prompt. "Be professional." "Don't discuss competitors." "Only recommend products in the user's region." These are probabilistic. The model generally follows them — Claude is well-trained and instruction-following. But "generally" is not a guarantee. Under adversarial input, edge cases, or novel contexts, prompt-based guidance can fail.
-
-The architectural decision is: which category does each constraint fall into?
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — When to Enforce Programmatically
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">When Programmatic Enforcement Is Required</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>Use programmatic enforcement whenever the consequence of a constraint violation is <strong>irreversible, financially material, legally significant, or a security risk</strong>.</p>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.6rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Financial operations</span> Refund limits, transfer caps, transaction thresholds — enforce in the tool execution layer, not in the prompt
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Identity and authorization</span> Only allow actions on resources the authenticated user owns — verified by your code against your database, not by the model's understanding of the request
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">Compliance boundaries</span> Data residency, PII handling, regulated data access — these have legal consequences if violated. Your code must enforce them.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E53E3E;">
-    <span class="di-step-num" style="color: #E53E3E;">Irreversible actions</span> Deletions, sends, deployments — require a confirmation gate in code before the action executes, regardless of what the prompt says
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-When do you enforce programmatically rather than trusting a prompt?
-
-The rule is clear: whenever the consequence of a violation is irreversible, financially material, legally significant, or a security risk.
-
-[click] Financial operations. If your agent can process refunds, you do not rely on the prompt to enforce a $500 limit. You check the amount in your tool execution layer. If it exceeds the threshold, the tool returns an error before any refund is issued.
-
-[click] Identity and authorization. If an agent is acting on behalf of a user, the authorization check must happen in your code — against your database. The model's understanding of "the user's account" is not an authorization control.
-
-[click] Compliance boundaries. Data residency requirements, PII access restrictions, regulated data handling — all of these have legal consequences if violated. Your code enforces them, not your prompt.
-
-[click] Irreversible actions. Any action that cannot be undone — a delete, a financial send, a deployment — needs a confirmation gate in your code. Prompt-based caution is not enough.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — When Prompt-Based Guidance Is Appropriate
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">When Prompt-Based Guidance Is Appropriate</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>Prompt-based guidance is the right choice when you want <strong>consistent behavior</strong> in areas where some flexibility and judgment are acceptable — and where violations are correctable.</p>
-</v-click>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.6rem;">
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.25rem;">Tone and style</div>
-    "Always respond professionally." "Avoid jargon." A deviation is awkward, not catastrophic.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.25rem;">Output format preferences</div>
-    "Always reply in bullet points." "Use markdown tables when comparing options." The model can exercise judgment.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.25rem;">Scope guidance</div>
-    "Focus on topics relevant to our product." "Decline off-topic requests politely." Violations are annoying, not harmful.
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="background: white; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.9rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.25rem;">User experience preferences</div>
-    "Ask clarifying questions when the request is ambiguous." These shape behavior without requiring guarantees.
-  </div>
-  </v-click>
-
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Prompt-based guidance isn't wrong — it's the right tool for a different category of constraints.
-
-Use it when you want consistent behavior in areas where some flexibility is acceptable and where violations are correctable.
-
-[click] Tone and style guidelines. "Always respond professionally." A violation produces an awkward response — not a financial loss.
-
-[click] Output format preferences. "Use bullet points." "Use markdown tables when comparing options." These shape how the model presents information. The model can exercise judgment about when to deviate.
-
-[click] Scope guidance. "Focus on topics relevant to our product." If the model goes slightly off-topic in an edge case, you review and adjust the prompt.
-
-[click] UX behavior preferences. Asking clarifying questions, providing caveats, acknowledging limitations. These are behaviors you want, not constraints you must enforce.
-
-The common thread: these are all areas where "generally follows the rule" is good enough. They are stylistic and behavioral, not financial, legal, or security-critical.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Programmatic Enforcement in Code
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Programmatic Enforcement — The Code Pattern</div>
-
-<v-click>
-
-```python {all|3-11|14-25|all}
-# The refund tool — programmatic limit enforced in the execution layer
-def process_refund(order_id: str, amount: float, user_id: str) -> dict:
-
-    # Step 1: Programmatic authorization — verify ownership in your system
-    order = db.get_order(order_id)
+<script setup>
+const progContent = "Your code prevents it — unconditionally. The model never gets the opportunity to make a different choice. Reliability: deterministic. Example: block any refund > $500 in the tool execution layer."
+const promptContent = "You instruct the model in the system prompt to follow a rule. The model generally will — but it's a statistical outcome, not a guarantee. Reliability: probabilistic. Example: 'Always use a professional tone when responding to customers.'"
+
+const enforceBullets = [
+  { label: 'Financial operations', detail: 'Refund limits, transfer caps, transaction thresholds — enforce in the tool execution layer, NOT the prompt.' },
+  { label: 'Identity and authorization', detail: 'Only allow actions on resources the authenticated user owns — verified by your code against your DB.' },
+  { label: 'Compliance boundaries', detail: 'Data residency, PII handling, regulated data access — legal consequences if violated.' },
+  { label: 'Irreversible actions', detail: 'Deletions, sends, deployments — require a confirmation gate in code, regardless of prompt.' },
+]
+
+const guideBullets = [
+  { label: 'Tone and style', detail: "'Always respond professionally.' 'Avoid jargon.' Deviation is awkward, not catastrophic." },
+  { label: 'Output format preferences', detail: "'Bullet points.' 'Markdown tables when comparing.' The model can exercise judgment." },
+  { label: 'Scope guidance', detail: "'Focus on topics relevant to our product.' Violations are annoying, not harmful." },
+  { label: 'UX preferences', detail: "'Ask clarifying questions when ambiguous.' Shape behavior without guarantees." },
+]
+
+const progLeft = [
+  'Irreversible actions (delete, send, deploy)',
+  'Financial thresholds and limits',
+  'Identity and authorization checks',
+  'Compliance and regulatory requirements',
+  'Security controls (rate limits, input validation)',
+  "Anything where 'almost always' is not good enough",
+]
+const promptRight = [
+  'Tone, voice, and style',
+  'Output format preferences',
+  'Domain focus and scope',
+  'Conversational behavior patterns',
+  'Persona and branding guidelines',
+  'Anything where judgment/flexibility is acceptable',
+]
+
+const takeaways = [
+  { label: 'Programmatic enforcement = deterministic', detail: 'Code prevents violations unconditionally; the model never gets the chance to make a different call.' },
+  { label: 'Prompt-based guidance = probabilistic', detail: 'The model generally follows instructions — a statistical outcome, not a guarantee.' },
+  { label: 'Use code for hard constraints', detail: 'Financial limits, authorization, compliance, irreversible actions, security controls.' },
+  { label: 'Use prompts for soft preferences', detail: 'Tone, style, format preferences, domain scope, conversational behavior.' },
+  { label: 'Diagnostic test', detail: "Ask: 'Would a violation require incident response?' Yes → code. No → prompt." },
+  { label: 'Emphasis does not promote probabilistic to deterministic', detail: 'ALL CAPS, repetition, or strong wording in a system prompt does not change the statistical nature of the instruction.' },
+]
+
+const enforceCode = `# Programmatic enforcement — the $500 limit is NOT in the system prompt.
+def process_refund(order_id: str, amount_cents: int, user_id: str) -> dict:
+    order = db.orders.get(order_id)
+
+    # Authorization: only act on resources the user owns.
     if order.customer_id != user_id:
-        return {"error": "Unauthorized: order does not belong to this user"}
+        return {
+            "status": "error",
+            "errorCategory": "authorization",
+            "isRetryable": False,
+            "description": f"User {user_id} not authorized for order {order_id}.",
+        }
 
-    # Step 2: Programmatic financial limit — not in the prompt, in the code
-    if amount > 500.00:
-        return {"error": f"Refund amount ${amount:.2f} exceeds the $500 limit. Requires supervisor approval."}
+    # Financial limit — enforced in code, not prompt.
+    MAX_REFUND_CENTS = 50_000  # $500
+    if amount_cents > MAX_REFUND_CENTS:
+        return {
+            "status": "error",
+            "errorCategory": "limit_exceeded",
+            "isRetryable": False,
+            "description": (
+                f"Refund of \${amount_cents/100:.2f} exceeds "
+                f"auto-approval limit of $500. Escalate to human agent."
+            ),
+        }
 
-    # Step 3: Execute the action — only reached if all gates pass
-    result = payment_gateway.issue_refund(order_id, amount)
-    return {"success": True, "refund_id": result.id, "amount": amount}
+    return db.process_refund(order_id, amount_cents)
 
 
-# The system prompt uses guidance for behavior, not for financial limits
+# System prompt — describes behavior but does NOT state the $500 limit.
 SYSTEM_PROMPT = """
-You are a customer support agent. Help customers resolve issues professionally.
+You are a customer support agent. Use the process_refund tool when
+customers have a legitimate refund claim. Always respond empathetically
+and professionally. Explain next steps clearly.
+"""`
+</script>
 
-When a customer requests a refund:
-- Look up their order first using get_order
-- Then call process_refund with the order ID and requested amount
-- If the refund tool returns an error, explain the situation to the customer politely
-"""
-# Notice: the $500 limit is NOT in the system prompt. It's in the tool.
-```
-
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 2px solid #E53E3E;">
-    <strong style="color: #E53E3E;">Wrong:</strong> "Never issue refunds over $500" in the system prompt
-  </div>
-  <div style="flex: 1; background: white; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">Right:</strong> reject in the tool function — Claude never bypasses it
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Here's the canonical pattern for programmatic enforcement.
-
-The process_refund tool function enforces two hard constraints in code, before the action executes.
-
-First, authorization: verify that the order belongs to the requesting user. This check happens against your database. The model's interpretation of who owns what is irrelevant.
-
-[click] Second, the financial limit: if the refund amount exceeds $500, return an error before issuing anything. Not "usually block it." Block it. Always.
-
-Notice the system prompt. It contains behavioral guidance — look up the order first, explain errors politely, be professional. But the $500 limit does not appear there. It's in the code.
-
-[click] This is the architectural principle: constraints with financial, legal, or safety consequences live in the code. Behavioral preferences live in the prompt. Never conflate them.
--->
-
----
-layout: two-cols
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Decision Matrix
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header" style="margin: -1.5rem -1rem 1rem -2rem; padding-right: 1rem;">Decision Matrix: Which Mechanism to Use</div>
-
-<v-click>
-<div style="padding-right: 1.2rem;">
-  <div class="di-col-left-label">Use Programmatic Enforcement</div>
-  <div class="di-col-body">
-    <ul>
-      <li>Irreversible actions (delete, send, deploy)</li>
-      <li>Financial thresholds and limits</li>
-      <li>Identity and authorization checks</li>
-      <li>Compliance and regulatory requirements</li>
-      <li>Security controls (rate limits, input validation)</li>
-      <li>Anything where "almost always" is not good enough</li>
-    </ul>
-    <div class="di-col-warning">
-      <strong>Signal:</strong> if a violation would require incident response, use code
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);"></div>
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Lecture 3.10 &middot; Domain 1</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1600px;">Programmatic <span style="color: var(--sprout-500);">Enforcement</span><br />vs Prompt Guidance</h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1300px; line-height:1.3;">Deterministic code versus probabilistic prompts.</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Domain 1 · 27%</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Scenarios 1 &amp; 4</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>Sets up 3.11 hooks</span>
     </div>
   </div>
-</div>
-</v-click>
+</Frame>
 
-::right::
+<!--
+Welcome to Lecture 3.10 — Programmatic Enforcement vs Prompt-Based Guidance. This is one of the most frequently tested distinctions in Domain 1, and it's a distinction you have to internalize before the rest of the domain makes sense. Every rule in your agent system has a home: either your code enforces it, or your prompt requests it. Get the home wrong and you get production incidents. This lecture gives you the diagnostic test — and Lecture 3.11 will show you the mechanism.
+-->
 
-<v-click>
-<div style="padding-left: 1.2rem; padding-top: 5rem;">
-  <div class="di-col-right-label">Use Prompt-Based Guidance</div>
-  <div class="di-col-body">
+---
+
+<TwoColSlide
+  variant="compare"
+  title="The Fundamental Fork: Deterministic vs Probabilistic"
+  eyebrow="Two reliability models"
+  leftLabel="Programmatic Enforcement"
+  rightLabel="Prompt-Based Guidance"
+  :footerNum="2"
+  :footerTotal="8"
+>
+  <template #left>
+    <p>{{ progContent }}</p>
+  </template>
+  <template #right>
+    <p>{{ promptContent }}</p>
+  </template>
+</TwoColSlide>
+
+<!--
+Here's the fundamental fork. Programmatic enforcement means your code prevents a violation, unconditionally. The model never gets the opportunity to make a different choice — the guarantee lives in the tool execution layer, not in the prompt. Reliability is deterministic. If you block any refund over $500 in the refund tool, the refund is blocked — always. Prompt-based guidance is the opposite: you instruct the model in the system prompt, and the model generally follows the instruction — but "generally" is statistical, not guaranteed. Reliability is probabilistic. Asking the model to "always use a professional tone" is guidance. Blocking a tool call above a threshold is enforcement. These are not two flavors of the same thing; they're two different reliability models, and you choose between them based on the consequence of a violation.
+-->
+
+---
+
+<BulletReveal
+  eyebrow="Enforce in code"
+  title="When Programmatic Enforcement Is Required"
+  :bullets="enforceBullets"
+  :footerNum="3"
+  :footerTotal="8"
+/>
+
+<!--
+Four categories where programmatic enforcement is required. Financial operations: refund limits, transfer caps, transaction thresholds — enforce these in the tool execution layer, never in the prompt. A prompt instruction to "never refund more than $500" will work most of the time, and then one day it won't. Identity and authorization: only allow actions on resources the authenticated user actually owns. This is a correctness and security requirement that must be verified in code against your database, not described in a prompt. Compliance boundaries: data residency rules, PII handling, regulated data access — legal consequences if you violate them. Irreversible actions: deletions, emails, deployments — anything where "oops" is not recoverable needs a confirmation gate in code. The common thread: whenever the consequence of a violation is irreversible, financially material, legally significant, or a security risk, the rule belongs in code.
+-->
+
+---
+
+<BulletReveal
+  eyebrow="Prompt is enough"
+  title="When Prompt-Based Guidance Is Appropriate"
+  :bullets="guideBullets"
+  :footerNum="4"
+  :footerTotal="8"
+/>
+
+<!--
+On the other side of the fork, four categories where prompt-based guidance is not only appropriate but preferable. Tone and style: "always respond professionally," "avoid jargon" — deviation here is awkward, not catastrophic. Output format preferences: bullets, tables, Markdown — the model can exercise judgment based on context. Scope guidance: "focus on topics relevant to our product" — violations are annoying, not harmful. UX preferences: "ask clarifying questions when ambiguous" — shapes behavior without requiring guarantees. The common thread: when "generally follows" is good enough, a prompt is the right tool. These are stylistic and behavioral, not financial or legal or safety-critical. A probabilistic instruction is exactly the right instrument for a probabilistic goal.
+-->
+
+---
+
+<CodeBlockSlide
+  eyebrow="Code pattern"
+  title="Programmatic Enforcement in Code"
+  lang="python"
+  :code="enforceCode"
+  annotation="The $500 limit is in the code, not the prompt. Claude never gets the chance to bypass it. Structured error response tells Claude exactly how to recover."
+  :footerNum="5"
+  :footerTotal="8"
+/>
+
+<!--
+Here's enforcement in practice. The process_refund function does two things before any refund executes. First, authorization: it checks that the authenticated user actually owns the order — if not, it returns a structured error with errorCategory, isRetryable, and a human-readable description. Second, the financial limit: $500 enforced in code. If the amount exceeds the cap, the tool returns a structured limit_exceeded error. Critically, the $500 figure appears only in the code — not in the system prompt. The system prompt describes tone and behavior: "respond empathetically, explain next steps clearly." It does NOT say "never refund more than $500." That limit does not belong in prose where it can be overridden or reasoned around. It belongs in the tool where Claude is physically incapable of exceeding it.
+-->
+
+---
+
+<TwoColSlide
+  variant="compare"
+  title="Decision Matrix: Which Mechanism to Use"
+  eyebrow="Use this checklist"
+  leftLabel="Use Programmatic Enforcement"
+  rightLabel="Use Prompt-Based Guidance"
+  :footerNum="6"
+  :footerTotal="8"
+>
+  <template #left>
     <ul>
-      <li>Tone, voice, and style</li>
-      <li>Output format preferences</li>
-      <li>Domain focus and scope</li>
-      <li>Conversational behavior patterns</li>
-      <li>Persona and branding guidelines</li>
-      <li>Anything where judgment and flexibility are acceptable</li>
+      <li v-for="(b, i) in progLeft" :key="i">{{ b }}</li>
     </ul>
-    <div style="margin-top: 0.5rem; background: #E8F5EB; padding: 0.5rem 0.7rem; border-radius: 5px; font-size: 0.88rem;">
-      <strong>Signal:</strong> if a violation would require a prompt update, use the prompt
-    </div>
+  </template>
+  <template #right>
+    <ul>
+      <li v-for="(b, i) in promptRight" :key="i">{{ b }}</li>
+    </ul>
+  </template>
+</TwoColSlide>
+
+<!--
+A decision matrix you can apply on exam day and in production. On the left — programmatic enforcement — you get: irreversible actions, financial thresholds and limits, identity and authorization checks, compliance and regulatory requirements, security controls like rate limits and input validation, and anything where "almost always" is not good enough. On the right — prompt-based guidance — you get: tone and voice, output format preferences, domain focus and scope, conversational behavior patterns, persona and branding, and anything where judgment and flexibility are acceptable. The diagnostic test is simple: if a violation would require an incident response, it belongs in code. If a violation would just require a prompt update, it belongs in the prompt. That test answers almost every exam question in this category.
+-->
+
+---
+
+<Frame>
+  <Eyebrow>⚡ Exam tip</Eyebrow>
+  <SlideTitle>The Probabilistic / Deterministic Distinction</SlideTitle>
+  <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; flex: 1; min-height: 0;">
+    <CalloutBox variant="dont" title="Common wrong answer">
+      <p>"Include the rule in the system prompt with emphasis — use ALL CAPS or multiple repetitions to ensure the model follows it."</p>
+      <p>This is <strong>always wrong</strong> for financial, legal, safety, or irreversible constraints. Emphasis does not change the probabilistic nature of a prompt instruction.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Pattern to apply">
+      <p>Ask: <em>is the consequence of violation a production incident?</em></p>
+      <p>Yes → enforce in code: tool layer, middleware, pre-execution check. No → prompt instruction.</p>
+    </CalloutBox>
   </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+  <SlideFooter label="Domain 1 · Enforcement distinction" :num="7" :total="8" />
+</Frame>
 
 <!--
-Here's a practical decision matrix.
-
-Use programmatic enforcement for anything where a violation would require incident response: irreversible actions, financial thresholds, authorization checks, compliance requirements, security controls. If "almost always" is not good enough — if you need a guarantee — use code.
-
-[click] Use prompt-based guidance for anything where a violation would require a prompt update: tone, format, domain scope, conversational behavior, persona. These are areas where the model's judgment and flexibility are acceptable, and where you can monitor and adjust.
-
-The diagnostic question is simple: if this constraint is violated, is it a production incident or a prompt revision? That answer tells you which mechanism to use.
+The exam trap. A question describes a scenario with a hard constraint — a financial limit, an authorization rule, something irreversible — and one of the distractor answers is "put it in the system prompt with emphasis, or repeat the rule multiple times." This answer is designed to look right because the rule IS about the model's behavior. But emphasis does not change the probabilistic nature of a prompt instruction. A system prompt that says "NEVER refund over $500" in all caps is still statistical — the model will usually follow it, and the one time it doesn't is a production incident. The decision rule: ask whether a violation would require incident response. If yes, enforce in code. If no, a prompt is fine. That's the whole exam-grade heuristic for this category.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">The Probabilistic / Deterministic Distinction</div>
-
-<div class="di-exam-body">
-  This is one of the most-tested distinctions in Domain 1. The exam presents a constraint and asks whether it should be enforced programmatically or via prompt. The correct answer always follows the same logic.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Common Wrong Answer</div>
-  "Include the rule in the system prompt with emphasis — use ALL CAPS or multiple repetitions to ensure the model follows it."<br><br>
-  <em>This is always wrong for financial, legal, safety, or irreversible constraints.</em> Emphasis does not change the probabilistic nature of prompt-based guidance.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ The Pattern to Apply</div>
-  Ask: <strong>Is the consequence of violation a production incident?</strong><br>
-  Yes → enforce in code (tool layer, middleware, pre-execution check).<br>
-  No → use a prompt instruction.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<BulletReveal
+  eyebrow="Takeaways"
+  title="Programmatic Enforcement vs Prompt Guidance"
+  :bullets="takeaways"
+  :footerNum="8"
+  :footerTotal="8"
+/>
 
 <!--
-This is one of the most-tested distinctions in Domain 1.
-
-The exam presents a constraint — a financial limit, a tone requirement, a compliance rule — and asks whether it should be enforced programmatically or via the system prompt.
-
-[click] The trap answer is always some variation of: "Put it in the system prompt with strong language — use emphasis, repeat it, make it clear." Candidates choose this because it seems sufficient for well-behaved models.
-
-But emphasis does not change the probabilistic nature of prompt-based guidance. No amount of emphasis makes a system prompt instruction deterministic.
-
-[click] The pattern to apply: ask whether a violation would be a production incident. Financial loss? Legal exposure? Security breach? Irreversible action? That's a code enforcement problem. A tone mismatch or a format deviation? That's a prompt guidance problem.
-
-Apply this test and you'll answer correctly on every scenario the exam presents.
--->
-
----
-layout: default
-class: di-takeaway-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-takeaway-title">Programmatic Enforcement vs Prompt Guidance</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li><strong>Programmatic enforcement = deterministic.</strong> Your code prevents violations unconditionally — the model never gets the opportunity to choose differently.</li></v-click>
-  <v-click><li><strong>Prompt-based guidance = probabilistic.</strong> The model generally follows instructions, but this is a statistical outcome — not a guarantee.</li></v-click>
-  <v-click><li>Use code for: financial limits, authorization, compliance, irreversible actions, security controls</li></v-click>
-  <v-click><li>Use prompts for: tone, style, format preferences, domain scope, conversational behavior</li></v-click>
-  <v-click><li>Diagnostic test: <em>"Would a violation require incident response?"</em> Yes = enforce in code. No = prompt guidance.</li></v-click>
-  <v-click><li>Emphasis in a system prompt does <strong>not</strong> make a probabilistic constraint deterministic</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
-
-<!--
-To summarize what you need to take from this lecture:
-
-Programmatic enforcement is deterministic. Your code prevents violations unconditionally. The model never gets the choice.
-
-Prompt-based guidance is probabilistic. The model generally follows instructions — but generally is not always.
-
-Use code for financial limits, authorization, compliance requirements, irreversible actions, and security controls.
-
-Use prompts for tone, style, format, scope, and conversational behavior.
-
-The diagnostic test: would a violation require incident response? Yes — enforce in code. No — prompt guidance.
-
-And the most important exam point: putting a constraint in the system prompt with emphasis does not make it deterministic. It's still probabilistic. The only way to make a constraint deterministic is to enforce it in your code.
+Six takeaways. One — programmatic enforcement is deterministic: your code prevents violations unconditionally. Two — prompt-based guidance is probabilistic: the model generally follows instructions, but it's a statistical outcome. Three — use code for financial limits, authorization, compliance, irreversible actions, and security controls. Four — use prompts for tone, style, format preferences, domain scope, and conversational behavior. Five — the diagnostic test: "would a violation require incident response?" Yes means code. No means prompt. And six — emphasis in a system prompt, even ALL CAPS or repetition, does NOT promote a probabilistic constraint to a deterministic one. In the next lecture, 3.11, we'll look at hooks — the specific Agent SDK mechanism that implements programmatic enforcement cleanly and centrally.
 -->
