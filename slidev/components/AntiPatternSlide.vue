@@ -7,9 +7,13 @@ import SlideFooter from './SlideFooter.vue'
 defineProps({
   eyebrow: { type: String, default: '' },
   title: { type: String, required: true },
-  badExample: { type: String, required: true },
+  // `badExample` / `fixExample` are intentionally optional. Slidev script-setup
+  // blocks are scoped per-slide, so a hoisted const declared at the top of a
+  // lecture markdown file is NOT visible in subsequent slides and
+  // :bad-example="..." can resolve to undefined.
+  badExample: { type: String, default: '' },
   whyItFails: { type: String, default: '' },
-  fixExample: { type: String, required: true },
+  fixExample: { type: String, default: '' },
   lang: { type: String, default: 'ts' },
   footerLabel: { type: String, default: '' },
   footerNum: { type: [Number, String], default: 1 },
@@ -30,7 +34,7 @@ defineProps({
           <span class="aps__glyph aps__glyph--bad">&times;</span>
           <span class="aps__label">Don't</span>
         </header>
-        <pre class="aps__pre aps__pre--bad"><code :class="`language-${lang}`">{{ badExample }}</code></pre>
+        <pre class="aps__pre aps__pre--bad"><code v-if="badExample" v-text="badExample" /><code v-else><slot name="bad" /></code></pre>
         <div v-if="whyItFails" class="aps__why">
           <span class="aps__why-label">Why it fails</span>
           <span class="aps__why-text">{{ whyItFails }}</span>
@@ -42,7 +46,7 @@ defineProps({
           <span class="aps__glyph aps__glyph--good">&#10003;</span>
           <span class="aps__label">Do</span>
         </header>
-        <pre class="aps__pre aps__pre--good"><code :class="`language-${lang}`">{{ fixExample }}</code></pre>
+        <pre class="aps__pre aps__pre--good"><code v-if="fixExample" v-text="fixExample" /><code v-else><slot name="fix" /></code></pre>
       </section>
     </div>
 
@@ -117,7 +121,7 @@ defineProps({
   color: var(--mint-100);
   border-radius: 12px;
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 24px;
   line-height: 1.55;
   white-space: pre;
   overflow: auto;
@@ -146,7 +150,7 @@ defineProps({
 }
 .aps__why-label {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -155,7 +159,7 @@ defineProps({
 .aps__why-text {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.4;
   color: var(--forest-500);
 }

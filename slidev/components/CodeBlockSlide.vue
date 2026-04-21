@@ -8,7 +8,12 @@ defineProps({
   eyebrow: { type: String, default: '' },
   title: { type: String, required: true },
   lang: { type: String, default: 'ts' },
-  code: { type: String, required: true },
+  // `code` is intentionally optional (not required) — Slidev script-setup
+  // blocks are scoped per-slide, so hoisted consts declared at the top of a
+  // lecture markdown file are NOT visible in subsequent slides and :code="..."
+  // can resolve to undefined. Accept undefined/empty here to avoid the Vue
+  // type-warning, and let the default slot act as a fallback code body.
+  code: { type: String, default: '' },
   annotation: { type: String, default: '' },
   footerLabel: { type: String, default: '' },
   footerNum: { type: [Number, String], default: 1 },
@@ -28,12 +33,14 @@ defineProps({
         <div class="cbs__lang">
           {{ lang }}
         </div>
-        <pre class="cbs__pre"><code :class="`language-${lang}`">{{ code }}</code></pre>
+        <pre class="cbs__pre"><code v-if="code" v-text="code" /><code v-else><slot /></code></pre>
       </div>
-      <aside v-if="annotation" class="cbs__rail">
-        <div class="cbs__rail-label">Annotation</div>
-        <div class="cbs__rail-body">{{ annotation }}</div>
-      </aside>
+      <v-click>
+        <aside v-if="annotation" class="cbs__rail">
+          <div class="cbs__rail-label">Annotation</div>
+          <div class="cbs__rail-body">{{ annotation }}</div>
+        </aside>
+      </v-click>
     </div>
 
     <SlideFooter :label="footerLabel" :num="footerNum" :total="footerTotal" />
@@ -65,7 +72,7 @@ defineProps({
   top: 16px;
   right: 24px;
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -81,7 +88,7 @@ defineProps({
   background: transparent;
   color: var(--forest-800);
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1.55;
   white-space: pre;
   overflow: auto;
@@ -109,7 +116,7 @@ defineProps({
 }
 .cbs__rail-label {
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
