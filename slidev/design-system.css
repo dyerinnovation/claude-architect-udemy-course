@@ -66,6 +66,16 @@
   --paper-800: #283029;
   --paper-900: #161a17;
 
+  /* Clay — muted terracotta red for "don't" / anti-pattern signalling */
+  --clay-50:  #fbeae7;
+  --clay-100: #f5d4cc;
+  --clay-200: #eab1a4;
+  --clay-300: #d98a77;
+  --clay-400: #c74a3a;   /* don't accent */
+  --clay-500: #c74a3a;   /* alias — primary clay */
+  --clay-600: #a43c2e;
+  --clay-700: #803125;
+
   /* Semantic */
   --warn:    #e29a2b;     /* ochre — like autumn leaf */
   --warn-bg: #fdf4e1;
