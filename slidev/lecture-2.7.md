@@ -3,173 +3,39 @@ theme: default
 title: "Lecture 2.7: Structured Output via the API"
 info: |
   Claude Certified Architect – Foundations
-  Section 2: Claude API Fundamentals Bootcamp
+  Section 2: Claude API Fundamentals Bootcamp (Domain 2 · 18%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const ranking = [
+  { label: '🏆 1st — Tool Use + JSON Schema', detail: 'Most reliable · schema enforced · exam\'s preferred answer' },
+  { label: '2nd — response_format', detail: 'Valid JSON syntax · no schema check' },
+  { label: '3rd — System Prompt + JSON mode', detail: 'Usually works · not a guarantee' },
+]
 
-<div class="di-cover-accent"></div>
+const takeaways = [
+  { label: 'Reliability order', detail: 'Tool use + JSON schema > response_format > system prompt instruction' },
+  { label: "Force with tool_choice", detail: "tool_choice={'type':'any'} prevents plain text — Claude MUST call a tool" },
+  { label: 'stop_reason = tool_use', detail: "When a tool is called; data arrives as parsed dict at response.content[0].input" },
+  { label: 'Syntax, not truth', detail: 'Tool use guarantees syntactic/structural validity — NOT factually correct values' },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Section 2 · Claude API Fundamentals Bootcamp</div>
-  <div class="di-cover-title">Structured Output<br>via the API</div>
-  <div class="di-cover-subtitle">Lecture 2.7 · Claude Certified Architect – Foundations</div>
-</div>
+const badJsonCode = `{
+  "order_id": "A123",
+  "customer": "Jane",
+  "total": 49.99,  ← trailing comma
+}`
 
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-Imagine you've built a pipeline that extracts structured data from documents.
-
-It works great — until one response comes back with a trailing comma and your JSON parser throws an exception.
-
-You can't write a retry loop that catches every edge case. You need a guarantee.
-
-This lecture is about three approaches to structured output — and which one actually gives you that guarantee.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — When JSON From Claude Breaks Your Pipeline
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">When JSON From Claude Breaks Your Pipeline</div>
-
-<div style="display: flex; align-items: stretch; gap: 1rem; margin-top: 0.75rem;">
-
-  <v-click>
-  <div style="flex: 1; background: white; border-left: 4px solid #E53E3E; border-radius: 6px; padding: 0.7rem 0.9rem; font-family: 'Courier New', monospace; font-size: 0.82rem; color: #1A3A4A;">
-    {<br>
-    &nbsp;&nbsp;"order_id": "A123",<br>
-    &nbsp;&nbsp;"customer": "Jane",<br>
-    &nbsp;&nbsp;"total": 49.99,<span style="color: #E53E3E; font-weight: 700;"> ←</span>
-  </div>
-  </v-click>
-
-  <div class="di-arrow" style="align-self: center; font-size: 1.5rem;">→</div>
-
-  <v-click>
-  <div style="flex: 1; background: #FFF0F0; border: 2px solid #E53E3E; border-radius: 6px; padding: 0.7rem 0.9rem; color: #7a2020;">
-    <div style="font-weight: 700; font-size: 0.95rem;">❌ JSONDecodeError</div>
-    <div style="font-size: 0.82rem; margin-top: 0.3rem; font-family: 'Courier New', monospace;">Expecting property name enclosed in double quotes: line 5 column 1</div>
-    <div style="font-size: 0.82rem; margin-top: 0.4rem;">One malformed response. One crashed pipeline.</div>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 1rem; font-size: 1rem; color: #1A3A4A; text-align: center;">
-  You can't write a retry loop for every edge case. <strong>You need a guarantee.</strong>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Imagine you've built a pipeline that extracts structured data from documents.
-
-It works great — until one response comes back with a trailing comma and your JSON parser throws an exception.
-
-You can't write a retry loop that catches every edge case. You need a guarantee.
-
-This lecture is about three approaches to structured output — and which one actually gives you that guarantee.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — Three Approaches, One Winner
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Three Approaches, One Winner</div>
-
-<div style="display: flex; align-items: flex-end; justify-content: center; gap: 0.8rem; margin-top: 1rem;">
-
-  <!-- 3rd place -->
-  <v-click>
-  <div style="flex: 1; text-align: center;">
-    <div style="background: #c89a6a; color: white; padding: 0.6rem; border-radius: 6px 6px 0 0; font-weight: 700; font-size: 0.85rem;">3rd</div>
-    <div style="background: white; border: 1px solid #c89a6a; padding: 0.7rem 0.5rem; min-height: 70px;">
-      <strong style="font-size: 0.9rem;">System Prompt + JSON Mode</strong>
-      <div style="font-size: 0.78rem; color: #666; margin-top: 0.3rem;">Usually works. Not a guarantee.</div>
-    </div>
-  </div>
-  </v-click>
-
-  <!-- 1st place -->
-  <v-click>
-  <div style="flex: 1; text-align: center;">
-    <div style="background: #E3A008; color: white; padding: 0.9rem; border-radius: 6px 6px 0 0; font-weight: 800; font-size: 1rem;">🏆 1st</div>
-    <div style="background: white; border: 2px solid #E3A008; padding: 0.9rem 0.5rem; min-height: 110px;">
-      <strong style="font-size: 0.95rem; color: #1A3A4A;">Tool Use + JSON Schema</strong>
-      <div style="font-size: 0.8rem; color: #1B8A5A; margin-top: 0.4rem; font-weight: 600;">Most reliable. Schema enforced. Exam's preferred answer.</div>
-    </div>
-  </div>
-  </v-click>
-
-  <!-- 2nd place -->
-  <v-click>
-  <div style="flex: 1; text-align: center;">
-    <div style="background: #9ca3af; color: white; padding: 0.75rem; border-radius: 6px 6px 0 0; font-weight: 700; font-size: 0.9rem;">2nd</div>
-    <div style="background: white; border: 1px solid #9ca3af; padding: 0.75rem 0.5rem; min-height: 90px;">
-      <strong style="font-size: 0.9rem;"><code>response_format</code></strong>
-      <div style="font-size: 0.78rem; color: #666; margin-top: 0.3rem;">Valid JSON syntax, no schema check.</div>
-    </div>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.9rem; font-size: 0.95rem; color: #1A3A4A; text-align: center;">
-  Three ways. <strong>Meaningfully different reliability profiles.</strong> Only one gives you a guarantee.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-There are three ways to get structured JSON out of Claude. They're not equivalent — they have meaningfully different reliability profiles.
-
-Third place: telling Claude in your system prompt to respond in JSON. It usually works. But "usually" is not a guarantee.
-
-Second place: using the response_format parameter set to json_object. This ensures Claude outputs valid JSON syntax, but doesn't enforce your specific schema.
-
-First place: using tool use with a JSON schema. This is the most reliable approach, and it's the one the exam expects you to reach for when schema compliance is critical.
-
-We'll cover all three — starting from the top.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — The Gold Standard: Tool Use for Structured Output
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Gold Standard: Tool Use for Structured Output</div>
-
-<v-click>
-
-```python {all|5-17|22|26|all}
-import anthropic
+const goldCode = `import anthropic
 
 client = anthropic.Anthropic()
 
@@ -197,49 +63,9 @@ response = client.messages.create(
     messages=[{"role": "user", "content": "Order #A123, Jane Smith, $49.99, shipped."}]
 )
 
-order_data = response.content[0].input   # Already a validated dict
-```
+order_data = response.content[0].input   # Already a validated dict`
 
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #E3A008;">
-    <strong style="color: #E3A008;">tool_choice: "any"</strong> forces a tool call — no plain text allowed
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">SDK validates</strong> output against your schema before returning
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The key insight: you're defining a tool purely to receive structured output.
-
-Claude isn't actually calling an external function — you're using the tool-calling mechanism as a schema enforcement layer.
-
-tool_choice type "any" is critical here. It forces Claude to call one of your tools — it cannot respond with plain text.
-
-The SDK validates the output against your schema before returning. This is why you get a guarantee: malformed JSON never reaches your application code.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Reading the Tool Use Response
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Reading the Tool Use Response</div>
-
-<v-click>
-
-```python {all|4|7|13-15|all}
-# After the create() call from the previous slide...
+const readCode = `# After the create() call from the previous slide...
 
 # stop_reason tells you Claude called a tool, not finished naturally
 print(response.stop_reason)           # "tool_use"
@@ -254,45 +80,9 @@ print(response.content[0].name)       # "extract_order"
 structured_data = response.content[0].input
 print(type(structured_data))          # <class 'dict'> — already parsed
 print(structured_data["order_id"])    # "A123"
-print(structured_data["status"])      # "shipped"
-```
+print(structured_data["status"])      # "shipped"`
 
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.85rem;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.5rem 0.7rem; border-left: 3px solid #E3A008;">
-    <strong style="color: #E3A008;">stop_reason</strong> is <strong>always <code>"tool_use"</code></strong> when a tool was called — common exam question
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.5rem 0.7rem; border-left: 3px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">content[0].input</strong> is already a Python dict — <em>no <code>json.loads()</code></em>
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-When a tool is called, stop_reason is always "tool_use" — not "end_turn". This is a common exam question. Know it.
-
-Notice that content[0].input is already a Python dict — the SDK parsed it for you. You're not doing json.loads() on a string. You get a native object.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — The Silver Medal: response_format & System Prompt JSON
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Silver Medal: <code>response_format</code> & System Prompt JSON</div>
-
-<v-click>
-
-```python
-# APPROACH 2: response_format parameter — valid JSON, but no schema check
+const silverCode = `# APPROACH 2: response_format parameter — valid JSON, but no schema check
 response = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=1024,
@@ -312,18 +102,144 @@ response = client.messages.create(
     model="claude-opus-4-7", max_tokens=1024, system=system,
     messages=[{"role": "user", "content": "Order #C789, Sara Kim, $99.50, delivered."}]
 )
-# Usually works. But Claude could add a markdown fence or a preamble sentence.
-```
+# Usually works. But Claude could add a markdown fence or a preamble sentence.`
+</script>
 
-</v-click>
+---
 
-<v-click>
-<div style="margin-top: 0.5rem; background: #FFF0F0; border-left: 4px solid #E53E3E; border-radius: 4px; padding: 0.55rem 0.9rem; font-size: 0.88rem; color: #7a2020;">
-  <strong>⚠ Neither approach enforces your schema.</strong> Shape is Claude's best effort — you still need application-level validation after parsing.
-</div>
-</v-click>
+<!-- SLIDE 1 — Cover -->
 
-<img src="/logo.png" class="di-logo" />
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div class="lec-cover">
+    <div class="lec-cover__brand">
+      <img src="/assets/logo-mark.png" alt="" class="lec-cover__logo" />
+      <div class="lec-cover__brand-text">Dyer Innovation</div>
+    </div>
+    <div>
+      <div class="lec-cover__section">Section 2 · Lecture 2.7 · Domain 2</div>
+      <h1 class="lec-cover__title">Structured Output via the API</h1>
+      <div class="lec-cover__subtitle">Three approaches, one winner</div>
+    </div>
+    <div class="lec-cover__stats">
+      <span>API Fundamentals Bootcamp</span>
+      <span class="lec-cover__dot">&middot;</span>
+      <span>Domain 2 · 18% weight</span>
+    </div>
+  </div>
+</Frame>
+
+<style>
+.lec-cover { position: relative; z-index: 1; padding: 110px 120px 96px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%); }
+.lec-cover__brand { display: flex; align-items: center; gap: 24px; }
+.lec-cover__logo { width: 72px; height: auto; }
+.lec-cover__brand-text { font-family: var(--font-body); font-size: 26px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint-200); }
+.lec-cover__section { font-family: var(--font-body); font-size: 26px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sprout-500); margin-bottom: 40px; }
+.lec-cover__title { font-family: var(--font-display); font-weight: 500; font-size: 112px; line-height: 1.02; letter-spacing: -0.025em; color: var(--paper-0); margin: 0; max-width: 1500px; }
+.lec-cover__subtitle { font-family: var(--font-display); font-size: 48px; color: var(--mint-200); margin-top: 32px; font-weight: 400; max-width: 1400px; line-height: 1.3; }
+.lec-cover__stats { display: flex; align-items: center; gap: 36px; font-family: var(--font-body); font-size: 24px; color: var(--mint-200); letter-spacing: 0.06em; }
+.lec-cover__dot { opacity: 0.4; }
+.exam-stack { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; flex: 1; min-height: 0; }
+</style>
+
+<!--
+You need structured data from Claude. A name, an amount, a status — parsed into a clean object your code can consume. You tell Claude "respond in JSON."
+
+Usually it works. But once in a while Claude wraps the JSON in a markdown code block. Or adds a trailing comma that blows up your parser. Or returns "Sure! Here's your JSON:" followed by the object.
+
+One malformed response crashes your pipeline. In production, "usually works" is not good enough.
+
+There's a right way to do this. Let me show you.
+-->
+
+---
+
+<!-- SLIDE 2 — Broken pipeline -->
+
+<CodeBlockSlide
+  eyebrow="Broken pipeline"
+  title="When JSON From Claude Breaks Your Pipeline"
+  lang="json"
+  :code="badJsonCode"
+  annotation="JSONDecodeError: Expecting property name enclosed in double quotes: line 5 column 1. One malformed response. One crashed pipeline. You need a guarantee — not a retry loop."
+/>
+
+<!--
+Here's what "usually works" looks like in production. One trailing comma. One markdown fence. One friendly preamble. Any of these breaks your JSON parser instantly.
+
+The fix isn't more retry logic. The fix is reaching for an API feature that gives you a structural guarantee — not a best-effort hint.
+-->
+
+---
+
+<!-- SLIDE 3 — Ranked by reliability -->
+
+<BulletReveal
+  eyebrow="Three approaches"
+  title="Ranked by Reliability"
+  :bullets="ranking"
+/>
+
+<!--
+There are three ways to get structured JSON out of Claude. They're not equivalent — they have meaningfully different reliability profiles.
+
+Third place: telling Claude in your system prompt to respond in JSON. It usually works. But "usually" is not a guarantee.
+
+Second place: using the response_format parameter. This ensures Claude outputs valid JSON syntax, but doesn't enforce your specific schema.
+
+First place: using tool use with a JSON schema. This is the most reliable approach, and it's the one the exam expects you to reach for when schema compliance is critical.
+-->
+
+---
+
+<!-- SLIDE 4 — Tool use for structured output -->
+
+<CodeBlockSlide
+  eyebrow="Gold standard"
+  title="Tool Use for Structured Output"
+  lang="python"
+  :code="goldCode"
+  annotation="tool_choice='any' forces a tool call — no plain text · SDK validates against schema before returning."
+/>
+
+<!--
+The key insight: you're defining a tool purely to receive structured output.
+
+Claude isn't actually calling an external function — you're using the tool-calling mechanism as a schema enforcement layer.
+
+tool_choice type "any" is critical here. It forces Claude to call one of your tools — it cannot respond with plain text.
+
+The SDK validates the output against your schema before returning. This is why you get a guarantee: malformed JSON never reaches your application code.
+-->
+
+---
+
+<!-- SLIDE 5 — Reading the response -->
+
+<CodeBlockSlide
+  eyebrow="Reading response"
+  title="How to Read the Tool-Use Response"
+  lang="python"
+  :code="readCode"
+  annotation="stop_reason is ALWAYS 'tool_use' when a tool was called · content[0].input is already a dict — no json.loads()."
+/>
+
+<!--
+When a tool is called, stop_reason is always "tool_use" — not "end_turn". This is a common exam question. Know it.
+
+Notice that content[0].input is already a Python dict — the SDK parsed it for you. You're not doing json.loads() on a string. You get a native object.
+-->
+
+---
+
+<!-- SLIDE 6 — Silver: response_format & system-prompt JSON -->
+
+<CodeBlockSlide
+  eyebrow="Runners-up"
+  title="response_format & System-Prompt JSON"
+  lang="python"
+  :code="silverCode"
+  annotation="⚠ Neither enforces your schema. Shape is Claude's best effort. You need application-level validation after parsing."
+/>
 
 <!--
 System prompt JSON mode is fine for quick extractions in low-stakes pipelines.
@@ -334,54 +250,33 @@ The response_format approach is cleaner but still doesn't validate against your 
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — What Tool Use Guarantees — And What It Doesn't
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — What tool use guarantees -->
 
-<div class="di-header">What Tool Use Guarantees — And What It Doesn't</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 0.5rem;">
-
-  <v-click>
-  <div>
-    <div class="di-col-left-label">✓ Tool Use GUARANTEES</div>
-    <div class="di-col-body">
-      <ul>
-        <li>Syntactically valid JSON</li>
-        <li>Schema-conformant field names</li>
-        <li>Correct data types per schema</li>
-        <li>No parse errors</li>
-      </ul>
-    </div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div>
-    <div class="di-col-right-label" style="color: #E53E3E; border-color: #E53E3E;">✗ Tool Use Does NOT Guarantee</div>
-    <div class="di-col-body">
-      <ul>
-        <li>Factually correct values</li>
-        <li>Data that actually exists in the source</li>
-        <li>Freedom from hallucination</li>
-        <li>Semantic accuracy</li>
-      </ul>
-    </div>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.9rem; background: white; border: 1px solid #c8e6d0; border-left: 4px solid #0D7377; border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.95rem; color: #111928;">
-  <strong style="color: #0D7377;">Mental model:</strong> Tool use is a <em>syntax and structure</em> guarantee, not a <em>truth</em> guarantee. For critical pipelines you still need application-level validation of the <strong>values</strong>.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<TwoColSlide
+  variant="compare"
+  title="What Tool Use Guarantees — and What It Doesn't"
+  leftLabel="✓ Guarantees"
+  rightLabel="✗ Does NOT guarantee"
+>
+  <template #left>
+    <ul>
+      <li>Syntactically valid JSON</li>
+      <li>Schema-conformant field names</li>
+      <li>Correct data types per schema</li>
+      <li>No parse errors</li>
+    </ul>
+  </template>
+  <template #right>
+    <ul>
+      <li>Factually correct values</li>
+      <li>Data that actually exists in source</li>
+      <li>Freedom from hallucination</li>
+      <li>Semantic accuracy</li>
+    </ul>
+    <p style="margin-top: 18px;"><strong>Tool use is a syntax/structure guarantee — not a truth guarantee.</strong> Still validate values.</p>
+  </template>
+</TwoColSlide>
 
 <!--
 This is the most important distinction in this lecture — and the exam tests it directly.
@@ -394,76 +289,50 @@ The mental model: tool use is a syntax and structure guarantee, not a truth guar
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — Exam Tip -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">Schema Conformance ≠ Semantic Correctness</div>
-
-<div class="di-exam-body">
-  The exam tests this distinction specifically — don't conflate a structural guarantee with a truth guarantee.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Trap</div>
-  Choosing tool use because you believe it eliminates <em>all</em> errors in the output — including wrong values or hallucinated data.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ Correct Approach</div>
-  Tool use with <code class="di-code-inline">tool_choice: "any"</code> guarantees syntactically valid, schema-conformant JSON — it eliminates parse errors and field-shape errors. It does <strong>not</strong> guarantee values are correct or that Claude hasn't hallucinated. Also: <code class="di-code-inline">stop_reason</code> is <code>"tool_use"</code> (not <code>"end_turn"</code>) whenever a tool is called.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<Frame>
+  <Eyebrow>⚡ Exam Tip</Eyebrow>
+  <SlideTitle>Schema Conformance ≠ Semantic Correctness</SlideTitle>
+  <div class="exam-stack">
+    <CalloutBox variant="dont" title="Trap">
+      <p>Choosing tool use because it eliminates <em>all</em> errors in the output — including wrong values or hallucinated data.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Correct pattern">
+      <p>Tool use + <code>tool_choice:'any'</code> guarantees syntactically valid, schema-conformant JSON. It does NOT guarantee values are correct or hallucination-free. <code>stop_reason</code> is <code>'tool_use'</code> (not <code>'end_turn'</code>) whenever a tool is called.</p>
+    </CalloutBox>
+  </div>
+</Frame>
 
 <!--
-Tool use with tool_choice "any" guarantees syntactically valid, schema-conformant JSON — it eliminates parse errors and field-shape errors. It does not guarantee that the values are correct or that Claude hasn't hallucinated data.
+The exam tests the distinction between structural guarantee and truth guarantee.
 
-When an exam question asks "What does using tool_use for structured output guarantee?" — the answer is schema conformance, not factual accuracy.
+If you choose tool use because "it eliminates all errors" — that's the trap.
 
-Also remember: stop_reason will be "tool_use" (not "end_turn") whenever Claude calls a tool.
+Tool use guarantees valid JSON, conformant fields, correct types. It does not guarantee the values are correct or free of hallucination.
+
+And know this cold: when a tool is called, stop_reason is 'tool_use' — never 'end_turn'.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 9 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 9 — Takeaways -->
 
-<div class="di-takeaway-title">What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>Reliability ranking: <strong>tool use + JSON schema</strong> &gt; <code>response_format</code> &gt; system prompt instruction</li></v-click>
-  <v-click><li>Use <code style="color: #3CAF50;">tool_choice={"type": "any"}</code> to force a tool call — prevents plain-text responses</li></v-click>
-  <v-click><li><code style="color: #3CAF50;">stop_reason</code> is <code>"tool_use"</code> when a tool is called; data lives in <code>response.content[0].input</code> as a parsed dict</li></v-click>
-  <v-click><li>Tool use guarantees <strong>syntactic</strong> and <strong>structural</strong> validity — <em>not</em> factually correct or hallucination-free values</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaway"
+  title="What to Remember"
+  :bullets="takeaways"
+/>
 
 <!--
-Four things to remember:
+Four things to hold onto.
 
-Three approaches ranked by reliability: tool use with JSON schema is most reliable, followed by the response_format parameter, followed by a system prompt instruction.
+Reliability order: tool use with JSON schema > response_format > system prompt instruction.
 
-Use tool_choice type "any" to force Claude to call a tool. This prevents plain text responses.
+Use tool_choice type "any" to force a tool call — prevents plain text.
 
-stop_reason is "tool_use" when a tool is called, and structured data lives in response.content[0].input as a parsed dict.
+stop_reason is "tool_use" when a tool is called; data arrives as a parsed dict at response.content[0].input.
 
-Tool use guarantees syntactic and structural validity. It does not guarantee factually correct or hallucination-free values.
+Tool use guarantees syntactic and structural validity — not factually correct values. Still validate.
 -->

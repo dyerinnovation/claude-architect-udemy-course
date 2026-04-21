@@ -3,119 +3,27 @@ theme: default
 title: "Lecture 2.2: System Prompts — Where Instructions Live"
 info: |
   Claude Certified Architect – Foundations
-  Section 2: Claude API Fundamentals Bootcamp
+  Section 2: Claude API Fundamentals Bootcamp (Domain 2 · 18%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const takeaways = [
+  { label: 'Top-level field', detail: 'system is a top-level parameter alongside model and max_tokens — never inside the messages array' },
+  { label: 'Auto-persists', detail: 'System prompts apply to every turn automatically — never confused with conversation history' },
+  { label: 'User messages can be lost', detail: 'Instructions placed in the first user message are part of history — they can be truncated' },
+  { label: 'Rule of thumb', detail: 'Use system for persona/format/safety; use messages for turn-specific data' },
+]
 
-<div class="di-cover-accent"></div>
-
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Section 2 · Claude API Fundamentals Bootcamp</div>
-  <div class="di-cover-title">System Prompts:<br>Where <span style="color: #3CAF50;">Instructions</span> Live</div>
-  <div class="di-cover-subtitle">Lecture 2.2 · Claude Certified Architect – Foundations</div>
-</div>
-
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-Here's a scenario you'll see on the exam.
-
-A developer builds a customer support bot for an airline. They put the bot's persona instructions in the first user message. Three turns in, the bot starts answering like a general assistant — no persona, no constraints.
-
-What went wrong? The instructions were in the wrong place.
-
-Understanding the system parameter is one of the most high-value things you can learn today.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — What the System Parameter Actually Is
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">What the <code>system</code> Parameter Actually Is</div>
-
-<div style="display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 1.2rem; margin-top: 0.5rem; align-items: start;">
-
-  <v-click>
-  <div>
-    <div style="background: #E3A008; color: white; border-radius: 6px; padding: 0.55rem 0.9rem; font-weight: 700; font-size: 0.92rem; text-align: center;">
-      system = "You are Aria, airline support..."
-    </div>
-    <div style="font-size: 0.75rem; color: #1B8A5A; text-align: center; margin-top: 0.2rem; font-style: italic;">applies to all turns</div>
-    <div class="di-arrow">↓</div>
-    <div style="background: white; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.5rem 0.8rem;">
-      <div style="font-size: 0.8rem; color: #0D7377; font-weight: 600;">messages array</div>
-      <div style="font-size: 0.78rem; color: #111928; margin-top: 0.3rem; line-height: 1.4;">
-        user → assistant → user → assistant → ...
-      </div>
-      <div style="font-size: 0.72rem; color: #6B7280; margin-top: 0.25rem; font-style: italic;">(no instructions repeated)</div>
-    </div>
-  </div>
-  </v-click>
-
-  <div style="font-size: 0.95rem; color: #111928; line-height: 1.65;">
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">Top-level</span>
-      a field in <code class="di-code-inline">messages.create()</code> — <em>outside</em> the <code>messages</code> array
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">Standing brief</span>
-      Claude reads it before the conversation begins
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">Persistent</span>
-      applies automatically across every turn — write once, apply everywhere
-    </div>
-    </v-click>
-  </div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The system parameter is a top-level field in every messages.create() call. It lives outside the messages array — above it, conceptually.
-
-Think of it as a standing brief that Claude reads before the conversation begins. It persists automatically across every turn in the conversation. You write it once. It applies everywhere.
-
-The messages array holds the conversation itself — the back-and-forth dialogue. The system parameter holds the rules, persona, and constraints for that dialogue.
-
-These are fundamentally different things and they belong in different places.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — The Right Way — System Parameter in Action
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">✓ Correct: <code>system</code> as a Top-Level Parameter</div>
-
-<v-click>
-
-```python
-import anthropic
+const correctCode = `import anthropic
 client = anthropic.Anthropic()
 
 # System prompt defined once — applies to every turn
@@ -132,44 +40,9 @@ response = client.messages.create(
     ]
 )
 
-print(response.content[0].text)
-```
+print(response.content[0].text)`
 
-</v-click>
-
-<v-click>
-<div style="background: #F0FFF4; border-left: 3px solid #3CAF50; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.6rem;">
-  <strong>system</strong> sits alongside <code>model</code> and <code>max_tokens</code> — Aria's persona is established before the first user message. You never repeat the system prompt inside <code>messages</code>.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Here's what correct usage looks like.
-
-Notice the system parameter sits alongside model and max_tokens — not inside messages.
-
-Aria's persona and constraints are established before the first user message. Every subsequent turn in this conversation will operate under those rules.
-
-You never repeat the system prompt in the messages array.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — The Wrong Way — Instructions in the User Message
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">✗ Wrong: Instructions Buried in a User Message</div>
-
-<v-click>
-
-```python
-# WRONG: Embedding instructions inside the first user message
+const wrongCode = `# WRONG: Embedding instructions inside the first user message
 response = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
@@ -184,47 +57,9 @@ Only answer questions about flights, baggage, and reservations.
 Hi, I need to change my seat on flight SK442."""
         }
     ]
-)
-```
+)`
 
-</v-click>
-
-<v-click>
-<div class="di-trap-box" style="margin-top: 0.6rem;">
-  <div class="di-trap-label">❌ Why this breaks</div>
-  Works for one turn. After that, instructions are buried in history as a user message — they may not influence later turns. <strong>If you truncate history to save tokens, the instructions disappear entirely.</strong> A system prompt is never truncated from history.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Now let's look at the pattern that breaks things.
-
-This works for exactly one turn. When the conversation continues, you have a problem.
-
-The instructions are now buried in the history as a user message. They're not guaranteed to influence future turns the same way a real system prompt would.
-
-And here's the critical difference: you're responsible for replaying the full messages array on every API call. If you truncate the history to save tokens, you lose the instructions entirely.
-
-A system prompt, by contrast, always comes through — it's never truncated from the history.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Multi-Turn Behavior
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Multi-Turn: Why <code>system</code> Persists</div>
-
-<v-click>
-
-```python
-# YOU maintain conversation history across turns
+const chatCode = `# YOU maintain conversation history across turns
 conversation_history = []
 
 def chat(user_message):
@@ -243,18 +78,150 @@ def chat(user_message):
 
 chat("Can I change my seat?")           # Turn 1 — persona active
 chat("What about baggage fees?")        # Turn 2 — persona STILL active
-chat("Can you help me book a hotel?")   # Turn 3 — Aria redirects, correctly
-```
+chat("Can you help me book a hotel?")   # Turn 3 — Aria redirects, correctly`
+</script>
 
-</v-click>
+---
 
-<v-click>
-<div style="background: #F0FFF4; border-left: 3px solid #3CAF50; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.6rem;">
-  The <code>system</code> prompt is re-sent on every call — but because it's a separate parameter, it's never confused with the conversation itself. Even if you trim <code>messages</code> history, the system prompt stays intact.
-</div>
-</v-click>
+<!-- SLIDE 1 — Cover -->
 
-<img src="/logo.png" class="di-logo" />
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div class="lec-cover">
+    <div class="lec-cover__brand">
+      <img src="/assets/logo-mark.png" alt="" class="lec-cover__logo" />
+      <div class="lec-cover__brand-text">Dyer Innovation</div>
+    </div>
+    <div>
+      <div class="lec-cover__section">Section 2 · Lecture 2.2 · Domain 2</div>
+      <h1 class="lec-cover__title">System Prompts</h1>
+      <div class="lec-cover__subtitle">Where Instructions Live</div>
+    </div>
+    <div class="lec-cover__stats">
+      <span>API Fundamentals Bootcamp</span>
+      <span class="lec-cover__dot">&middot;</span>
+      <span>Domain 2 · 18% weight</span>
+    </div>
+  </div>
+</Frame>
+
+<style>
+.lec-cover { position: relative; z-index: 1; padding: 110px 120px 96px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%); }
+.lec-cover__brand { display: flex; align-items: center; gap: 24px; }
+.lec-cover__logo { width: 72px; height: auto; }
+.lec-cover__brand-text { font-family: var(--font-body); font-size: 26px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint-200); }
+.lec-cover__section { font-family: var(--font-body); font-size: 26px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sprout-500); margin-bottom: 40px; }
+.lec-cover__title { font-family: var(--font-display); font-weight: 500; font-size: 128px; line-height: 1.02; letter-spacing: -0.025em; color: var(--paper-0); margin: 0; max-width: 1500px; }
+.lec-cover__subtitle { font-family: var(--font-display); font-size: 48px; color: var(--mint-200); margin-top: 32px; font-weight: 400; max-width: 1400px; line-height: 1.3; }
+.lec-cover__stats { display: flex; align-items: center; gap: 36px; font-family: var(--font-body); font-size: 24px; color: var(--mint-200); letter-spacing: 0.06em; }
+.lec-cover__dot { opacity: 0.4; }
+.exam-stack { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; flex: 1; min-height: 0; }
+</style>
+
+<!--
+Here's a scenario you'll see on the exam.
+
+A developer builds a customer support bot for an airline. They put the bot's persona instructions in the first user message. Three turns in, the bot starts answering like a general assistant — no persona, no constraints.
+
+What went wrong? The instructions were in the wrong place.
+
+Understanding the system parameter is one of the most high-value things you can learn today.
+-->
+
+---
+
+<!-- SLIDE 2 — What the System Parameter Actually Is -->
+
+<TwoColSlide
+  variant="compare"
+  eyebrow="What it is"
+  title="What the system Parameter Actually Is"
+  leftLabel="Visualized"
+  rightLabel="Three properties"
+>
+  <template #left>
+    <p><strong>system =</strong> "You are Aria, airline support..."</p>
+    <p style="color: var(--sprout-600); font-style: italic;">applies to all turns</p>
+    <p>↓</p>
+    <p><strong>messages array</strong></p>
+    <p>user → assistant → user → assistant → ...</p>
+    <p style="color: var(--forest-500); font-style: italic; font-size: 20px;">(no instructions repeated)</p>
+  </template>
+  <template #right>
+    <ul>
+      <li><strong>Top-level</strong> — a field in <code>messages.create()</code>, outside the <code>messages</code> array</li>
+      <li><strong>Standing brief</strong> — Claude reads it before the conversation begins</li>
+      <li><strong>Persistent</strong> — applies automatically across every turn</li>
+    </ul>
+  </template>
+</TwoColSlide>
+
+<!--
+The system parameter is a top-level field in every messages.create() call. It lives outside the messages array — above it, conceptually.
+
+Think of it as a standing brief that Claude reads before the conversation begins. It persists automatically across every turn in the conversation. You write it once. It applies everywhere.
+
+The messages array holds the conversation itself — the back-and-forth dialogue. The system parameter holds the rules, persona, and constraints for that dialogue.
+
+These are fundamentally different things and they belong in different places.
+-->
+
+---
+
+<!-- SLIDE 3 — Correct usage -->
+
+<CodeBlockSlide
+  eyebrow="✓ Correct"
+  title="system as a Top-Level Parameter"
+  lang="python"
+  :code="correctCode"
+  annotation="system sits alongside model and max_tokens. Aria's persona is established before the first user message. Never repeat the system prompt inside messages."
+/>
+
+<!--
+Here's what correct usage looks like.
+
+Notice the system parameter sits alongside model and max_tokens — not inside messages.
+
+Aria's persona and constraints are established before the first user message. Every subsequent turn in this conversation will operate under those rules.
+
+You never repeat the system prompt in the messages array.
+-->
+
+---
+
+<!-- SLIDE 4 — Wrong way -->
+
+<CodeBlockSlide
+  eyebrow="✗ Wrong"
+  title="Instructions Buried in a User Message"
+  lang="python"
+  :code="wrongCode"
+  annotation="Works for one turn. After that, instructions are conversation history — truncate history, instructions disappear. System prompts are never truncated."
+/>
+
+<!--
+Now let's look at the pattern that breaks things.
+
+This works for exactly one turn. When the conversation continues, you have a problem.
+
+The instructions are now buried in the history as a user message. They're not guaranteed to influence future turns the same way a real system prompt would.
+
+And here's the critical difference: you're responsible for replaying the full messages array on every API call. If you truncate the history to save tokens, you lose the instructions entirely.
+
+A system prompt, by contrast, always comes through — it's never truncated from the history.
+-->
+
+---
+
+<!-- SLIDE 5 — Multi-turn -->
+
+<CodeBlockSlide
+  eyebrow="Persistence"
+  title="Multi-Turn: Why system Persists"
+  lang="python"
+  :code="chatCode"
+  annotation="system is re-sent every call as a separate parameter — even if you trim messages history, system stays intact."
+/>
 
 <!--
 Let's see this play out across multiple turns.
@@ -267,19 +234,16 @@ This is exactly why the system parameter exists as a distinct field.
 -->
 
 ---
-layout: two-cols
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — When to Use System vs. User-Level
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — When to use system vs messages -->
 
-<div class="di-header" style="margin: -1.5rem -1rem 1rem -2rem; padding-right: 1rem;">When to Use <code>system</code> vs. User-Level Instructions</div>
-
-<v-click>
-<div style="padding-right: 1rem;">
-  <div class="di-col-left-label">Use <code>system</code> parameter</div>
-  <div class="di-col-body">
+<TwoColSlide
+  variant="compare"
+  title="When to Use system vs. User-Level"
+  leftLabel="Use system parameter"
+  rightLabel="Use messages content"
+>
+  <template #left>
     <p><em>Anything that must be true for every turn.</em></p>
     <ul>
       <li>Persona and role definitions</li>
@@ -287,30 +251,17 @@ layout: two-cols
       <li>Safety guardrails and topic restrictions</li>
       <li>Tool usage policies</li>
     </ul>
-  </div>
-</div>
-</v-click>
-
-::right::
-
-<div style="padding-left: 1rem; padding-top: 5rem;">
-  <v-click>
-  <div class="di-col-right-label">Use <code>messages</code> content</div>
-  <div class="di-col-body">
+  </template>
+  <template #right>
     <p><em>Anything specific to a single turn.</em></p>
     <ul>
       <li>Dynamic data (customer account details)</li>
       <li>One-off instructions for the current question</li>
       <li>Turn-specific context</li>
     </ul>
-    <div style="margin-top: 0.75rem; text-align: center; font-size: 1.0rem; font-weight: 700; color: #1A3A4A;">
-      Rule of thumb: if it must be true for every exchange → <code>system</code>.
-    </div>
-  </div>
-  </v-click>
-</div>
-
-<img src="/logo.png" class="di-logo" />
+    <p style="margin-top: 18px;"><strong>Rule of thumb:</strong> if it must be true for every exchange → <code>system</code>.</p>
+  </template>
+</TwoColSlide>
 
 <!--
 Not every instruction belongs in the system prompt.
@@ -323,39 +274,21 @@ The rule of thumb: if it needs to be true for every single exchange, it belongs 
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — Exam Tip -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">System Prompts Persist. First User Messages Don't.</div>
-
-<div class="di-exam-body">
-  The <code class="di-code-inline">system</code> parameter is the <strong>only</strong> mechanism that guarantees instructions apply across all turns. User messages are conversation history — they can be truncated, and their influence on later turns is not guaranteed the same way.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Distractor Pattern</div>
-  Putting persona or role instructions in the first user message and assuming they'll persist through the conversation.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ Exam Signal</div>
-  A scenario where a bot "forgets" its persona or breaks its rules after several turns → the root cause is almost always instructions placed in a user message rather than the <code>system</code> parameter.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<Frame>
+  <Eyebrow>⚡ Exam Tip</Eyebrow>
+  <SlideTitle>System Prompts Persist. First User Messages Don't.</SlideTitle>
+  <div class="exam-stack">
+    <CalloutBox variant="dont" title="Distractor pattern">
+      <p>Putting persona or role instructions in the first user message and assuming they'll persist through the conversation.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Exam signal">
+      <p>A scenario where a bot "forgets" its persona or breaks its rules after several turns → the root cause is almost always instructions placed in a user message rather than the <code>system</code> parameter.</p>
+    </CalloutBox>
+  </div>
+</Frame>
 
 <!--
 Here's the exam trap: putting persistent role or persona instructions in the first user message instead of the system parameter, assuming they'll apply throughout the conversation.
@@ -366,24 +299,14 @@ Watch for exam scenarios where a bot "forgets" its persona or breaks its rules a
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — Takeaways -->
 
-<div class="di-takeaway-title">What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>The <code>system</code> parameter is a <strong>top-level field</strong> alongside <code>model</code> and <code>max_tokens</code> — never inside the <code>messages</code> array</li></v-click>
-  <v-click><li>System prompts apply to every turn automatically — same <code>system</code> value passed each call, never confused with conversation history</li></v-click>
-  <v-click><li>Instructions in the first user message are part of history — they can be lost if history is truncated and don't behave like true system-level constraints</li></v-click>
-  <v-click><li>Use <code>system</code> for persona, output format, safety rules — use <code>messages</code> for turn-specific context and dynamic data</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaway"
+  title="What to Remember"
+  :bullets="takeaways"
+/>
 
 <!--
 Four things to hold onto.

@@ -3,206 +3,36 @@ theme: default
 title: "Lecture 2.9: Multimodal Inputs — Images in the Messages API"
 info: |
   Claude Certified Architect – Foundations
-  Section 2: Claude API Fundamentals Bootcamp
+  Section 2: Claude API Fundamentals Bootcamp (Domain 2 · 18%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const capabilities = [
+  { label: 'Describe', detail: 'Scene summary, object ID, general captioning' },
+  { label: 'Extract', detail: 'OCR — screenshots, scanned forms, handwritten notes' },
+  { label: 'Analyze', detail: 'Charts, graphs, diagrams — axes, trends, labels' },
+  { label: 'Compare', detail: 'Multiple images in one message — spot differences' },
+  { label: 'Answer', detail: 'Targeted Qs: "what color?" "does this look right?"' },
+  { label: 'Identify', detail: 'Objects, UI elements, defects (visual QA)' },
+]
 
-<div class="di-cover-accent"></div>
+const takeaways = [
+  { label: 'content is an array of blocks', detail: "'type':'text' for text, 'type':'image' for images" },
+  { label: 'Two source types', detail: "'base64' (with media_type + data) or 'url' (with url)" },
+  { label: 'Valid media_type', detail: 'image/jpeg, image/png, image/gif, image/webp' },
+  { label: 'Order matters', detail: 'Images + text coexist in one message — order blocks the way Claude should read them' },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Section 2 · Claude API Fundamentals Bootcamp</div>
-  <div class="di-cover-title">Multimodal Inputs:<br><span style="color: #3CAF50;">Images</span> in the Messages API</div>
-  <div class="di-cover-subtitle">Lecture 2.9 · Can Claude actually see?</div>
-</div>
-
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-What happens when your users need to reason about images, not just text?
-
-Maybe it's a screenshot, a chart, a scanned document, or a product photo.
-
-Claude can process all of those — but the way you send images might surprise you.
-
-It's not a separate parameter or a special endpoint. Images go right inside the messages array, alongside your text.
-
-Let's look at exactly how that works.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — The Content Block Model
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The Content Block Model</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 0.5rem; align-items: start;">
-
-  <v-click>
-  <div>
-    <div class="di-col-left-label">String form</div>
-
-```json
-{
-  "role": "user",
-  "content": "Hello"
-}
-```
-
-  </div>
-  </v-click>
-
-  <v-click>
-  <div>
-    <div class="di-col-right-label">Content-block form</div>
-
-```json
-{
-  "role": "user",
-  "content": [
-    { "type": "text", "text": "Hello" }
-  ]
-}
-```
-
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.8rem; font-size: 0.92rem; color: #111928; line-height: 1.6;">
-  Both are valid. The array form unlocks <strong>mixed content</strong> — text <em>and</em> images in one message.
-  <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
-    <div style="background: #E8F5EB; border-radius: 5px; padding: 0.3rem 0.6rem; font-size: 0.82rem;"><code>"type": "text"</code> → <code>text</code> field</div>
-    <div style="background: #E8F5EB; border-radius: 5px; padding: 0.3rem 0.6rem; font-size: 0.82rem;"><code>"type": "image"</code> → <code>source</code> field</div>
-  </div>
-</div>
-</v-click>
-
-<v-click>
-<div style="margin-top: 0.6rem; font-size: 0.88rem; color: #1A3A4A;">
-  Order matters. Claude reads blocks top to bottom.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-You already know that content in the Messages API can be a plain string.
-
-But content can also be an array of objects called content blocks.
-
-Each block has a type field that tells Claude what kind of content it is.
-
-Text content uses "type": "text" with a "text" field.
-
-[click] Image content uses "type": "image" with a "source" field. That source object is where you tell Claude how to find the image.
-
-Think of content blocks as slots — you can put text in one slot and an image in another. The order matters: Claude reads them in sequence, top to bottom.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — Two Ways to Provide an Image
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Two Ways to Provide an Image</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; align-items: start;">
-
-  <v-click>
-  <div>
-    <div class="di-col-left-label">base64</div>
-
-```json
-{
-  "type": "image",
-  "source": {
-    "type": "base64",
-    "media_type": "image/jpeg",
-    "data": "<base64 bytes>"
-  }
-}
-```
-
-<div class="di-col-body" style="font-size: 0.85rem;">
-  Use when the image is <strong>private</strong> or <strong>local</strong>.
-</div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div>
-    <div class="di-col-right-label">url</div>
-
-```json
-{
-  "type": "image",
-  "source": {
-    "type": "url",
-    "url": "https://example.com/img.jpg"
-  }
-}
-```
-
-<div class="di-col-body" style="font-size: 0.85rem;">
-  Use when the image is <strong>publicly accessible</strong> and stable. Claude fetches at inference time.
-</div>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.7rem; background: white; border-left: 3px solid #3CAF50; border-radius: 4px; padding: 0.5rem 0.75rem; font-size: 0.88rem;">
-  Valid <code class="di-code-inline">media_type</code> values: <code>image/jpeg</code>, <code>image/png</code>, <code>image/gif</code>, <code>image/webp</code>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-There are two source types for image content blocks.
-
-The first is "type": "base64" — you encode the image bytes as a base64 string. You also provide media_type to tell Claude the image format. The valid media types are image/jpeg, image/png, image/gif, and image/webp.
-
-[click] The second is "type": "url" — you provide a public HTTPS URL. Claude fetches the image at inference time.
-
-Use base64 when the image is private or stored locally. Use URL when the image is already publicly accessible and stable.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — Sending an Image (Python)
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Sending an Image — Python</div>
-
-<v-click>
-
-```python {all|7-9|12-25|all}
-import anthropic
+const imageCode = `import anthropic
 import base64
 
 client = anthropic.Anthropic()
@@ -233,23 +63,144 @@ response = client.messages.create(
             ],
         }
     ],
-)
-```
+)`
+</script>
 
-</v-click>
+---
 
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">Image first, text after</strong> — Claude reads them in order
+<!-- SLIDE 1 — Cover -->
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div class="lec-cover">
+    <div class="lec-cover__brand">
+      <img src="/assets/logo-mark.png" alt="" class="lec-cover__logo" />
+      <div class="lec-cover__brand-text">Dyer Innovation</div>
+    </div>
+    <div>
+      <div class="lec-cover__section">Section 2 · Lecture 2.9 · Domain 2</div>
+      <h1 class="lec-cover__title">Multimodal Inputs</h1>
+      <div class="lec-cover__subtitle">Images in the Messages API</div>
+    </div>
+    <div class="lec-cover__stats">
+      <span>API Fundamentals Bootcamp</span>
+      <span class="lec-cover__dot">&middot;</span>
+      <span>Domain 2 · 18% weight</span>
+    </div>
   </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #E3A008;">
-    <strong style="color: #E3A008;">All three required</strong> on a base64 source: <code>type</code>, <code>media_type</code>, <code>data</code>
-  </div>
-</div>
-</v-click>
+</Frame>
 
-<img src="/logo.png" class="di-logo" />
+<style>
+.lec-cover { position: relative; z-index: 1; padding: 110px 120px 96px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%); }
+.lec-cover__brand { display: flex; align-items: center; gap: 24px; }
+.lec-cover__logo { width: 72px; height: auto; }
+.lec-cover__brand-text { font-family: var(--font-body); font-size: 26px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint-200); }
+.lec-cover__section { font-family: var(--font-body); font-size: 26px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sprout-500); margin-bottom: 40px; }
+.lec-cover__title { font-family: var(--font-display); font-weight: 500; font-size: 128px; line-height: 1.02; letter-spacing: -0.025em; color: var(--paper-0); margin: 0; max-width: 1500px; }
+.lec-cover__subtitle { font-family: var(--font-display); font-size: 48px; color: var(--mint-200); margin-top: 32px; font-weight: 400; max-width: 1400px; line-height: 1.3; }
+.lec-cover__stats { display: flex; align-items: center; gap: 36px; font-family: var(--font-body); font-size: 24px; color: var(--mint-200); letter-spacing: 0.06em; }
+.lec-cover__dot { opacity: 0.4; }
+.exam-stack { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; flex: 1; min-height: 0; }
+</style>
+
+<!--
+You've used Claude for text. Now you need it to see.
+
+A customer sends you a screenshot of an error. An insurance claim shows up as a photo of a damaged car. A chart in a PDF needs its data extracted.
+
+Claude can handle all of this — but not through a separate "vision" API. Images plug into the same Messages API you already know, as a new kind of content block.
+
+In this lecture, I'll show you exactly how that works, and the distractors the exam will throw at you.
+-->
+
+---
+
+<!-- SLIDE 2 — Content block model -->
+
+<TwoColSlide
+  variant="compare"
+  title="The Content Block Model"
+  leftLabel="String form"
+  rightLabel="Content-block form"
+>
+  <template #left>
+    <pre><code>{"role": "user",
+ "content": "Hello"}</code></pre>
+  </template>
+  <template #right>
+    <pre><code>{"role": "user",
+ "content": [
+   {"type": "text",
+    "text": "Hello"}
+ ]}</code></pre>
+    <p style="margin-top: 18px;">Array form unlocks mixed content (text + images). Order matters — Claude reads top to bottom.</p>
+  </template>
+</TwoColSlide>
+
+<!--
+You already know that content in the Messages API can be a plain string.
+
+But content can also be an array of objects called content blocks.
+
+Each block has a type field that tells Claude what kind of content it is.
+
+Text content uses "type": "text" with a "text" field.
+
+Image content uses "type": "image" with a "source" field. That source object is where you tell Claude how to find the image.
+
+Think of content blocks as slots — you can put text in one slot and an image in another. The order matters: Claude reads them in sequence, top to bottom.
+-->
+
+---
+
+<!-- SLIDE 3 — Two ways to provide an image -->
+
+<TwoColSlide
+  variant="compare"
+  title="Two Ways to Provide an Image"
+  leftLabel="base64"
+  rightLabel="url"
+>
+  <template #left>
+    <pre><code>{"type": "image",
+ "source": {
+   "type": "base64",
+   "media_type": "image/jpeg",
+   "data": "&lt;base64 bytes&gt;"
+ }}</code></pre>
+    <p>Use when private or local.</p>
+  </template>
+  <template #right>
+    <pre><code>{"type": "image",
+ "source": {
+   "type": "url",
+   "url": "https://example.com/img.jpg"
+ }}</code></pre>
+    <p>Use when publicly accessible and stable. Claude fetches at inference time.</p>
+    <p style="margin-top: 12px;">Valid <code>media_type</code>: <code>image/jpeg</code>, <code>image/png</code>, <code>image/gif</code>, <code>image/webp</code></p>
+  </template>
+</TwoColSlide>
+
+<!--
+There are two source types for image content blocks.
+
+The first is "type": "base64" — you encode the image bytes as a base64 string. You also provide media_type to tell Claude the image format. The valid media types are image/jpeg, image/png, image/gif, and image/webp.
+
+The second is "type": "url" — you provide a public HTTPS URL. Claude fetches the image at inference time.
+
+Use base64 when the image is private or stored locally. Use URL when the image is already publicly accessible and stable.
+-->
+
+---
+
+<!-- SLIDE 4 — Sending an image in Python -->
+
+<CodeBlockSlide
+  eyebrow="Example"
+  title="Sending an Image — Python"
+  lang="python"
+  :code="imageCode"
+  annotation="Image first, text after — Claude reads blocks in order · All three required on base64: type, media_type, data."
+/>
 
 <!--
 Here is a complete example that encodes a local image as base64 and sends it with a question.
@@ -262,160 +213,78 @@ The text block with your question comes after the image block. Claude sees both 
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — What Claude Can Do With Images
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — What Claude can do with images -->
 
-<div class="di-header">What Claude Can Do With Images</div>
-
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 0.75rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Describe</span>
-    Scene summary, object identification, general captioning
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Extract</span>
-    OCR for screenshots, scanned forms, handwritten notes
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">Analyze</span>
-    Charts, graphs, diagrams — axes, trends, data labels
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #1B8A5A;">
-    <span class="di-step-num" style="color: #1B8A5A;">Compare</span>
-    Multiple images in one message — spot differences
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Answer</span>
-    Targeted Qs: "what color is this?" "does this look right?"
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Identify</span>
-    Objects, UI elements, defects in a visual QA pipeline
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.8rem; font-size: 0.9rem; color: #1A3A4A; background: #E8F5EB; border-radius: 6px; padding: 0.6rem 0.8rem;">
-  <strong>For architects:</strong> document processing, UI testing, data extraction, visual QA — all unlock with the same content-block pattern.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<BulletReveal
+  eyebrow="Capabilities"
+  title="What Claude Can Do With Images"
+  :bullets="capabilities"
+/>
 
 <!--
-Let's be specific about the vision capabilities that matter for your applications.
+Claude's image capabilities cover six major use cases.
 
-Claude can describe what's in an image and summarize the scene.
+Describe — scene summary, object identification, general captioning.
 
-It can extract text from images — think screenshots, scanned forms, handwritten notes.
+Extract — OCR for screenshots, scanned forms, handwritten notes.
 
-It can analyze charts, graphs, and diagrams — reading axes, trends, and data labels.
+Analyze — read charts, graphs, and diagrams with specific data extraction.
 
-[click] You can send multiple images in a single message to compare them.
+Compare — include multiple images in one message and ask about differences.
 
-It answers targeted questions about visual content — "what color is the button?" or "does this circuit look correct?"
+Answer — targeted questions like "what color is this?" or "does this look right?"
 
-For architects: this makes Claude useful in document processing, UI testing, data extraction, and visual QA pipelines.
+Identify — objects, UI elements, defects in a visual QA pipeline.
+
+For architects, this unlocks document processing, UI testing, data extraction, and visual QA without a separate vision model.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — Exam Tip -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">Images Are Content Blocks — Not a Separate Parameter</div>
-
-<div class="di-exam-body">
-  The exam will show candidates passing images as a standalone <code class="di-code-inline">image=</code> argument or a top-level key outside <code class="di-code-inline">messages</code>. That is <strong>not</strong> how the API works.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Distractor Patterns</div>
-  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem;">
-    <li>Passing images via a top-level <code>image=</code> parameter</li>
-    <li>Putting the image URL in the <code>system</code> prompt</li>
-    <li>Omitting <code>media_type</code> on a base64 source</li>
-  </ul>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ The Only Correct Pattern</div>
-  Images live inside the <code class="di-code-inline">content</code> array as a block with <code>"type": "image"</code> and a <code>source</code> object containing <code>type</code>, <code>media_type</code>, and either <code>data</code> or <code>url</code>.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<Frame>
+  <Eyebrow>⚡ Exam Tip</Eyebrow>
+  <SlideTitle>Images Are Content Blocks — Not a Separate Parameter</SlideTitle>
+  <div class="exam-stack">
+    <CalloutBox variant="dont" title="Distractor patterns">
+      <p>Passing images via a top-level <code>image=</code> parameter · putting the image URL in the system prompt · omitting <code>media_type</code> on a base64 source.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Only correct pattern">
+      <p>Images live inside the <code>content</code> array as a block with <code>'type':'image'</code> and a source object containing <code>type</code>, <code>media_type</code>, and either <code>data</code> or <code>url</code>.</p>
+    </CalloutBox>
+  </div>
+</Frame>
 
 <!--
-The exam trap: candidates pass images as a standalone parameter like image= or as a top-level key outside messages. This is not how the API works.
+The exam distractors for multimodal inputs all share a pattern: they invent a mechanism that doesn't exist.
 
-The correct approach: images go inside the content array of a message as a content block with "type": "image" and a "source" object. The source must include type ("base64" or "url"), media_type (e.g. "image/jpeg"), and either data or url.
+Passing images via a top-level image= parameter — not a thing.
+Putting the image URL in the system prompt — not a thing.
+Omitting media_type on a base64 source — will be rejected.
 
-A missing media_type on a base64 source is another common trap — it is required, not optional.
+The only correct pattern: images live inside the content array as a block with "type":"image" and a source object containing type, media_type, and either data or url.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — Takeaways -->
 
-<div class="di-takeaway-title">What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>Message <code style="color: #3CAF50;">content</code> is an array of blocks — <code>"type": "text"</code> for text, <code>"type": "image"</code> for images</li></v-click>
-  <v-click><li>Image sources are either <code style="color: #3CAF50;">"base64"</code> (with <code>media_type</code> and <code>data</code>) or <code style="color: #3CAF50;">"url"</code> (with <code>url</code>)</li></v-click>
-  <v-click><li>Valid <code style="color: #3CAF50;">media_type</code> values: <code>image/jpeg</code>, <code>image/png</code>, <code>image/gif</code>, <code>image/webp</code></li></v-click>
-  <v-click><li>Images and text can coexist in one message — order the blocks the way you want Claude to read them</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaway"
+  title="What to Remember"
+  :bullets="takeaways"
+/>
 
 <!--
-Four things to remember:
+Four things to hold onto.
 
-Message content is an array of blocks — text blocks use "type": "text", image blocks use "type": "image".
+Message content is an array of blocks — "type":"text" for text, "type":"image" for images.
 
-Image sources are either base64 (with media_type and data) or url (with url).
+Image sources: "base64" with media_type + data, or "url" with url.
 
-The valid media_type values are image/jpeg, image/png, image/gif, and image/webp.
+Valid media_types: image/jpeg, image/png, image/gif, image/webp.
 
-Images and text can coexist in the same message — order them to match how Claude should read them.
+Images and text coexist in one message — order the blocks the way Claude should read them.
 -->

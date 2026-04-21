@@ -3,29 +3,120 @@ theme: default
 title: "Lecture 2.1: The Messages API — Anatomy of a Request and Response"
 info: |
   Claude Certified Architect – Foundations
-  Section 2: Claude API Fundamentals Bootcamp
+  Section 2: Claude API Fundamentals Bootcamp (Domain 2 · 18%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const coreParams = [
+  { label: 'model', detail: 'Which Claude to use — e.g. claude-sonnet-4-6' },
+  { label: 'max_tokens', detail: 'Hard ceiling on generated tokens' },
+  { label: 'messages', detail: 'Conversation history — array of turns' },
+  { label: 'system', detail: 'Persistent top-level instructions' },
+  { label: 'temperature', detail: 'How creative vs deterministic' },
+]
 
-<div class="di-cover-accent"></div>
+const stopReasons = [
+  { label: 'end_turn', detail: 'Claude finished naturally' },
+  { label: 'max_tokens', detail: 'Hit the ceiling — response may be truncated' },
+  { label: 'stop_sequence', detail: 'A custom stop string was triggered' },
+  { label: 'tool_use', detail: "Claude wants to call a tool — loop continues" },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Section 2 · Claude API Fundamentals Bootcamp</div>
-  <div class="di-cover-title">The Messages API:<br>Anatomy of a <span style="color: #3CAF50;">Request &amp; Response</span></div>
-  <div class="di-cover-subtitle">Lecture 2.1 · Claude Certified Architect – Foundations</div>
-</div>
+const takeaways = [
+  { label: 'Three required fields', detail: 'Every messages.create() call needs model, max_tokens, messages — system is a separate top-level parameter' },
+  { label: 'Two roles only', detail: "messages array accepts only 'user' and 'assistant' — 'system' is NOT a valid role" },
+  { label: 'Content is a list', detail: "Responses return a content list of typed blocks — 'text' for plain output, 'tool_use' when tools fire" },
+  { label: 'Always check stop_reason', detail: 'It tells you WHY Claude stopped — critical for handling truncation and tool loops' },
+]
 
-<img src="/logo.png" class="di-logo-centered" />
+const requestCode = `import anthropic
+
+client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment
+
+response = client.messages.create(
+    model="claude-sonnet-4-6",              # Which Claude model to use
+    max_tokens=1024,                        # Max tokens in the response
+    system="You are a helpful assistant.",  # Top-level system prompt
+    messages=[
+        {"role": "user",      "content": "What is the capital of France?"},
+        {"role": "assistant", "content": "The capital of France is Paris."},
+        {"role": "user",      "content": "What is its population?"}
+    ]
+)`
+
+const responseCode = `{
+  "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    { "type": "text", "text": "The population of Paris..." }
+  ],
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": { "input_tokens": 42, "output_tokens": 31 }
+}`
+
+const readCode = `# Most common case: access the first text block directly
+answer = response.content[0].text
+print(answer)
+
+# Safer: iterate over all content blocks
+for block in response.content:
+    if block.type == "text":
+        print(block.text)
+
+# Check why Claude stopped
+print(response.stop_reason)  # "end_turn", "max_tokens", "stop_sequence", "tool_use"
+
+# Check token usage
+print(f"Input: {response.usage.input_tokens}")
+print(f"Output: {response.usage.output_tokens}")`
+</script>
+
+---
+
+<!-- SLIDE 1 — Cover -->
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div class="lec-cover">
+    <div class="lec-cover__brand">
+      <img src="/assets/logo-mark.png" alt="" class="lec-cover__logo" />
+      <div class="lec-cover__brand-text">Dyer Innovation</div>
+    </div>
+    <div>
+      <div class="lec-cover__section">Section 2 · Lecture 2.1 · Domain 2</div>
+      <h1 class="lec-cover__title">The Messages API</h1>
+      <div class="lec-cover__subtitle">Anatomy of a Request &amp; Response</div>
+    </div>
+    <div class="lec-cover__stats">
+      <span>API Fundamentals Bootcamp</span>
+      <span class="lec-cover__dot">&middot;</span>
+      <span>Domain 2 · 18% weight</span>
+    </div>
+  </div>
+</Frame>
+
+<style>
+.lec-cover { position: relative; z-index: 1; padding: 110px 120px 96px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%); }
+.lec-cover__brand { display: flex; align-items: center; gap: 24px; }
+.lec-cover__logo { width: 72px; height: auto; }
+.lec-cover__brand-text { font-family: var(--font-body); font-size: 26px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint-200); }
+.lec-cover__section { font-family: var(--font-body); font-size: 26px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sprout-500); margin-bottom: 40px; }
+.lec-cover__title { font-family: var(--font-display); font-weight: 500; font-size: 128px; line-height: 1.02; letter-spacing: -0.025em; color: var(--paper-0); margin: 0; max-width: 1500px; }
+.lec-cover__subtitle { font-family: var(--font-display); font-size: 48px; color: var(--mint-200); margin-top: 32px; font-weight: 400; max-width: 1400px; line-height: 1.3; }
+.lec-cover__stats { display: flex; align-items: center; gap: 36px; font-family: var(--font-body); font-size: 24px; color: var(--mint-200); letter-spacing: 0.06em; }
+.lec-cover__dot { opacity: 0.4; }
+</style>
 
 <!--
 You've probably called the Claude API before.
@@ -40,55 +131,14 @@ Today we're going to dissect every part of a request and response. By the end of
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — The Five Core Request Parameters
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — The Five Core Request Parameters -->
 
-<div class="di-header">The Five Core Request Parameters</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<p>Every call to <code class="di-code-inline">client.messages.create()</code> shares the same skeleton. Five parameters to know cold:</p>
-
-<div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem;">
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">model</span>
-    Which Claude to use — e.g. <code class="di-code-inline">claude-sonnet-4-6</code>
-  </div>
-  </v-click>
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">max_tokens</span>
-    Hard ceiling on how many tokens Claude can generate in the response
-  </div>
-  </v-click>
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">messages</span>
-    Conversation history — an array of turns with roles and content
-  </div>
-  </v-click>
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">system</span>
-    Persistent instructions that apply to the entire conversation
-  </div>
-  </v-click>
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">temperature</span>
-    Controls how creative or deterministic the output is
-  </div>
-  </v-click>
-</div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
+<BulletReveal
+  eyebrow="The primitives"
+  title="The Five Core Request Parameters"
+  :bullets="coreParams"
+/>
 
 <!--
 Every call to client.messages.create() shares the same skeleton.
@@ -109,52 +159,16 @@ These five parameters are the foundation of everything else in this section.
 -->
 
 ---
-layout: default
-class: di-code-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — A Complete Request, Annotated
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — A Complete Request, Annotated -->
 
-<div class="di-code-header">A Complete Request, Annotated</div>
-
-<v-click>
-
-```python
-import anthropic
-
-client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment
-
-response = client.messages.create(
-    model="claude-sonnet-4-6",    # Which Claude model to use
-    max_tokens=1024,                        # Max tokens in the response
-    system="You are a helpful assistant.",  # Top-level system prompt
-    messages=[
-        {"role": "user",      "content": "What is the capital of France?"},
-        {"role": "assistant", "content": "The capital of France is Paris."},
-        {"role": "user",      "content": "What is its population?"}
-    ]
-)
-```
-
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.6rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">system is top-level</strong> — never inside the <code>messages</code> array
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #0D7377;">
-    <strong style="color: #0D7377;">Roles alternate</strong> — only <code>"user"</code> and <code>"assistant"</code>
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #E3A008;">
-    <strong style="color: #E3A008;">No memory</strong> — you pass history every call
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<CodeBlockSlide
+  eyebrow="Anatomy"
+  title="A Complete Request, Annotated"
+  lang="python"
+  :code="requestCode"
+  annotation="system is top-level — never inside messages. Roles alternate: only 'user' and 'assistant'. Claude has no memory — you pass history every call."
+/>
 
 <!--
 Let's look at a real, complete request.
@@ -169,53 +183,16 @@ Claude has no memory between calls — everything it knows about the conversatio
 -->
 
 ---
-layout: default
-class: di-code-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — The Response Object, Dissected
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — The Response Object, Dissected -->
 
-<div class="di-code-header">The Response Object, Dissected</div>
-
-<v-click>
-
-```json
-{
-  "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
-  "type": "message",
-  "role": "assistant",
-  "content": [
-    { "type": "text", "text": "The population of Paris..." }
-  ],
-  "model": "claude-sonnet-4-6",
-  "stop_reason": "end_turn",
-  "stop_sequence": null,
-  "usage": { "input_tokens": 42, "output_tokens": 31 }
-}
-```
-
-</v-click>
-
-<v-click>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.6rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">content is a list</strong> of typed blocks — not a string
-  </div>
-  <div style="background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #0D7377;">
-    <strong style="color: #0D7377;">stop_reason</strong> tells you <em>why</em> Claude stopped
-  </div>
-  <div style="background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #E3A008;">
-    <code>"type": "text"</code> for plain output; <code>"tool_use"</code> when tools fire
-  </div>
-  <div style="background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #1A3A4A;">
-    <strong>usage</strong> is exactly what you're billed for
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<CodeBlockSlide
+  eyebrow="Response"
+  title="The Response Object, Dissected"
+  lang="json"
+  :code="responseCode"
+  annotation="content is a list of typed blocks, not a string. stop_reason tells you why Claude stopped. usage = exactly what you're billed for."
+/>
 
 <!--
 Now let's look at what comes back.
@@ -230,49 +207,14 @@ usage tells you exactly what you're being billed for.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — stop_reason Values You'll See
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — stop_reason Values -->
 
-<div class="di-header">stop_reason — The Four Values You'll See</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.5rem;">
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">end_turn</span>
-    Claude finished naturally
-  </div>
-  </v-click>
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #E3A008;">
-    <span class="di-step-num" style="color: #E3A008;">max_tokens</span>
-    Hit the ceiling you set — response may be cut off
-  </div>
-  </v-click>
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">stop_sequence</span>
-    A custom stop string triggered
-  </div>
-  </v-click>
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #1A3A4A;">
-    <span class="di-step-num" style="color: #1A3A4A;">tool_use</span>
-    Claude wants to call a tool — loop continues
-  </div>
-  </v-click>
-</div>
-
-<v-click>
-<div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.9rem; margin-top: 0.8rem;">
-  <strong>Production rule:</strong> always check <code class="di-code-inline">stop_reason</code>. If it's <code>"max_tokens"</code>, the response was cut off — you may need to continue it.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<BulletReveal
+  eyebrow="stop_reason"
+  title="The Four Values You'll See"
+  :bullets="stopReasons"
+/>
 
 <!--
 stop_reason is the field you'll return to again and again throughout this course.
@@ -283,50 +225,16 @@ The production rule: always check stop_reason. If it's "max_tokens", you may nee
 -->
 
 ---
-layout: default
-class: di-code-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Reading the Response in Code
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — Reading the Response in Code -->
 
-<div class="di-code-header">Reading the Response in Code</div>
-
-<v-click>
-
-```python
-# Most common case: access the first text block directly
-answer = response.content[0].text
-print(answer)
-
-# Safer: iterate over all content blocks
-for block in response.content:
-    if block.type == "text":
-        print(block.text)
-
-# Check why Claude stopped
-print(response.stop_reason)  # "end_turn", "max_tokens", "stop_sequence", "tool_use"
-
-# Check token usage
-print(f"Input: {response.usage.input_tokens}")
-print(f"Output: {response.usage.output_tokens}")
-```
-
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.6rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">Quick &amp; dirty</strong> — <code>content[0].text</code> works for simple text replies
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #E3A008;">
-    <strong style="color: #E3A008;">Production</strong> — iterate content blocks, especially with tools
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<CodeBlockSlide
+  eyebrow="Reading the response"
+  title="Access Text, Stop Reason, and Usage"
+  lang="python"
+  :code="readCode"
+  annotation="Quick: content[0].text works for simple text. Production: iterate content blocks — especially with tools."
+/>
 
 <!--
 Knowing the structure matters when you go to read the response.
@@ -337,39 +245,25 @@ Checking stop_reason is important for robustness. If stop_reason is "max_tokens"
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — Exam Tip: System Is NOT a Role -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
+<Frame>
+  <Eyebrow>⚡ Exam Tip</Eyebrow>
+  <SlideTitle>System Is NOT a Role</SlideTitle>
+  <div class="exam-stack">
+    <CalloutBox variant="dont" title="Distractor pattern">
+      <p><code>{"role": "system", "content": "..."}</code> inside the <code>messages</code> array. That's OpenAI's API — not Claude's.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Correct pattern">
+      <p><code>system="..."</code> at the top level of <code>client.messages.create()</code>, alongside <code>model</code> and <code>max_tokens</code>. The only valid roles inside <code>messages</code> are <code>"user"</code> and <code>"assistant"</code>.</p>
+    </CalloutBox>
+  </div>
+</Frame>
 
-<v-click>
-<div class="di-exam-subtitle">System Is NOT a Role</div>
-
-<div class="di-exam-body">
-  The <code class="di-code-inline">system</code> parameter is always a <strong>top-level</strong> field in <code class="di-code-inline">client.messages.create()</code> — never inside the <code>messages</code> array. The only valid roles in <code>messages</code> are <code>"user"</code> and <code>"assistant"</code>.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Distractor Pattern</div>
-  <code>{"role": "system", "content": "..."}</code> inside the <code>messages</code> array — that's OpenAI's API, not Claude's.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ Correct Pattern</div>
-  <code>system="..."</code> sits alongside <code>model</code> and <code>max_tokens</code> at the top of the call.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<style>
+.exam-stack { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; flex: 1; min-height: 0; }
+</style>
 
 <!--
 Here's the exam trap you need to watch for: passing the system prompt as a message in the messages array using role: "system". This is not valid in the Claude API.
@@ -380,24 +274,14 @@ If you see a question showing {"role": "system", "content": "..."} inside the me
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — Takeaways -->
 
-<div class="di-takeaway-title">What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>Every <code>messages.create()</code> call needs <code>model</code>, <code>max_tokens</code>, and <code>messages</code> — <code>system</code> is a separate top-level parameter</li></v-click>
-  <v-click><li>The <code>messages</code> array only accepts two roles: <code>"user"</code> and <code>"assistant"</code> — <code>"system"</code> is <strong>not</strong> a valid role</li></v-click>
-  <v-click><li>Responses return a <code>content</code> list of typed blocks — <code>"text"</code> for plain output, <code>"tool_use"</code> when tools are involved</li></v-click>
-  <v-click><li><code>stop_reason</code> tells you why generation ended — always check it in production to handle truncated responses</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaway"
+  title="What to Remember"
+  :bullets="takeaways"
+/>
 
 <!--
 Four things to hold onto from this lecture.

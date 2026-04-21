@@ -1,164 +1,179 @@
 ---
 theme: default
-title: "Lecture 2.6: Response Streaming: Real-Time Output"
+title: "Lecture 2.6: Response Streaming — Real-Time Output"
 info: |
   Claude Certified Architect – Foundations
-  Section 2: Claude API Fundamentals Bootcamp
+  Section 2: Claude API Fundamentals Bootcamp (Domain 2 · 18%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const eventSteps = [
+  { title: 'message_start', body: 'message metadata: model name, message ID' },
+  { title: 'content_block_start', body: 'a new content block is beginning (e.g. text block)' },
+  { title: 'content_block_delta', body: 'the workhorse — repeats many times, carries text_delta' },
+  { title: 'content_block_stop', body: 'closes the block when finished' },
+  { title: 'message_delta', body: 'contains stop_reason + final usage stats ← exam tests this' },
+]
 
-<div class="di-cover-accent"></div>
+const takeaways = [
+  { label: 'SSE + event order', detail: 'message_start → content_block_start → content_block_delta* → content_block_stop → message_delta → message_stop' },
+  { label: 'stop_reason lives in message_delta', detail: 'NOT in message_stop — tool args arrive as input_json_delta' },
+  { label: 'Reduces TTFT, not total time', detail: 'Streaming changes perceived latency; total generation time unchanged' },
+  { label: 'Stream for users, not batch', detail: 'Humans watching → stream; code parsing full response → don\'t' },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Section 2 · Claude API Fundamentals Bootcamp</div>
-  <div class="di-cover-title">Response Streaming:<br>Real-Time Output</div>
-  <div class="di-cover-subtitle">Lecture 2.6 · Claude Certified Architect – Foundations</div>
-</div>
+const sdkCode = `import anthropic
 
-<img src="/logo.png" class="di-logo-centered" />
+client = anthropic.Anthropic()
+
+# The SDK's stream() context manager handles SSE for you
+with client.messages.stream(
+    model="claude-opus-4-7",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Explain REST APIs in plain English."}]
+) as stream:
+    # text_stream yields each text chunk as a plain string
+    for text in stream.text_stream:
+        print(text, end="", flush=True)  # flush=True = immediate output
+
+# After the context exits, the final message is available
+final_message = stream.get_final_message()
+print(f"\\nStop reason: {final_message.stop_reason}")
+print(f"Input tokens: {final_message.usage.input_tokens}")`
+
+const rawCode = `import anthropic
+
+client = anthropic.Anthropic()
+
+# Use raw event iteration when you need to handle every event type
+with client.messages.stream(
+    model="claude-opus-4-7",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "List three benefits of microservices."}]
+) as stream:
+    for event in stream:
+        if event.type == "content_block_delta":
+            if event.delta.type == "text_delta":
+                print(event.delta.text, end="", flush=True)
+            elif event.delta.type == "input_json_delta":
+                # Partial JSON from a tool call — accumulate this
+                print(event.delta.partial_json, end="")
+        elif event.type == "message_delta":
+            # stop_reason is HERE, not in message_stop
+            print(f"\\nStop reason: {event.delta.stop_reason}")`
+</script>
+
+---
+
+<!-- SLIDE 1 — Cover -->
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div class="lec-cover">
+    <div class="lec-cover__brand">
+      <img src="/assets/logo-mark.png" alt="" class="lec-cover__logo" />
+      <div class="lec-cover__brand-text">Dyer Innovation</div>
+    </div>
+    <div>
+      <div class="lec-cover__section">Section 2 · Lecture 2.6 · Domain 2</div>
+      <h1 class="lec-cover__title">Response Streaming</h1>
+      <div class="lec-cover__subtitle">Real-Time Output</div>
+    </div>
+    <div class="lec-cover__stats">
+      <span>API Fundamentals Bootcamp</span>
+      <span class="lec-cover__dot">&middot;</span>
+      <span>Domain 2 · 18% weight</span>
+    </div>
+  </div>
+</Frame>
+
+<style>
+.lec-cover { position: relative; z-index: 1; padding: 110px 120px 96px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%); }
+.lec-cover__brand { display: flex; align-items: center; gap: 24px; }
+.lec-cover__logo { width: 72px; height: auto; }
+.lec-cover__brand-text { font-family: var(--font-body); font-size: 26px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint-200); }
+.lec-cover__section { font-family: var(--font-body); font-size: 26px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sprout-500); margin-bottom: 40px; }
+.lec-cover__title { font-family: var(--font-display); font-weight: 500; font-size: 128px; line-height: 1.02; letter-spacing: -0.025em; color: var(--paper-0); margin: 0; max-width: 1500px; }
+.lec-cover__subtitle { font-family: var(--font-display); font-size: 48px; color: var(--mint-200); margin-top: 32px; font-weight: 400; max-width: 1400px; line-height: 1.3; }
+.lec-cover__stats { display: flex; align-items: center; gap: 36px; font-family: var(--font-body); font-size: 24px; color: var(--mint-200); letter-spacing: 0.06em; }
+.lec-cover__dot { opacity: 0.4; }
+.exam-stack { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; flex: 1; min-height: 0; }
+</style>
 
 <!--
-Have you ever watched a loading spinner for five seconds, then had a wall of text appear at once?
+You build a Claude-powered chat app. Feature-complete, looks great. You ship it.
 
-That's not a slow model — that's a slow delivery strategy.
+First user feedback: "feels slow."
 
-Streaming is how you fix it.
+You check the logs. Claude's returning responses in three seconds. Your network is fast. What's the problem?
 
-Instead of waiting for Claude to finish the entire response, your app gets each word as it's generated.
+The problem is that for three seconds, the user sees nothing. A blank screen or a spinner. In chat UX, that gap is fatal.
 
-Users see output immediately, and the experience feels completely different.
-
-This lecture is about when to stream, when not to, and exactly what happens under the hood.
+Streaming is the fix, and it's one of the most important UX concepts in the Claude API.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — Why Does Your App Feel Slow?
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — Why slow? -->
 
-<div class="di-header">Why Does Your App Feel Slow?</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 0.75rem;">
-
-  <v-click>
-  <div>
-    <div class="di-col-right-label" style="color: #E53E3E; border-color: #E53E3E;">✗ No Streaming</div>
-    <div class="di-col-body">
-      <div style="background: #FFF0F0; border-left: 3px solid #E53E3E; border-radius: 4px; padding: 0.6rem 0.9rem; font-size: 0.9rem;">
-        <div style="font-family: 'Courier New', monospace; color: #7a2020;">⟳ ⟳ ⟳ ⟳ ⟳ (5s of spinner)</div>
-        <div style="margin-top: 0.4rem; color: #7a2020;">→ Wall of text appears at once</div>
-      </div>
-      <p style="margin-top: 0.4rem; font-size: 0.85rem;">Feels broken. Users close the tab.</p>
-    </div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div>
-    <div class="di-col-left-label">✓ Streaming</div>
-    <div class="di-col-body">
-      <div style="background: #F0FFF4; border-left: 3px solid #3CAF50; border-radius: 4px; padding: 0.6rem 0.9rem; font-size: 0.9rem;">
-        <div style="font-family: 'Courier New', monospace; color: #1B8A5A;">Text appears word</div>
-        <div style="font-family: 'Courier New', monospace; color: #1B8A5A;">by word, immediately...</div>
-      </div>
-      <p style="margin-top: 0.4rem; font-size: 0.85rem;">Feels alive. Users stay engaged.</p>
-    </div>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 1rem; text-align: center; font-size: 1.05rem; font-weight: 600; color: #1A3A4A;">
-  Same model. Same response. Different delivery.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<TwoColSlide
+  variant="antipattern-fix"
+  title="Why Does Your App Feel Slow?"
+  leftLabel="✗ No Streaming"
+  rightLabel="✓ Streaming"
+>
+  <template #left>
+    <p>⟳ ⟳ ⟳ 5s of spinner → wall of text.</p>
+    <p><strong>Feels broken.</strong> Users close the tab.</p>
+  </template>
+  <template #right>
+    <p>Text appears word by word, immediately.</p>
+    <p><strong>Feels alive.</strong> Users stay engaged.</p>
+    <p style="font-size: 20px; color: var(--forest-500); font-style: italic;">Same model. Same response. Different delivery.</p>
+  </template>
+</TwoColSlide>
 
 <!--
-Have you ever watched a loading spinner for five seconds, then had a wall of text appear at once? That's not a slow model — that's a slow delivery strategy.
+Without streaming, here's what your users see: five seconds of nothing, then a wall of text appears all at once. The app feels broken. People close the tab.
 
-Streaming fixes it. Instead of waiting for Claude to finish the entire response, your app gets each word as it's generated. Users see output immediately, and the experience feels completely different.
+With streaming, text begins appearing almost instantly — word by word, like the AI is typing. The app feels alive. Users stay engaged through the full response.
 
-This lecture is about when to stream, when not to, and exactly what happens under the hood.
+Same model. Same total generation time. Same final response. The only difference is how the response is delivered from the server to your app.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — What Is Streaming, Actually?
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — What is streaming -->
 
-<div class="di-header">What Is Streaming, Actually?</div>
-
-<div style="display: flex; align-items: stretch; gap: 1.5rem; margin-top: 0.5rem;">
-
-  <!-- Diagram column -->
-  <div style="flex: 0 0 45%; display: flex; flex-direction: column; gap: 0.5rem;">
-    <v-click>
-    <div style="background: #E53E3E; color: white; border-radius: 6px; padding: 0.6rem 1rem; font-weight: 600; text-align: center; font-size: 0.9rem;">
-      Full Response (blocking)
-    </div>
-    </v-click>
-    <div class="di-arrow">vs.</div>
-    <v-click>
-    <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-      <div style="background: #3CAF50; color: white; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">δ</div>
-    </div>
-    <div style="margin-top: 0.3rem; font-size: 0.82rem; color: #1A3A4A; text-align: center;">
-      stream of <code>text_delta</code> events via <strong>SSE</strong>
-    </div>
-    </v-click>
-  </div>
-
-  <!-- Explanation column -->
-  <div style="flex: 1; font-size: 0.92rem; color: #111928; line-height: 1.6;">
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">Protocol</span>
-      Server-Sent Events (<strong>SSE</strong>) — small events over one open connection
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">Payload</span>
-      Each event carries a few tokens; your code renders as they arrive
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card" style="border-left-color: #E3A008;">
-      <span class="di-step-num" style="color: #E3A008;">Key insight</span>
-      <strong>Total generation time doesn't change.</strong> What drops is <em>time-to-first-token</em> (TTFT)
-    </div>
-    </v-click>
-  </div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
+<TwoColSlide
+  variant="compare"
+  title="What Is Streaming, Actually?"
+  leftLabel="Visualized"
+  rightLabel="Mechanics"
+>
+  <template #left>
+    <p><strong>Full response (blocking):</strong></p>
+    <p>─── ─── ─── ─── → one blob</p>
+    <p>vs.</p>
+    <p><strong>Stream of text_delta events:</strong></p>
+    <p>δ δ δ δ δ δ δ δ (via SSE)</p>
+  </template>
+  <template #right>
+    <ul>
+      <li><strong>Protocol</strong> — Server-Sent Events (SSE): small events over one open connection</li>
+      <li><strong>Payload</strong> — each event carries a few tokens; render as they arrive</li>
+      <li><strong>Key insight</strong> — total generation time doesn't change. Time-to-first-token (TTFT) drops</li>
+    </ul>
+  </template>
+</TwoColSlide>
 
 <!--
 Streaming uses a protocol called Server-Sent Events — SSE. Instead of one big HTTP response, the server sends a series of small events over an open connection.
@@ -169,68 +184,14 @@ The total time for Claude to generate the full response is the same either way. 
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — The Streaming Event Sequence
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — The streaming event sequence -->
 
-<div class="di-header">The Streaming Event Sequence</div>
-
-<div style="margin-top: 0.5rem; font-size: 0.9rem;">
-
-  <v-click>
-  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-    <div style="background: #2a4a6a; color: white; border-radius: 4px; padding: 0.35rem 0.8rem; min-width: 180px; font-family: 'Courier New', monospace; font-size: 0.85rem;">message_start</div>
-    <div style="color: #1A3A4A;">message metadata: model name, message ID</div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-    <div style="background: #1B8A5A; color: white; border-radius: 4px; padding: 0.35rem 0.8rem; min-width: 180px; font-family: 'Courier New', monospace; font-size: 0.85rem;">content_block_start</div>
-    <div style="color: #1A3A4A;">a new content block is beginning (e.g. text block)</div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-    <div style="background: #1B8A5A; color: white; border-radius: 4px; padding: 0.35rem 0.8rem; min-width: 180px; font-family: 'Courier New', monospace; font-size: 0.85rem;">content_block_delta</div>
-    <div style="color: #1A3A4A;">the workhorse — repeats dozens/hundreds of times, carries <code>text_delta</code></div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-    <div style="background: #1B8A5A; color: white; border-radius: 4px; padding: 0.35rem 0.8rem; min-width: 180px; font-family: 'Courier New', monospace; font-size: 0.85rem;">content_block_stop</div>
-    <div style="color: #1A3A4A;">closes the block when finished</div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-    <div style="background: #E3A008; color: white; border-radius: 4px; padding: 0.35rem 0.8rem; min-width: 180px; font-family: 'Courier New', monospace; font-size: 0.85rem;">message_delta</div>
-    <div style="color: #1A3A4A;"><strong>contains <code>stop_reason</code> + final usage stats</strong> ← exam tests this</div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div style="display: flex; align-items: center; gap: 0.6rem;">
-    <div style="background: #E53E3E; color: white; border-radius: 4px; padding: 0.35rem 0.8rem; min-width: 180px; font-family: 'Courier New', monospace; font-size: 0.85rem;">message_stop</div>
-    <div style="color: #1A3A4A;">stream is completely done</div>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.75rem; background: #FFF8E6; border-left: 4px solid #E3A008; border-radius: 4px; padding: 0.55rem 0.9rem; font-size: 0.88rem;">
-  <strong style="color: #E3A008;">Memorize this sequence.</strong> The exam tests it.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<StepSequence
+  eyebrow="Memorize this"
+  title="The Streaming Event Sequence"
+  :steps="eventSteps"
+/>
 
 <!--
 When you open a streaming request, you always see events in this exact order.
@@ -251,53 +212,16 @@ Memorize this sequence. The exam tests it.
 -->
 
 ---
-layout: default
-class: di-code-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Streaming in Python — The SDK Way
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — SDK way -->
 
-<div class="di-code-header">Streaming in Python — The SDK Way</div>
-
-<v-click>
-
-```python {all|6-9|11-12|16-18|all}
-import anthropic
-
-client = anthropic.Anthropic()
-
-# The SDK's stream() context manager handles SSE for you
-with client.messages.stream(
-    model="claude-opus-4-7",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Explain REST APIs in plain English."}]
-) as stream:
-    # text_stream yields each text chunk as a plain string
-    for text in stream.text_stream:
-        print(text, end="", flush=True)  # flush=True = immediate output
-
-# After the context exits, the final message is available
-final_message = stream.get_final_message()
-print(f"\nStop reason: {final_message.stop_reason}")
-print(f"Input tokens: {final_message.usage.input_tokens}")
-```
-
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">text_stream</strong> yields only the text deltas — no event parsing required
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #0D7377;">
-    <strong style="color: #0D7377;">get_final_message()</strong> gives you the complete assembled message with <code>stop_reason</code> + usage
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<CodeBlockSlide
+  eyebrow="SDK helper"
+  title="Streaming in Python — The SDK Way"
+  lang="python"
+  :code="sdkCode"
+  annotation="text_stream yields text deltas only — no event parsing · get_final_message() returns stop_reason + usage."
+/>
 
 <!--
 The SDK's stream() context manager abstracts the SSE protocol entirely.
@@ -308,50 +232,16 @@ After the with block exits, get_final_message() gives you the complete assembled
 -->
 
 ---
-layout: default
-class: di-code-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Raw Event Streaming — When You Need Control
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — Raw event streaming -->
 
-<div class="di-code-header">Raw Event Streaming — When You Need Control</div>
-
-<v-click>
-
-```python {all|11-15|16-18|19-21|all}
-import anthropic
-
-client = anthropic.Anthropic()
-
-# Use raw event iteration when you need to handle every event type
-with client.messages.stream(
-    model="claude-opus-4-7",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "List three benefits of microservices."}]
-) as stream:
-    for event in stream:
-        if event.type == "content_block_delta":
-            if event.delta.type == "text_delta":
-                print(event.delta.text, end="", flush=True)
-            elif event.delta.type == "input_json_delta":
-                # Partial JSON from a tool call — accumulate this
-                print(event.delta.partial_json, end="")
-        elif event.type == "message_delta":
-            # stop_reason is HERE, not in message_stop
-            print(f"\nStop reason: {event.delta.stop_reason}")
-```
-
-</v-click>
-
-<v-click>
-<div style="margin-top: 0.5rem; background: #FFF8E6; border-left: 4px solid #E3A008; border-radius: 4px; padding: 0.6rem 0.9rem; font-size: 0.9rem;">
-  <strong style="color: #E3A008;">⚠ Trips people up (including on the exam):</strong> <code>stop_reason</code> lives in <code>message_delta</code>, not <code>message_stop</code>. Tool arguments arrive as <code>input_json_delta</code> — partial JSON you accumulate.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<CodeBlockSlide
+  eyebrow="Full control"
+  title="Raw Event Streaming"
+  lang="python"
+  :code="rawCode"
+  annotation="⚠ stop_reason lives in message_delta, not message_stop · tool args arrive as input_json_delta — partial JSON you accumulate."
+/>
 
 <!--
 When you're streaming tool calls, you need the raw event loop.
@@ -362,54 +252,33 @@ Notice that stop_reason lives in message_delta, not message_stop. This trips peo
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Stream vs. No-Stream: The Decision Framework
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — Decision framework -->
 
-<div class="di-header">Stream vs. No-Stream: The Decision Framework</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 0.5rem;">
-
-  <v-click>
-  <div>
-    <div class="di-col-left-label">✓ Use Streaming</div>
-    <div class="di-col-body">
-      <ul>
-        <li>Chat interfaces, copilots, assistants</li>
-        <li>Anywhere a <strong>human is waiting</strong></li>
-        <li>Long responses (the wait without streaming is longest)</li>
-        <li>Any UX where immediate feedback matters</li>
-      </ul>
-    </div>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div>
-    <div class="di-col-right-label" style="color: #E53E3E; border-color: #E53E3E;">✗ Don't Stream</div>
-    <div class="di-col-body">
-      <ul>
-        <li>Batch pipelines & classification jobs</li>
-        <li><strong>Code consumes the output</strong>, not humans</li>
-        <li>Need the complete response before acting (e.g. full JSON parse)</li>
-        <li>Automated extraction with no human in loop</li>
-      </ul>
-    </div>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.9rem; background: white; border: 1px solid #c8e6d0; border-left: 4px solid #0D7377; border-radius: 6px; padding: 0.7rem 1rem; font-size: 0.95rem; color: #111928;">
-  <strong style="color: #0D7377;">Rule of thumb:</strong> If a human sees output in real time, stream it. If a program consumes output after it's complete, don't bother.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<TwoColSlide
+  variant="compare"
+  title="Stream vs. No-Stream: Decision Framework"
+  leftLabel="✓ Use Streaming"
+  rightLabel="✗ Don't Stream"
+>
+  <template #left>
+    <ul>
+      <li>Chat interfaces, copilots, assistants</li>
+      <li>Anywhere a <strong>human is waiting</strong></li>
+      <li>Long responses (the wait is longest)</li>
+      <li>Any UX where immediate feedback matters</li>
+    </ul>
+  </template>
+  <template #right>
+    <ul>
+      <li>Batch pipelines & classification jobs</li>
+      <li><strong>Code consumes output</strong>, not humans</li>
+      <li>Need complete response before acting (full JSON parse)</li>
+      <li>Automated extraction with no human in loop</li>
+    </ul>
+    <p style="margin-top: 18px;"><strong>Rule of thumb:</strong> if a human sees output in real time, stream. If a program consumes it complete, don't.</p>
+  </template>
+</TwoColSlide>
 
 <!--
 Use streaming when your users are watching. Chat interfaces, copilots, and assistants — anywhere a human is waiting — streaming makes these feel alive. Long responses benefit most from streaming because the wait without it is the longest.
@@ -422,76 +291,48 @@ The rule of thumb: if a human sees the output in real time, stream it. If a prog
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — Exam Tip -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">Streaming Changes Delivery, Not Content</div>
-
-<div class="di-exam-body">
-  The exam tests <strong>perceived latency</strong> vs. <strong>total latency</strong>, and the event where <code class="di-code-inline">stop_reason</code> actually lives.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Trap</div>
-  Thinking streaming makes Claude generate responses <em>faster</em>, or that it changes what Claude outputs. It does neither.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ Correct Approach</div>
-  Streaming reduces <strong>time-to-first-token</strong> (perceived latency) — total generation time is unchanged. Choose streaming for user-facing UX, not batch pipelines. And remember: <code class="di-code-inline">stop_reason</code> arrives in <strong><code>message_delta</code></strong>, not <code>message_stop</code>.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<Frame>
+  <Eyebrow>⚡ Exam Tip</Eyebrow>
+  <SlideTitle>Streaming Changes Delivery, Not Content</SlideTitle>
+  <div class="exam-stack">
+    <CalloutBox variant="dont" title="Trap">
+      <p>Thinking streaming makes Claude generate faster, or changes what Claude outputs. It does neither.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Correct pattern">
+      <p>Streaming reduces time-to-first-token (perceived latency) — total generation time is unchanged. Choose streaming for user-facing UX, not batch. <code>stop_reason</code> arrives in <code>message_delta</code>, not <code>message_stop</code>.</p>
+    </CalloutBox>
+  </div>
+</Frame>
 
 <!--
-Streaming does not change the content or total generation time — it changes when you receive the first token. Streaming reduces perceived latency (time-to-first-token) but does not reduce total latency.
+Here's the exam trap: thinking streaming makes Claude generate faster or changes what Claude outputs. It does neither.
 
-The exam will present scenarios asking when streaming helps: the correct answer is always a user-facing interface where immediate feedback improves experience, not a batch pipeline.
+Streaming is strictly a delivery mechanism. The total generation time is identical — what changes is when you see the first token.
 
-Also watch for questions about where stop_reason lives — it's in the message_delta event, not message_stop.
+And the detail that trips candidates up: stop_reason lives in message_delta, not message_stop. When the exam asks where stop_reason arrives in the stream, the correct answer is message_delta.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 9 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 9 — Takeaways -->
 
-<div class="di-takeaway-title">What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>Streaming uses <strong>SSE</strong>; event order is <code>message_start</code> → <code>content_block_start</code> → <code>content_block_delta</code> (many) → <code>content_block_stop</code> → <code>message_delta</code> → <code>message_stop</code></li></v-click>
-  <v-click><li><code style="color: #3CAF50;">stop_reason</code> and usage stats arrive in <code>message_delta</code> — <strong>not</strong> <code>message_stop</code></li></v-click>
-  <v-click><li>Streaming reduces <strong>time-to-first-token</strong> (perceived latency); total generation time is unchanged</li></v-click>
-  <v-click><li>Stream for user-facing interfaces; skip it for batch pipelines that need the full response before acting</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaway"
+  title="What to Remember"
+  :bullets="takeaways"
+/>
 
 <!--
-Four things to remember:
+Four things to hold onto.
 
-Streaming uses Server-Sent Events. The event order is always message_start, content_block_start, many content_block_deltas, content_block_stop, message_delta, and finally message_stop.
+Streaming uses Server-Sent Events with a fixed event order: message_start → content_block_start → content_block_delta* → content_block_stop → message_delta → message_stop.
 
-stop_reason and usage stats arrive in message_delta, not message_stop.
+stop_reason and usage arrive in message_delta — NOT in message_stop.
 
-Streaming reduces time-to-first-token — perceived latency — but does not reduce total generation time.
+Streaming reduces time-to-first-token (perceived latency); total generation time is unchanged.
 
-Use streaming for user-facing interfaces. Skip it for batch processing and programmatic pipelines that need the full response before acting.
+Stream for user-facing interfaces; skip for batch that needs the full response first.
 -->

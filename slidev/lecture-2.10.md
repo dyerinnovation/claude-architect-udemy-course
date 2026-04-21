@@ -3,127 +3,35 @@ theme: default
 title: "Lecture 2.10: Tool Use Fundamentals — Your First Function Call"
 info: |
   Claude Certified Architect – Foundations
-  Section 2: Claude API Fundamentals Bootcamp
+  Section 2: Claude API Fundamentals Bootcamp (Domain 1 & 2)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const cycleSteps = [
+  { label: '1 · You', sublabel: 'user message + tool definitions' },
+  { label: '2 · Claude', sublabel: "returns tool_use block, stop_reason='tool_use'" },
+  { label: '3 · You', sublabel: 'execute the real function' },
+  { label: '4 · You', sublabel: 'send tool_result inside a user message' },
+  { label: '5 · Claude', sublabel: "final response, stop_reason='end_turn'" },
+]
 
-<div class="di-cover-accent"></div>
+const takeaways = [
+  { label: 'Three required fields', detail: 'Every tool needs name, description, and input_schema (JSON Schema)' },
+  { label: 'Pass via tools=[...]', detail: 'In messages.create() — Claude decides whether to call one' },
+  { label: "tool_use block", detail: "When stop_reason=='tool_use', content has a tool_use block with id, name, input" },
+  { label: "Return in USER message", detail: "tool_result block in a user turn, using tool_use_id to link back" },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Section 2 · Claude API Fundamentals Bootcamp</div>
-  <div class="di-cover-title">Tool Use Fundamentals:<br><span style="color: #3CAF50;">Your First</span> Function Call</div>
-  <div class="di-cover-subtitle">Lecture 2.10 · Connecting Claude's reasoning to real-world actions</div>
-</div>
-
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-Here's a constraint that trips up a lot of architects early on.
-
-Claude is a language model — it reasons and generates text.
-
-It cannot look up today's stock price, query your database, or send an email. Not by itself.
-
-But you can give Claude tools — and Claude will call them when it needs to.
-
-This is how you connect Claude's reasoning to real-world actions and live data.
-
-The mechanism is called tool use, and it is one of the most important API concepts you'll learn in this course.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — Anatomy of a Tool Definition
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Anatomy of a Tool Definition</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; align-items: start;">
-
-  <v-click>
-  <div>
-
-```json
-{
-  "name": "get_weather",
-  "description": "Retrieves current weather for a city.",
-  "input_schema": {
-    "type": "object",
-    "properties": {
-      "city": { "type": "string" }
-    },
-    "required": ["city"]
-  }
-}
-```
-
-  </div>
-  </v-click>
-
-  <div style="font-size: 0.9rem; color: #111928; line-height: 1.65; padding-top: 0.25rem;">
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">name</span> snake_case identifier Claude uses when calling the tool
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card" style="border-left-color: #1B8A5A;">
-      <span class="di-step-num" style="color: #1B8A5A;">description</span> Natural-language — <strong>Claude's ability to pick the right tool depends entirely on this</strong>
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card" style="border-left-color: #E3A008;">
-      <span class="di-step-num" style="color: #E3A008;">input_schema</span> JSON Schema object — the function signature. Must have <code>type</code>, <code>properties</code>, <code>required</code>
-    </div>
-    </v-click>
-  </div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Every tool you give Claude has exactly three required fields.
-
-name — a string identifier in snake_case, like "get_weather" or "search_database". This is the name Claude uses when it calls the tool.
-
-description — a natural language explanation of what the tool does and when to use it.
-
-[click] This field is critical. Claude's ability to choose the right tool depends entirely on a good description.
-
-input_schema — a JSON Schema object that defines the tool's parameters. It must have "type": "object", a properties map, and a required array.
-
-Think of input_schema as the function signature — it tells Claude what arguments to provide.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — A Concrete Tool Definition
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">A Concrete Tool Definition</div>
-
-<v-click>
-
-```python {all|2-6|7-21|10-13|17|all}
-get_weather_tool = {
+const weatherToolCode = `get_weather_tool = {
     "name": "get_current_weather",
     "description": (
         "Retrieves the current weather for a given city. "
@@ -144,49 +52,9 @@ get_weather_tool = {
         },
         "required": ["city"]  # unit is optional
     }
-}
-```
+}`
 
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">Per-property description</strong> — Claude reads these too; they guide value choice
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #E3A008;">
-    <strong style="color: #E3A008;">required[]</strong> — which args Claude must always supply; optional args may be omitted
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Let's make this concrete with a real example.
-
-The description inside input_schema.properties is also read by Claude. It helps Claude understand what value to put in each argument.
-
-The required array tells Claude which arguments it must always provide.
-
-Optional fields like unit can be omitted by Claude if they're not relevant.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — Sending the Request with Tools
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Sending the Request With Tools</div>
-
-<v-click>
-
-```python {all|8|9-14|all}
-import anthropic
+const requestCode = `import anthropic
 
 client = anthropic.Anthropic()
 
@@ -201,118 +69,11 @@ response = client.messages.create(
         }
     ]
 )
-```
 
-</v-click>
+# If Claude decides to call a tool, response.stop_reason == "tool_use"
+# That's your signal — Claude is handing control back to you.`
 
-<v-click>
-<div style="margin-top: 0.6rem; background: white; border-left: 3px solid #E3A008; border-radius: 4px; padding: 0.6rem 0.9rem; font-size: 0.9rem;">
-  If Claude decides to call a tool, <code class="di-code-inline">response.stop_reason == "tool_use"</code>.<br>
-  <span style="color: #E3A008; font-weight: 600;">That's your signal.</span> Claude is handing control back to you — it's <em>not</em> done.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-You pass tools to messages.create() using the tools parameter.
-
-Claude evaluates the conversation and decides whether to call a tool.
-
-If it decides to call one, stop_reason in the response will be "tool_use". That's your signal — Claude is handing control back to you.
-
-It's not done. It's waiting for you to execute the tool and return the result.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Reading the Tool Use Response
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Reading the Tool Use Response</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; align-items: start;">
-
-  <v-click>
-  <div>
-
-```json
-{
-  "stop_reason": "tool_use",
-  "content": [
-    {
-      "type": "tool_use",
-      "id": "toolu_01XFb...",
-      "name": "get_current_weather",
-      "input": {
-        "city": "Tokyo",
-        "unit": "celsius"
-      }
-    }
-  ]
-}
-```
-
-  </div>
-  </v-click>
-
-  <div style="font-size: 0.9rem; color: #111928; line-height: 1.65; padding-top: 0.25rem;">
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">type</span> Always <code class="di-code-inline">"tool_use"</code> — find this block in content
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card" style="border-left-color: #E3A008;">
-      <span class="di-step-num" style="color: #E3A008;">id</span> Unique per call — <strong>echo this back</strong> in your result
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card" style="border-left-color: #1B8A5A;">
-      <span class="di-step-num" style="color: #1B8A5A;">name</span> Matches the tool you defined
-    </div>
-    <div class="di-step-card" style="border-left-color: #0D7377;">
-      <span class="di-step-num" style="color: #0D7377;">input</span> A ready-to-use dict — call your function directly with it
-    </div>
-    </v-click>
-  </div>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-When stop_reason is "tool_use", the response content array contains a tool_use block.
-
-That block has four important fields.
-
-type is always "tool_use" — use this to identify it in the array.
-
-id is a unique identifier like "toolu_01XFb..." — you'll need this to send the result back.
-
-[click] name is the tool name Claude chose — matches what you defined.
-
-input is a Python dict containing the parsed arguments Claude generated. You don't need to parse anything — Claude gives you a ready-to-use dict. Just call your function with those arguments directly.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Executing the Tool and Returning the Result
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Execute the Tool — and Return the Result</div>
-
-<v-click>
-
-```python {all|2-4|7|10-26|19-22|all}
-# Step 1: find the tool_use block in the response content
+const executeCode = `# Step 1: find the tool_use block in the response content
 tool_use_block = next(
     block for block in response.content if block.type == "tool_use"
 )
@@ -339,23 +100,202 @@ followup = client.messages.create(
             ],
         },
     ],
-)
-```
+)`
+</script>
 
-</v-click>
+---
 
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">tool_result</strong> goes in a <code>user</code> message — never assistant
+<!-- SLIDE 1 — Cover -->
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div class="lec-cover">
+    <div class="lec-cover__brand">
+      <img src="/assets/logo-mark.png" alt="" class="lec-cover__logo" />
+      <div class="lec-cover__brand-text">Dyer Innovation</div>
+    </div>
+    <div>
+      <div class="lec-cover__section">Section 2 · Lecture 2.10 · Domain 1 & 2</div>
+      <h1 class="lec-cover__title">Tool Use Fundamentals</h1>
+      <div class="lec-cover__subtitle">Your First Function Call</div>
+    </div>
+    <div class="lec-cover__stats">
+      <span>API Fundamentals Bootcamp</span>
+      <span class="lec-cover__dot">&middot;</span>
+      <span>Agentic foundations</span>
+    </div>
   </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #E3A008;">
-    <strong style="color: #E3A008;">tool_use_id</strong> links result back to the specific call
-  </div>
-</div>
-</v-click>
+</Frame>
 
-<img src="/logo.png" class="di-logo" />
+<style>
+.lec-cover { position: relative; z-index: 1; padding: 110px 120px 96px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%); }
+.lec-cover__brand { display: flex; align-items: center; gap: 24px; }
+.lec-cover__logo { width: 72px; height: auto; }
+.lec-cover__brand-text { font-family: var(--font-body); font-size: 26px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint-200); }
+.lec-cover__section { font-family: var(--font-body); font-size: 26px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sprout-500); margin-bottom: 40px; }
+.lec-cover__title { font-family: var(--font-display); font-weight: 500; font-size: 128px; line-height: 1.02; letter-spacing: -0.025em; color: var(--paper-0); margin: 0; max-width: 1500px; }
+.lec-cover__subtitle { font-family: var(--font-display); font-size: 48px; color: var(--mint-200); margin-top: 32px; font-weight: 400; max-width: 1400px; line-height: 1.3; }
+.lec-cover__stats { display: flex; align-items: center; gap: 36px; font-family: var(--font-body); font-size: 24px; color: var(--mint-200); letter-spacing: 0.06em; }
+.lec-cover__dot { opacity: 0.4; }
+.exam-stack { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; flex: 1; min-height: 0; }
+</style>
+
+<!--
+Here's a constraint that trips up a lot of architects early on.
+
+Claude is a language model — it reasons and generates text.
+
+It cannot look up today's stock price, query your database, or send an email. Not by itself.
+
+But you can give Claude tools — and Claude will call them when it needs to.
+
+This is how you connect Claude's reasoning to real-world actions and live data.
+
+The mechanism is called tool use, and it is one of the most important API concepts you'll learn in this course.
+-->
+
+---
+
+<!-- SLIDE 2 — Anatomy of a tool definition -->
+
+<TwoColSlide
+  variant="compare"
+  title="Anatomy of a Tool Definition"
+  leftLabel="JSON"
+  rightLabel="Three required fields"
+>
+  <template #left>
+    <pre><code>{"name": "get_weather",
+ "description": "Retrieves current weather for a city.",
+ "input_schema": {
+   "type": "object",
+   "properties": {
+     "city": {"type": "string"}
+   },
+   "required": ["city"]
+ }}</code></pre>
+  </template>
+  <template #right>
+    <ul>
+      <li><strong>name</strong> — snake_case identifier Claude uses when calling</li>
+      <li><strong>description</strong> — Claude's ability to pick the right tool depends entirely on this</li>
+      <li><strong>input_schema</strong> — JSON Schema — the function signature — type, properties, required</li>
+    </ul>
+  </template>
+</TwoColSlide>
+
+<!--
+Every tool you give Claude has exactly three required fields.
+
+name — a string identifier in snake_case, like "get_weather" or "search_database". This is the name Claude uses when it calls the tool.
+
+description — a natural language explanation of what the tool does and when to use it. This field is critical. Claude's ability to choose the right tool depends entirely on a good description.
+
+input_schema — a JSON Schema object that defines the tool's parameters. It must have "type": "object", a properties map, and a required array.
+
+Think of input_schema as the function signature — it tells Claude what arguments to provide.
+-->
+
+---
+
+<!-- SLIDE 3 — Concrete tool definition -->
+
+<CodeBlockSlide
+  eyebrow="Concrete example"
+  title="A Full Tool Definition"
+  lang="python"
+  :code="weatherToolCode"
+  annotation="Per-property description — Claude reads these too · required[] — which args Claude must always supply; optional args may be omitted."
+/>
+
+<!--
+Let's make this concrete with a real example.
+
+The description inside input_schema.properties is also read by Claude. It helps Claude understand what value to put in each argument.
+
+The required array tells Claude which arguments it must always provide.
+
+Optional fields like unit can be omitted by Claude if they're not relevant.
+-->
+
+---
+
+<!-- SLIDE 4 — Sending the request -->
+
+<CodeBlockSlide
+  eyebrow="The request"
+  title="Sending the Request With Tools"
+  lang="python"
+  :code="requestCode"
+  annotation="If Claude decides to call a tool, response.stop_reason == 'tool_use' — Claude is handing control back to you, it's not done."
+/>
+
+<!--
+You pass tools to messages.create() using the tools parameter.
+
+Claude evaluates the conversation and decides whether to call a tool.
+
+If it decides to call one, stop_reason in the response will be "tool_use". That's your signal — Claude is handing control back to you.
+
+It's not done. It's waiting for you to execute the tool and return the result.
+-->
+
+---
+
+<!-- SLIDE 5 — Reading the tool use response -->
+
+<TwoColSlide
+  variant="compare"
+  title="Reading the Tool-Use Response"
+  leftLabel="JSON"
+  rightLabel="Four fields"
+>
+  <template #left>
+    <pre><code>{"stop_reason": "tool_use",
+ "content": [
+   {"type": "tool_use",
+    "id": "toolu_01XFb...",
+    "name": "get_current_weather",
+    "input": {
+      "city": "Tokyo",
+      "unit": "celsius"
+    }}
+ ]}</code></pre>
+  </template>
+  <template #right>
+    <ul>
+      <li><strong>type</strong> — always <code>'tool_use'</code> — find this in content</li>
+      <li><strong>id</strong> — unique per call — echo this back in your result</li>
+      <li><strong>name</strong> — matches the tool you defined</li>
+      <li><strong>input</strong> — ready-to-use dict — call your function directly</li>
+    </ul>
+  </template>
+</TwoColSlide>
+
+<!--
+When stop_reason is "tool_use", the response content array contains a tool_use block.
+
+That block has four important fields.
+
+type is always "tool_use" — use this to identify it in the array.
+
+id is a unique identifier like "toolu_01XFb..." — you'll need this to send the result back.
+
+name is the tool name Claude chose — matches what you defined.
+
+input is a Python dict containing the parsed arguments Claude generated. You don't need to parse anything — Claude gives you a ready-to-use dict. Just call your function with those arguments directly.
+-->
+
+---
+
+<!-- SLIDE 6 — Execute and return -->
+
+<CodeBlockSlide
+  eyebrow="Returning the result"
+  title="Execute the Tool — and Return the Result"
+  lang="python"
+  :code="executeCode"
+  annotation="tool_result goes in a user message — never assistant · tool_use_id links result back to the specific call."
+/>
 
 <!--
 Here is the pattern for executing the tool and sending the result back.
@@ -368,152 +308,72 @@ Claude reads the result and generates its final natural language response.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — The Request-Response Cycle Visualized
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — Request-response cycle -->
 
-<div class="di-header">The Request-Response Cycle</div>
-
-<div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; max-width: 820px; margin-left: auto; margin-right: auto;">
-
-  <v-click>
-  <div class="di-flow-box" style="background: #2a4a6a;">
-    <strong>1 · You</strong> — user message + tool definitions
-  </div>
-  <div class="di-arrow">↓</div>
-  </v-click>
-
-  <v-click>
-  <div class="di-flow-tool">
-    <strong>2 · Claude</strong> — returns <code>tool_use</code> block, <code>stop_reason = "tool_use"</code>
-  </div>
-  <div class="di-arrow">↓</div>
-  </v-click>
-
-  <v-click>
-  <div class="di-flow-box" style="background: #E3A008;">
-    <strong>3 · You</strong> — execute the real function
-  </div>
-  <div class="di-arrow">↓</div>
-  </v-click>
-
-  <v-click>
-  <div class="di-flow-box" style="background: #2a4a6a;">
-    <strong>4 · You</strong> — send <code>tool_result</code> inside a <code>user</code> message
-  </div>
-  <div class="di-arrow">↓</div>
-  </v-click>
-
-  <v-click>
-  <div class="di-flow-stop">
-    <strong>5 · Claude</strong> — final response, <code>stop_reason = "end_turn"</code>
-  </div>
-  </v-click>
-
-</div>
-
-<v-click>
-<div style="margin-top: 0.8rem; text-align: center; font-size: 0.95rem; color: #1A3A4A; font-weight: 600;">
-  Two-step exchange. Everything in agentic architecture builds on this.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<FlowDiagram
+  eyebrow="The full cycle"
+  title="The Request-Response Cycle"
+  :steps="cycleSteps"
+/>
 
 <!--
 Let's step back and see the full cycle.
 
-You send Claude a message with tool definitions attached.
+You send Claude a message with tool definitions attached. Claude decides to call a tool and returns a tool_use block with stop_reason "tool_use".
 
-Claude reasons about whether a tool is needed and generates a tool_use block. It pauses with stop_reason: "tool_use" — your application must take action.
+You execute the real function with the arguments Claude provided.
 
-[click] You execute the real function and collect the result.
+You send the result back as a tool_result block inside a user message — matching the tool_use_id to link it to Claude's call.
 
-You send that result back as a tool_result block inside a user message.
+Claude reads the result and generates its final natural-language response with stop_reason "end_turn".
 
-Claude reads it, generates the final answer, and returns with stop_reason: "end_turn".
-
-That two-step exchange is the core of the tool use pattern. Everything in agentic architecture builds on this foundation.
+Two-step exchange. Everything in agentic architecture builds on this.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — Exam Tip -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">Tool Results Go in a <code style="color: #3CAF50;">user</code> Message</div>
-
-<div class="di-exam-body">
-  Candidates put <code class="di-code-inline">tool_result</code> blocks inside the <code class="di-code-inline">assistant</code> message alongside the <code class="di-code-inline">tool_use</code> block. <strong>Wrong.</strong>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Wrong Structure</div>
-  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem;">
-    <li>Putting <code>tool_result</code> inside the assistant message</li>
-    <li>Omitting <code>tool_use_id</code> or using the wrong value</li>
-    <li>Skipping the assistant message (with <code>tool_use</code>) in the replayed history</li>
-  </ul>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ The Only Correct Pattern</div>
-  Append the <strong>assistant message</strong> (with its <code>tool_use</code> content) to history, <em>then</em> append a new <strong>user message</strong> containing a <code>tool_result</code> block with the matching <code>tool_use_id</code>.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<Frame>
+  <Eyebrow>⚡ Exam Tip</Eyebrow>
+  <SlideTitle>Tool Results Go in a user Message</SlideTitle>
+  <div class="exam-stack">
+    <CalloutBox variant="dont" title="Wrong structure">
+      <p>Putting <code>tool_result</code> inside the assistant message alongside <code>tool_use</code> · omitting <code>tool_use_id</code> · skipping the assistant message in replayed history.</p>
+    </CalloutBox>
+    <CalloutBox variant="do" title="Only correct pattern">
+      <p>Append assistant message (with <code>tool_use</code> content) to history, THEN append a new user message containing a <code>tool_result</code> block with matching <code>tool_use_id</code>.</p>
+    </CalloutBox>
+  </div>
+</Frame>
 
 <!--
-The exam trap: candidates put tool_result blocks inside the assistant message alongside the tool_use block. This is wrong. The assistant message contains the tool_use block. Your follow-up goes in a separate user message.
+The exam will present scenarios where candidates put tool_result in the wrong message, or skip the assistant message entirely.
 
-The correct approach: after receiving a tool_use response, append the assistant message (with its tool_use content) to the conversation history. Then append a new user message containing a tool_result content block with the matching tool_use_id.
+The rule: assistant message (with tool_use content) first, then a new user message with tool_result. The tool_use_id on the result must match the id on the original tool_use.
 
-The tool_use_id field is mandatory — omitting it or using the wrong value will break the link between call and result.
+Skip either step and Claude's conversation history is malformed — you'll see errors or broken behavior.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 9 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 9 — Takeaways -->
 
-<div class="di-takeaway-title">What to Remember</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>Every tool needs three fields: <code style="color: #3CAF50;">name</code>, <code style="color: #3CAF50;">description</code>, and <code style="color: #3CAF50;">input_schema</code> (a JSON Schema object)</li></v-click>
-  <v-click><li>Pass tools via <code style="color: #3CAF50;">tools=[...]</code> in <code>messages.create()</code> — Claude decides whether to call one</li></v-click>
-  <v-click><li>When <code style="color: #3CAF50;">stop_reason == "tool_use"</code>, the response content contains a <code>tool_use</code> block with <code>id</code>, <code>name</code>, and <code>input</code></li></v-click>
-  <v-click><li>Return results as a <code style="color: #3CAF50;">tool_result</code> content block in a <code>user</code> message, using <code>tool_use_id</code> to link it back</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaway"
+  title="What to Remember"
+  :bullets="takeaways"
+/>
 
 <!--
-Four things to remember:
+Four things to hold onto.
 
-Every tool needs three fields — name, description, and input_schema (a JSON Schema object).
+Every tool needs name, description, and input_schema (JSON Schema).
 
 Pass tools via tools=[...] in messages.create() — Claude decides whether to call one.
 
-When stop_reason equals "tool_use", the response content contains a tool_use block with id, name, and input.
+When stop_reason=='tool_use', content has a tool_use block with id, name, input.
 
-Return results as a tool_result content block in a user message, using tool_use_id to link it back.
+Return results as tool_result in a USER message, using tool_use_id to link back.
 -->
