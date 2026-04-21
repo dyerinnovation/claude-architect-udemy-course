@@ -3,5 +3,23 @@ __pycache__/
 *.pyc
 .claude/settings.local.json
 .claude/worktrees/
+.claude/scheduled_tasks.lock
 .playwright-mcp/
 /feedback
+
+# Phase F wave scratch dirs (briefing + intermediate build artifacts)
+.wave1-output/
+claude_projects/phase-f-wave-1/
+
+# Slidev build outputs + local dev
+slidev/dist/
+slidev/node_modules/
+slidev/index.html
+
+# Screenshots from Udemy/browser workflow research (not course content)
+after-topic-type.png
+final-sidebar.png
+instructor-updated.png
+profile-edit.png
+topic-claude.png
+udemy-login.png
