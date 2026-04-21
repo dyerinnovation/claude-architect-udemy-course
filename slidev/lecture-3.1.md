@@ -3,130 +3,66 @@ theme: default
 title: "Lecture 3.1: The Agentic Loop: stop_reason Is Everything"
 info: |
   Claude Certified Architect – Foundations
-  Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const tuBullets = [
+  { label: 'tool_use →', detail: 'Keep going. Execute the tool, append the result, and send the next request.' },
+  { label: 'end_turn →', detail: 'Stop. Return the response to the user.' },
+]
 
-<div class="di-cover-accent"></div>
+const fieldBullets = [
+  { label: 'type', detail: "Always 'tool_use' — identifies this block in the content array." },
+  { label: 'name', detail: 'Which tool Claude selected from the set you provided.' },
+  { label: 'input', detail: 'The arguments Claude decided to pass to the tool.' },
+  { label: 'id  ⚠', detail: 'Echo it back on the tool_result — matches each result to its request.' },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Domain 1 · Agentic Architecture & Orchestration (27%)</div>
-  <div class="di-cover-title">The Agentic Loop:<br><span style="color: #3CAF50;">stop_reason</span> Is Everything</div>
-  <div class="di-cover-subtitle">Lecture 3.1 · Claude Certified Architect – Foundations</div>
-</div>
+const appendSteps = [
+  { number: 'Step 1', title: 'Append the assistant response', body: 'Append the full assistant response (including the tool_use block) to the messages array.' },
+  { number: 'Step 2', title: 'Append a user tool_result', body: 'Append a USER message with tool_result blocks — each needs tool_use_id, content, and is_error.' },
+  { number: 'Step 3', title: 'Call the API with full history', body: 'Make the next API call with the FULL updated messages array — nothing else.' },
+]
 
-<img src="/logo.png" class="di-logo-centered" />
+const takeawayBullets = [
+  { label: "stop_reason='tool_use' → continue", detail: 'Execute the tool, append the result, and loop back.' },
+  { label: "stop_reason='end_turn' → stop", detail: 'Return the response to the user.' },
+  { label: 'Always append BOTH', detail: 'Assistant message AND tool result before the next call.' },
+  { label: 'while True + explicit break', detail: 'Claude drives termination, not a counter.' },
+  { label: 'Never inspect text content', detail: 'Do not use the response text to decide whether to keep looping.' },
+  { label: 'Foundational pattern', detail: 'This is the pattern behind every scenario on the exam — master it first.' },
+]
 
-<!--
-Here's the fundamental question you must answer when building any agentic system with Claude.
+const examTipBad = `# Distractors the exam plants
 
-How does Claude communicate to your code whether it's done — or whether it needs you to do something first?
+if 'done' in response.content[0].text:
+    break
 
-The answer is a single field in every API response: stop_reason.
+for attempt in range(10):      # cap as PRIMARY exit
+    ...
 
-Get this wrong, and your agent either terminates before it finishes, or loops forever. There is no middle ground.
--->
+if any(b.type == 'tool_use' for b in response.content):
+    continue                    # inspecting content instead of stop_reason`
 
----
-layout: default
----
+const examTipGood = `# The only correct pattern
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — What the Agentic Loop Looks Like
-     ═════════════════════════════════════════════════════════════════════════ -->
+if response.stop_reason == 'end_turn':
+    break
+elif response.stop_reason == 'tool_use':
+    # execute tools, append results, continue
+    ...`
 
-<div class="di-header">What the Agentic Loop Looks Like</div>
-
-<v-click>
-<div style="display: flex; align-items: stretch; gap: 1.5rem; margin-top: 0.5rem;">
-
-  <!-- Flowchart column -->
-  <div style="flex: 0 0 42%; display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-    <div class="di-flow-box" style="width: 100%;">Send request to Claude</div>
-    <div class="di-arrow">↓</div>
-    <div style="background: #2a4a6a; color: white; border-radius: 6px; padding: 0.5rem 1rem; width: 100%; text-align: center; font-weight: 600; font-size: 0.9rem;">
-      check <code style="color: #3CAF50;">stop_reason</code>
-    </div>
-    <div style="display: flex; width: 100%; gap: 0.5rem; margin-top: 0.2rem;">
-      <div style="flex: 1; text-align: center;">
-        <v-click at="2">
-        <div style="font-size: 0.75rem; color: #E3A008; font-weight: 600; margin-bottom: 0.2rem;">"tool_use"</div>
-        <div class="di-flow-tool" style="font-size: 0.82rem;">Execute tool<br>→ append result<br>→ loop back ↺</div>
-        </v-click>
-      </div>
-      <div style="flex: 1; text-align: center;">
-        <v-click at="4">
-        <div style="font-size: 0.75rem; color: #1B8A5A; font-weight: 600; margin-bottom: 0.2rem;">"end_turn"</div>
-        <div class="di-flow-stop" style="font-size: 0.82rem;">Return response<br>to user<br>→ stop ■</div>
-        </v-click>
-      </div>
-    </div>
-  </div>
-
-  <!-- Explanation column -->
-  <div style="flex: 1; font-size: 0.92rem; color: #111928; line-height: 1.65;">
-    <p>You send a request to Claude. Every response includes a <code class="di-code-inline">stop_reason</code> field.</p>
-    <v-click at="3">
-    <div class="di-step-card" style="margin-top: 0.5rem;">
-      <span class="di-step-num" style="color: #E3A008;">tool_use →</span>
-      <em>Keep going.</em> Execute the tool, append the result to the conversation, send the next request.
-    </div>
-    </v-click>
-    <v-click at="5">
-    <div class="di-step-card" style="margin-top: 0.5rem; border-left-color: #1B8A5A;">
-      <span class="di-step-num" style="color: #1B8A5A;">end_turn →</span>
-      <em>Stop.</em> The response is complete. Return it to the user.
-    </div>
-    </v-click>
-    <v-click at="6">
-    <p style="margin-top: 0.75rem; font-size: 0.88rem; color: #1A3A4A;">
-      That's the entire loop. <code class="di-code-inline">stop_reason</code> is the signal. Your code responds to it.
-    </p>
-    </v-click>
-  </div>
-
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Let me show you the complete loop structure.
-
-You send a request to Claude. Claude responds with a message that always includes a stop_reason field.
-
-[click] If stop_reason is "tool_use", Claude is telling you: I've decided to call a tool. Execute the tool, take the result, append it to the conversation, and send the next request. Keep going.
-
-[click] If stop_reason is "end_turn", Claude is telling you: I'm done. The response is complete. Don't loop. Return it to the user.
-
-That's the entire loop. The stop_reason field is the signal. Your code responds to it.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — The Canonical Loop (Code)
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">The Code Pattern — The Canonical Loop</div>
-
-<v-click>
-
-```python {all|9-10|13-16|all}
-messages = [{"role": "user", "content": initial_prompt}]
+const loopCode = `messages = [{"role": "user", "content": initial_prompt}]
 
 while True:
     response = client.messages.create(
@@ -135,57 +71,123 @@ while True:
         messages=messages
     )
 
-    # The exit condition — always check stop_reason first
+    # Exit condition — always check stop_reason first
     if response.stop_reason == "end_turn":
         break
 
-    # The continuation condition
+    # Continuation condition
     if response.stop_reason == "tool_use":
         tool_results = execute_tools(response.content)
         messages.append({"role": "assistant", "content": response.content})
         messages.append({"role": "user", "content": tool_results})
-        # Loop continues
-```
+        # Loop continues`
+</script>
 
-</v-click>
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDE 1 — Cover
+     ═══════════════════════════════════════════════════════════════ -->
 
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #1A3A4A;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">while True</strong> — Claude drives termination, not a counter
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);" />
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Domain 1 &middot; Lecture 3.1</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1500px;">
+        The Agentic Loop:<br /><span style="color: var(--sprout-500);">stop_reason</span> Is Everything
+      </h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1200px; line-height:1.3;">
+        Domain 1 · Agentic Architecture & Orchestration (27%)
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Lecture 3.1</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>~9 min</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>8 slides</span>
+    </div>
   </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 2px solid #E3A008;">
-    <strong style="color: #E3A008;">Append both</strong> assistant msg + tool result before next call
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+</Frame>
 
 <!--
-Here's what this looks like in code.
-
-Notice the structure: while True loop with an explicit break on end_turn.
-
-The loop is intentionally unbounded — Claude drives the termination, not a counter.
-
-And the tool results get appended to the conversation history before the next call. That's not optional. Claude needs to see what its tools returned.
+Here's the fundamental question you must answer when building any agentic system with Claude. How does Claude communicate to your code whether it's done — or whether it needs you to do something first? The answer is a single field in every API response: stop_reason. Get this wrong, and your agent either terminates before it finishes, or loops forever. There is no middle ground.
 -->
 
 ---
-layout: default
+
+<!-- SLIDE 2 — What the Agentic Loop Looks Like -->
+
+<TwoColSlide
+  variant="compare"
+  title="What the Agentic Loop Looks Like"
+  leftLabel="Flow"
+  rightLabel="What stop_reason tells you"
+  footerLabel="Lecture 3.1"
+  :footerNum="2"
+  :footerTotal="8"
+>
+<template #left>
+
+1. **Send request** to Claude with tools + messages.
+2. **Check `stop_reason`** on the response.
+3. Branch:
+   - **`tool_use`** → execute tool, append result, loop back.
+   - **`end_turn`** → return response, stop.
+
+That's the entire loop. `stop_reason` is the signal — your code responds to it.
+
+</template>
+<template #right>
+
+<div style="display:flex; flex-direction:column; gap:18px;">
+  <div><strong><code>tool_use →</code></strong><br/>Keep going. Execute the tool, append the result, and send the next request.</div>
+  <div><strong><code>end_turn →</code></strong><br/>Stop. Return the response to the user.</div>
+</div>
+
+</template>
+</TwoColSlide>
+
+<!--
+Let me show you the complete loop structure. You send a request to Claude. Claude responds with a message that always includes a stop_reason field. If stop_reason is tool_use, Claude is telling you: I've decided to call a tool. Execute the tool, take the result, append it to the conversation, and send the next request. Keep going. If stop_reason is end_turn, Claude is telling you: I'm done. The response is complete. Don't loop. Return it to the user. That's the entire loop. The stop_reason field is the signal. Your code responds to it.
+-->
+
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — What's in a Tool Use Response
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — The Code Pattern -->
 
-<div class="di-header">What's in a Tool Use Response</div>
+<CodeBlockSlide
+  eyebrow="Canonical loop"
+  title="The Code Pattern"
+  lang="python"
+  :code="loopCode"
+  annotation="while True — Claude drives termination, not a counter. Append BOTH the assistant message AND the tool result before the next call."
+  footerLabel="Lecture 3.1"
+  :footerNum="3"
+  :footerTotal="8"
+/>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; align-items: start;">
+<!--
+Here's what this looks like in code. Notice the structure: while True loop with an explicit break on end_turn. The loop is intentionally unbounded — Claude drives the termination, not a counter. And the tool results get appended to the conversation history before the next call. That's not optional. Claude needs to see what its tools returned.
+-->
 
-  <v-click>
-  <div>
+---
+
+<!-- SLIDE 4 — Tool Use Response -->
+
+<TwoColSlide
+  variant="compare"
+  title="What's in a Tool Use Response"
+  leftLabel="JSON"
+  rightLabel="Key fields"
+  footerLabel="Lecture 3.1"
+  :footerNum="4"
+  :footerTotal="8"
+>
+<template #left>
 
 ```json
 {
@@ -195,255 +197,116 @@ layout: default
       "type": "tool_use",
       "id": "toolu_01ABC123",
       "name": "get_weather",
-      "input": {
-        "location": "Seattle, WA"
-      }
+      "input": {"location": "Seattle, WA"}
     }
   ]
 }
 ```
 
-  </div>
-  </v-click>
+</template>
+<template #right>
 
-  <div style="font-size: 0.9rem; color: #111928; line-height: 1.65; padding-top: 0.25rem;">
-    <v-click>
-    <div class="di-step-card">
-      <span class="di-step-num">type</span> Always <code class="di-code-inline">"tool_use"</code> — identifies this block
-    </div>
-    <div class="di-step-card">
-      <span class="di-step-num">name</span> Which tool Claude selected
-    </div>
-    <div class="di-step-card">
-      <span class="di-step-num">input</span> Arguments Claude decided to pass
-    </div>
-    </v-click>
-    <v-click>
-    <div class="di-step-card" style="border-left-color: #E3A008;">
-      <span class="di-step-num" style="color: #E3A008;">id ⚠</span> Must be echoed back when you return the result — Claude uses it to match results to requests when multiple tools are called
-    </div>
-    </v-click>
-  </div>
+- **`type`** — always `"tool_use"`, identifies this block.
+- **`name`** — which tool Claude selected.
+- **`input`** — arguments Claude decided to pass.
+- **`id` ⚠** — echo it back on the tool_result; matches results to requests.
 
-</div>
-
-<img src="/logo.png" class="di-logo" />
+</template>
+</TwoColSlide>
 
 <!--
-When stop_reason is "tool_use", the response content contains a tool use block.
-
-It has four key parts: the type ("tool_use"), the id (a unique identifier for this specific call), the name (which tool Claude selected), and the input (the arguments Claude decided to pass).
-
-[click] The id matters because when you send the tool result back, you must reference this same ID. Claude uses it to match results to requests — especially when multiple tools are called in the same response.
-
-Your code's job: find all "tool_use" blocks in the content, execute each tool with the provided inputs, and package the results back with matching IDs.
+When stop_reason is tool_use, the response content contains a tool use block. It has four key parts: the type — always tool_use — the id which is a unique identifier for this specific call, the name which tells you which tool Claude selected, and the input which is the arguments Claude decided to pass. The id matters because when you send the tool result back, you must reference this same ID. Claude uses it to match results to requests — especially when multiple tools are called in the same response. Your code's job: find all tool_use blocks in the content, execute each tool with the provided inputs, and package the results back with matching IDs.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Appending Tool Results Correctly
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — Appending Tool Results -->
 
-<div class="di-header">Appending Tool Results Correctly</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<v-click>
-<p style="color: #E53E3E; font-weight: 600; font-size: 0.95rem;">Most common mistake: forgetting to append <em>both</em> the assistant message AND the tool result.</p>
-</v-click>
-
-<div style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem;">
-
-  <v-click>
-  <div class="di-step-card">
-    <span class="di-step-num">Step 1</span>
-    Append the full assistant response (the one with the <code class="di-code-inline">tool_use</code> block) to the messages array
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #0D7377;">
-    <span class="di-step-num" style="color: #0D7377;">Step 2</span>
-    Append a <strong>user</strong> message with the tool result — each result block needs: <code class="di-code-inline">tool_use_id</code>, <code class="di-code-inline">content</code>, and <code class="di-code-inline">is_error</code>
-  </div>
-  </v-click>
-
-  <v-click>
-  <div class="di-step-card" style="border-left-color: #1B8A5A;">
-    <span class="di-step-num" style="color: #1B8A5A;">Step 3</span>
-    Make the next API call with the <strong>full updated messages array</strong>
-  </div>
-  <div style="background: #FFF0F0; border-left: 3px solid #E53E3E; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.25rem;">
-    <strong>Skip either step:</strong> Claude's context is incomplete → it will repeat itself or hallucinate what the tool returned
-  </div>
-  </v-click>
-
-</div>
-</div>
-
-<img src="/logo.png" class="di-logo" />
+<StepSequence
+  eyebrow="Common mistake"
+  title="Appending Tool Results Correctly"
+  :steps="appendSteps"
+  footerLabel="Lecture 3.1"
+  :footerNum="5"
+  :footerTotal="8"
+/>
 
 <!--
-The most common implementation mistake: forgetting to append both the assistant message AND the tool result before the next call.
-
-This is the required sequence on every iteration:
-
-First, append the full assistant response (the one containing the tool_use block) to the messages array.
-
-[click] Second, append a user message containing the tool result. This is formatted as a list of tool_result blocks, each with the tool_use_id matching Claude's request, the content (the actual result), and whether it's an error.
-
-[click] Then make the next API call with the full updated messages array.
-
-Skip either step, and Claude's context is incomplete. It will either repeat itself or hallucinate what the tool returned.
+The most common implementation mistake: forgetting to append both the assistant message AND the tool result before the next call. This is the required sequence on every iteration. First, append the full assistant response, the one containing the tool_use block, to the messages array. Second, append a user message containing the tool result. This is formatted as a list of tool_result blocks, each with the tool_use_id matching Claude's request, the content — the actual result — and whether it's an error. Then make the next API call with the full updated messages array. Skip either step, and Claude's context is incomplete. It will either repeat itself or hallucinate what the tool returned.
 -->
 
 ---
-layout: two-cols
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — The Two stop_reason Values
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — Two stop_reason Values -->
 
-<div class="di-header" style="margin: -1.5rem -1rem 1rem -2rem; padding-right: 1rem;">The Two stop_reason Values You Must Know</div>
+<TwoColSlide
+  variant="compare"
+  title="The Two stop_reason Values You Must Know"
+  leftLabel="tool_use"
+  rightLabel="end_turn"
+  footerLabel="Lecture 3.1"
+  :footerNum="6"
+  :footerTotal="8"
+>
+<template #left>
 
-<v-click>
-<div style="padding-right: 1rem;">
-  <div class="di-col-left-label"><code>"tool_use"</code></div>
-  <div class="di-col-body">
-    <p><em>Claude has decided to call a tool.</em></p>
-    <ul>
-      <li>The loop <strong>must continue</strong></li>
-      <li>Execute tools, append results, call API again</li>
-    </ul>
-    <div class="di-col-warning">
-      <strong>Do NOT:</strong> treat this as a complete response<br>
-      <strong>Do NOT:</strong> return this to the user
-    </div>
-  </div>
-</div>
-</v-click>
+Claude has decided to call a tool. The loop **must continue**.
 
-::right::
+- Execute tools, append results, call the API again.
+- **Do not** treat as complete.
+- **Do not** return to the user yet.
 
-<div style="padding-left: 1rem; padding-top: 5rem;">
-  <v-click>
-  <div class="di-col-right-label"><code>"end_turn"</code></div>
-  <div class="di-col-body">
-    <p><em>Claude has completed its response.</em></p>
-    <ul>
-      <li>The loop <strong>must stop</strong></li>
-      <li>Return response to user</li>
-    </ul>
-    <div class="di-col-warning">
-      <strong>Do NOT:</strong> keep looping "just to check"<br>
-      <strong>Do NOT:</strong> inspect text for keywords like "done"
-    </div>
-    <div style="margin-top: 0.75rem; text-align: center; font-size: 1.1rem; font-weight: 700; color: #1A3A4A;">
-      The field speaks. Believe it.
-    </div>
-  </div>
-  </v-click>
-</div>
+</template>
+<template #right>
 
-<img src="/logo.png" class="di-logo" />
+Claude has completed its response. The loop **must stop**.
+
+- Return the response to the user.
+- **Do not** keep looping "just to check."
+- **Do not** inspect text for "done" keywords.
+
+*The field speaks. Believe it.*
+
+</template>
+</TwoColSlide>
 
 <!--
-There are other stop_reason values — like "max_tokens" and "stop_sequence" — but for agentic loops, these two are the only ones you need to make decisions about.
-
-"tool_use" means: Claude made a decision to call a tool. The loop must continue. Do not treat this as a complete response. Do not return this to the user.
-
-[click] "end_turn" means: Claude has completed its response. The loop must stop. Do not keep looping "just to check." Do not inspect the text for keywords like "done" or "finished."
-
-The field speaks. Believe it.
+There are other stop_reason values — like max_tokens and stop_sequence — but for agentic loops, these two are the only ones you need to make decisions about. tool_use means Claude made a decision to call a tool. The loop must continue. Do not treat this as a complete response. Do not return this to the user. end_turn means Claude has completed its response. The loop must stop. Do not keep looping just to check. Do not inspect the text for keywords like done or finished. The field speaks. Believe it.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — Exam Tip -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
-
-<v-click>
-<div class="di-exam-subtitle">How to Control the Loop</div>
-
-<div class="di-exam-body">
-  The exam will present scenarios where the candidate uses something other than <code class="di-code-inline">stop_reason</code> to control the loop. These are <strong>all</strong> anti-patterns.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Distractor Patterns</div>
-  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem;">
-    <li>Checking if response text contains "done" or "complete"</li>
-    <li>Setting a maximum iteration counter as the <em>primary</em> exit condition</li>
-    <li>Checking whether <code>content</code> includes a tool_use block (instead of the <code>stop_reason</code> field)</li>
-  </ul>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-correct-box">
-  <div class="di-correct-label">✓ The Only Correct Pattern</div>
-  Read <code class="di-code-inline">stop_reason</code> from the response object.<br>
-  <strong>"end_turn"</strong> → stop. &nbsp; <strong>"tool_use"</strong> → execute tools and continue.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+<AntiPatternSlide
+  eyebrow="⚡ Exam Tip"
+  title="How to Control the Loop"
+  lang="text"
+  :badExample="examTipBad"
+  whyItFails="Text is non-deterministic. Caps-as-primary hide partial results. Inspecting content blocks duplicates a signal the API already gives you."
+  :fixExample="examTipGood"
+  footerLabel="Lecture 3.1"
+  :footerNum="7"
+  :footerTotal="8"
+/>
 
 <!--
-The exam will present scenarios where a candidate is doing something other than reading stop_reason to control the loop.
-
-Examples you'll see as distractors: checking if the response text contains the word "done" or "complete," setting a maximum iteration counter as the primary exit condition, or checking whether the response includes a tool_use block in the content (instead of checking the stop_reason field).
-
-All of these are anti-patterns. The correct pattern is exactly one thing: read stop_reason from the response object.
-
-If it's "end_turn", stop. If it's "tool_use", execute tools and continue. That's it.
+The exam will present scenarios where a candidate is doing something other than reading stop_reason to control the loop. Examples you'll see as distractors: checking if the response text contains the word done or complete, setting a maximum iteration counter as the primary exit condition, or checking whether the response includes a tool_use block in the content — instead of checking the stop_reason field. All of these are anti-patterns. The correct pattern is exactly one thing: read stop_reason from the response object. If it's end_turn, stop. If it's tool_use, execute tools and continue. That's it.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — Takeaways -->
 
-<div class="di-takeaway-title">The Agentic Loop — What to Know Cold</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li><code style="color: #3CAF50;">stop_reason = "tool_use"</code> → execute tool, append result, loop back</li></v-click>
-  <v-click><li><code style="color: #3CAF50;">stop_reason = "end_turn"</code> → return response to user, stop</li></v-click>
-  <v-click><li><strong>Always append both</strong> the assistant message AND tool result before the next call</li></v-click>
-  <v-click><li><strong>The loop is <code style="color: #A8D5C2;">while True</code> with an explicit break</strong> — Claude drives termination</li></v-click>
-  <v-click><li><strong>Never use text content inspection</strong> to decide whether to continue looping</li></v-click>
-  <v-click><li>This pattern applies to every scenario on the exam — master it first</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<BulletReveal
+  eyebrow="Takeaway"
+  title="The Agentic Loop — What to Know Cold"
+  :bullets="takeawayBullets"
+  footerLabel="Lecture 3.1"
+  :footerNum="8"
+  :footerTotal="8"
+/>
 
 <!--
-To summarize what you need to know cold:
-
-stop_reason = "tool_use" → execute tool, append result, loop back.
-stop_reason = "end_turn" → return response to user, stop.
-
-Always append both the assistant message AND the tool result before the next call.
-
-The loop is while True with an explicit break — Claude drives termination, not your code.
-
-Never use text content inspection to decide whether to continue looping.
-
-This pattern is the foundation for every agentic scenario on the exam. Master it first.
+Six things to carry forward. stop_reason tool_use means execute the tool, append the result, and loop back. stop_reason end_turn means return the response to the user and stop. Always append both the assistant message AND the tool result before the next call. The loop is while True with an explicit break — Claude drives termination, not a counter. Never use text content inspection to decide whether to continue looping. And this pattern applies to every scenario on the exam — master it first.
 -->

@@ -3,432 +3,308 @@ theme: default
 title: "Lecture 3.4: Multi-Agent Hub-and-Spoke Architecture"
 info: |
   Claude Certified Architect – Foundations
-  Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const jobsBullets = [
+  { label: '1. Decompose', detail: 'Break the task into pieces with clear, bounded responsibility — no implicit dependencies.' },
+  { label: '2. Delegate', detail: 'Spawn each subagent with its task and context. Subagents do NOT inherit coordinator history.' },
+  { label: '3. Aggregate', detail: 'Collect outputs, synthesize, handle failures gracefully — retry, skip, or surface.' },
+]
 
-<div class="di-cover-accent"></div>
+const takeawayBullets = [
+  { label: 'All traffic through the hub', detail: 'Subagents never talk directly to each other — everything flows through the coordinator.' },
+  { label: "Coordinator's three jobs", detail: 'Decompose → Delegate → Aggregate.' },
+  { label: 'No inherited context', detail: 'Coordinator must pass everything the subagent needs, explicitly, in the task prompt.' },
+  { label: "allowedTools must include 'Task'", detail: 'Without it, the subagent cannot properly accept its assignment.' },
+  { label: 'Parallel = ONE coordinator turn', detail: 'All parallel subagent spawning happens in a single coordinator response turn.' },
+  { label: 'Why hub-and-spoke?', detail: 'Centralized observability, consistent error handling, predictable control flow.' },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Claude Certified Architect – Foundations</div>
-  <div class="di-cover-title">Multi-Agent<br>Hub-and-Spoke Architecture</div>
-  <div class="di-cover-subtitle">Lecture 3.4 · Domain 1 — Agentic Architecture & Orchestration (27%)</div>
-</div>
+const examBad = `Two traps the exam plants
 
-<img src="/logo.png" class="di-logo-centered" />
+Trap 1 — Sequential spawning presented as parallel
+  Coordinator emits one Task, waits, then emits another
+  across multiple turns. That's sequential, not parallel.
 
-<!--
-Single agents are powerful. But they have limits.
+Trap 2 — Direct subagent-to-subagent communication
+  Subagent A sends data directly to Subagent B. Violates
+  hub-and-spoke — all traffic must go through the hub.`
 
-They operate in a single context window. They can only do one thing at a time. And complex tasks — research, code review, customer support pipelines — often need multiple specialized capabilities running in parallel.
+const examGood = `Two rules
 
-Multi-agent systems solve these problems. But they introduce coordination challenges.
+(1) Parallel spawning = ONE coordinator turn,
+    multiple Task calls in the same response.
 
-The architecture that the CCA-F exam focuses on is hub-and-spoke — a central coordinator managing multiple specialized subagents.
--->
+(2) Subagents NEVER communicate directly —
+    all traffic flows through the coordinator.`
 
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — Hub-and-Spoke: The Core Structure
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Hub-and-Spoke — The Core Structure</div>
-
-<v-click>
-<div style="display: flex; align-items: stretch; gap: 1.5rem; margin-top: 0.5rem;">
-
-  <div style="flex: 0 0 44%; display: flex; flex-direction: column; align-items: center; gap: 0.3rem;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; width: 100%;">
-      <div style="background: #E8F5EB; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.4rem 0.6rem; text-align: center; font-size: 0.78rem; font-weight: 600; color: #1A3A4A;">Research<br>Subagent</div>
-      <div style="background: #E8F5EB; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.4rem 0.6rem; text-align: center; font-size: 0.78rem; font-weight: 600; color: #1A3A4A;">Document<br>Subagent</div>
-    </div>
-    <div style="color: #0D7377; font-size: 0.9rem; display: flex; justify-content: space-around; width: 100%;">↑&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑</div>
-    <div style="background: #1A3A4A; color: white; border: 3px solid #3CAF50; border-radius: 8px; padding: 0.6rem 1rem; width: 100%; text-align: center; font-weight: 700; font-size: 0.95rem;">
-      Coordinator<br><span style="color: #A8D5C2; font-size: 0.8rem;">Hub</span>
-    </div>
-    <div style="color: #0D7377; font-size: 0.9rem; display: flex; justify-content: space-around; width: 100%;">↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; width: 100%;">
-      <div style="background: #E8F5EB; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.4rem 0.6rem; text-align: center; font-size: 0.78rem; font-weight: 600; color: #1A3A4A;">Synthesis<br>Subagent</div>
-      <div style="background: #E8F5EB; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.4rem 0.6rem; text-align: center; font-size: 0.78rem; font-weight: 600; color: #1A3A4A;">Report<br>Subagent</div>
-    </div>
-    <div style="font-size: 0.75rem; color: #E53E3E; font-style: italic; margin-top: 0.3rem; text-align: center;">No arrows between the outer nodes</div>
-  </div>
-
-  <div style="flex: 1; font-size: 0.92rem; color: #111928; line-height: 1.65;">
-    <p>The hub-and-spoke pattern has one defining rule: <strong>all communication flows through the coordinator</strong>.</p>
-    <v-click at="2">
-    <div class="di-step-card" style="margin-top: 0.5rem;">
-      <span class="di-step-num">Subagents</span> only ever communicate with the coordinator. They <em>never</em> talk directly to each other.
-    </div>
-    </v-click>
-    <v-click at="3">
-    <div class="di-step-card" style="margin-top: 0.4rem; border-left-color: #0D7377;">
-      <span class="di-step-num" style="color: #0D7377;">Why not a mesh?</span> Direct subagent communication creates a mesh topology — harder to debug, harder to monitor, and harder to reason about when something goes wrong.
-    </div>
-    </v-click>
-    <v-click at="4">
-    <p style="margin-top: 0.6rem; font-size: 0.88rem; color: #1A3A4A;">This is a <strong>deliberate design choice</strong>: centralized observability, consistent error handling, predictable control flow.</p>
-    </v-click>
-  </div>
-
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The hub-and-spoke pattern has one defining rule: all communication flows through the coordinator.
-
-The coordinator — the hub — receives the original task. It decomposes it. It assigns work to subagents. It collects results. It aggregates. And it produces the final output.
-
-The subagents — the spokes — only ever communicate with the coordinator. They never talk directly to each other.
-
-This is not a limitation. It's a deliberate design choice that gives you centralized observability, consistent error handling, and predictable control flow.
-
-If subagents communicated directly, you'd have a mesh topology — harder to debug, harder to monitor, and harder to reason about when something goes wrong.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — The Coordinator's Three Jobs
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The Coordinator's Three Jobs</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<div class="di-step-card">
-  <span class="di-step-num">1. Decompose</span>
-  Break the original task into pieces that subagents can handle independently. Good decomposition means each subagent has a <strong>clear, bounded responsibility</strong> with no implicit dependencies on what other subagents are doing.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #0D7377;">
-  <span class="di-step-num" style="color: #0D7377;">2. Delegate</span>
-  Spawn each subagent with its specific task and the context it needs. This means <strong>explicit context passing</strong> — subagents don't inherit the coordinator's history. Each one starts fresh.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #1B8A5A;">
-  <span class="di-step-num" style="color: #1B8A5A;">3. Aggregate</span>
-  Collect all subagent outputs, synthesize them into a coherent response, and handle any failures gracefully. The coordinator is responsible for catching subagent errors and deciding whether to <strong>retry, skip, or surface the failure</strong>.
-</div>
-</v-click>
-
-<v-click>
-<div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.5rem;">
-  <strong>The coordinator is the brain.</strong> It never runs the actual domain work — it orchestrates the agents that do.
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The coordinator has exactly three jobs: decompose, delegate, and aggregate.
-
-Decompose: break the original task into pieces that subagents can handle independently. Good decomposition means each subagent has a clear, bounded responsibility with no implicit dependencies on what other subagents are doing.
-
-Delegate: spawn each subagent with its specific task and the context it needs. This means explicit context passing — subagents don't inherit the coordinator's history. Each one starts fresh.
-
-Aggregate: collect all the subagent outputs, synthesize them into a coherent response, and handle any failures gracefully. The coordinator is responsible for catching subagent errors and deciding whether to retry, skip, or surface the failure.
--->
-
----
-layout: two-cols
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — Subagent Context Isolation
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header" style="margin: -1.5rem -1rem 1rem -2rem; padding-right: 1rem;">Subagent Context Isolation</div>
-
-<v-click>
-<div style="padding-right: 1.2rem;">
-  <div class="di-col-left-label">❌ What candidates assume</div>
-  <div class="di-col-body">
-    <div style="background: #1A3A4A; color: white; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.85rem; margin-bottom: 0.35rem;">
-      Coordinator<br><span style="color: #A8D5C2; font-size: 0.78rem;">full conversation history</span>
-    </div>
-    <div style="text-align: center; color: #0D7377;">↓ inherits history</div>
-    <div style="background: #E8F5EB; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.85rem; color: #111928;">
-      Subagent<br><span style="font-size: 0.78rem; color: #1B8A5A;">knows everything coordinator knows</span>
-    </div>
-    <div class="di-col-warning" style="margin-top: 0.5rem;">
-      <strong>Wrong:</strong> Subagents do not see the coordinator's messages
-    </div>
-  </div>
-</div>
-</v-click>
-
-::right::
-
-<v-click>
-<div style="padding-left: 1.2rem; padding-top: 5rem;">
-  <div class="di-col-right-label">✓ What actually happens</div>
-  <div class="di-col-body">
-    <div style="background: #1A3A4A; color: white; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.85rem; margin-bottom: 0.35rem;">
-      Coordinator<br><span style="color: #A8D5C2; font-size: 0.78rem;">passes context explicitly</span>
-    </div>
-    <div style="text-align: center; color: #0D7377;">↓ explicit prompt only</div>
-    <div style="background: #E8F5EB; border: 1px solid #c8e6d0; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.85rem; color: #111928;">
-      Subagent<br><span style="font-size: 0.78rem; color: #1B8A5A;">starts with fresh context</span>
-    </div>
-    <div style="margin-top: 0.5rem; background: #F0FFF4; border-left: 3px solid #3CAF50; padding: 0.4rem 0.6rem; border-radius: 3px; font-size: 0.88rem;">
-      <strong>Rule:</strong> Nothing flows implicitly. Everything that matters must be passed explicitly.
-    </div>
-  </div>
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-One of the most important things to understand about subagents: they don't inherit the coordinator's conversation history.
-
-Each subagent starts with a completely fresh context.
-
-This means the coordinator must be explicit about what information each subagent needs. If the research pipeline has already found key facts, and the synthesis subagent needs those facts, the coordinator must explicitly include them in the synthesis subagent's task prompt.
-
-Nothing flows implicitly. Everything that matters must be passed explicitly.
-
-This is why the exam asks about "explicit context passing" — it's the mechanism that makes multi-agent systems actually work.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — The Task Tool: Spawning Subagents
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">The Task Tool — Spawning Subagents</div>
-
-<v-click>
-
-```python {all|4-6|7-9|11-14}
-# Coordinator spawning a research subagent
+const taskCode = `# Coordinator spawns a subagent via the Task tool
 response = client.messages.create(
     model="claude-opus-4-7",
     tools=[{
-        "type": "computer_use",
         "name": "Task",
-        "description": "Spawn a subagent to complete a specific task",
-        "input_schema": { ... }
+        "description": "Delegate a bounded subtask to a specialist subagent.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "description": {"type": "string"},
+                "prompt":      {"type": "string"},
+                "allowedTools":{"type": "array", "items": {"type": "string"}}
+            },
+            "required": ["description", "prompt", "allowedTools"]
+        }
     }],
-    messages=[...],
-    system="""You are a coordinator. Use the Task tool to delegate
-              work to specialized subagents. Pass all required
-              context explicitly — subagents have no shared memory."""
+    system=COORDINATOR_SYSTEM_PROMPT,
+    messages=messages
 )
+
+# Example Task call the coordinator emits:
+# {
+#   "name": "Task",
+#   "input": {
+#     "description": "Analyze the Q3 report",
+#     "prompt": "Extract revenue, margin, and growth numbers from ...",
+#     "allowedTools": ["Task", "read_file"]   # Task MUST be present
+#   }
+# }`
+</script>
+
+<!-- SLIDE 1 — Cover -->
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);" />
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Domain 1 &middot; Lecture 3.4</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1500px;">
+        Multi-Agent<br /><span style="color: var(--sprout-500);">Hub-and-Spoke</span>
+      </h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1200px; line-height:1.3;">
+        Coordinator-centered orchestration — the pattern the exam tests.
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Lecture 3.4</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>~9 min</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>8 slides</span>
+    </div>
+  </div>
+</Frame>
+
+<!--
+Single agents are powerful. But they have limits. They operate in a single context window. They can only do one thing at a time. And complex tasks — research, code review, customer support pipelines — often need multiple specialized capabilities running in parallel. Multi-agent systems solve these problems. But they introduce coordination challenges. The architecture that the CCA-F exam focuses on is hub-and-spoke — a central coordinator managing multiple specialized subagents.
+-->
+
+---
+
+<!-- SLIDE 2 — Hub-and-Spoke core structure
+     TODO: HubSpokeDiagram component needed. Wave 5 consolidator will
+     either inline an SVG here or build a dedicated HubSpokeDiagram
+     component. For now we use TwoColSlide with a text-rendered topology. -->
+
+<TwoColSlide
+  variant="compare"
+  title="Hub-and-Spoke — The Core Structure"
+  leftLabel="Topology"
+  rightLabel="Mechanic"
+  footerLabel="Lecture 3.4"
+  :footerNum="2"
+  :footerTotal="8"
+>
+<template #left>
+
+```text
+                  Coordinator (Hub)
+                   /    |    |    \
+                  /     |    |     \
+             Research  Docs  Synth  Report
+              Agent    Agent Agent  Writer
 ```
 
-</v-click>
+**4 subagents** around **one coordinator hub**. No arrows between outer nodes — all flow goes through the coordinator.
 
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.84rem;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.5rem 0.7rem; border-left: 3px solid #E3A008;">
-    <strong style="color: #E3A008;">Key parameter: <code>allowedTools</code></strong><br>
-    Must include <code>"Task"</code> for a subagent to accept its assignment. Without it, the subagent cannot properly process its task specification.
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.5rem 0.7rem; border-left: 3px solid #3CAF50;">
-    <strong style="color: #1B8A5A;">Think of it this way</strong><br>
-    The Task tool is how an agent formally accepts an assignment. No Task in allowedTools → no assignment accepted.
-  </div>
-</div>
-</v-click>
+</template>
+<template #right>
 
-<img src="/logo.png" class="di-logo" />
+- **Subagents** — only ever communicate with the coordinator. Never each other.
+- **Why not a mesh?** Direct subagent comms = mesh topology — harder to debug, monitor, reason about.
+- **Deliberate** — centralized observability, consistent error handling, predictable control flow.
+
+</template>
+</TwoColSlide>
 
 <!--
-In Claude's agent framework, coordinators spawn subagents using the Task tool.
-
-A Task call has three key parameters: the task description (what to do), the instructions (context and constraints), and allowedTools (what tools the subagent is permitted to use).
-
-The allowedTools parameter is an exam favorite. For a subagent to receive and process its task, allowedTools must include "Task". Without it, the subagent can't properly accept the task specification.
-
-Think of it this way: the Task tool is how an agent formally accepts an assignment. No Task in allowedTools means no assignment accepted.
+The hub-and-spoke pattern has one defining rule: all communication flows through the coordinator. The coordinator — the hub — receives the original task. It decomposes it. It assigns work to subagents. It collects results. It aggregates. And it produces the final output. The subagents — the spokes — only ever communicate with the coordinator. They never talk directly to each other. This is not a limitation. It's a deliberate design choice that gives you centralized observability, consistent error handling, and predictable control flow. If subagents communicated directly, you'd have a mesh topology — harder to debug, harder to monitor, and harder to reason about when something goes wrong.
 -->
 
 ---
-layout: default
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Parallel vs Sequential Subagent Execution
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — Coordinator's Three Jobs -->
 
-<div class="di-header">Parallel vs Sequential Subagent Execution</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #E3A008;">
-  <span class="di-step-num" style="color: #E3A008;">Sequential</span>
-  Coordinator spawns subagent 1 → waits for result → spawns subagent 2 → waits → spawns subagent 3. Use when subagent B depends on subagent A's output.
-</div>
-</v-click>
-
-<v-click>
-<div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: nowrap; margin: 0.3rem 0; font-size: 0.82rem; overflow: hidden;">
-  <div style="background: #1A3A4A; color: white; border-radius: 5px; padding: 0.3rem 0.5rem; white-space: nowrap;">Coordinator</div>
-  <div style="color: #0D7377;">→</div>
-  <div style="background: #E3A008; color: white; border-radius: 5px; padding: 0.3rem 0.5rem; white-space: nowrap; font-size: 0.78rem;">Subagent 1</div>
-  <div style="color: #0D7377;">→ wait →</div>
-  <div style="background: #E3A008; color: white; border-radius: 5px; padding: 0.3rem 0.5rem; white-space: nowrap; font-size: 0.78rem;">Subagent 2</div>
-  <div style="color: #0D7377;">→ wait →</div>
-  <div style="background: #E3A008; color: white; border-radius: 5px; padding: 0.3rem 0.5rem; white-space: nowrap; font-size: 0.78rem;">Subagent 3</div>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #3CAF50; margin-top: 0.5rem;">
-  <span class="di-step-num">Parallel</span>
-  Coordinator spawns <strong>all independent subagents in a single response turn</strong> — multiple Task calls in one response. The coordinator then waits for all results before continuing.
-</div>
-</v-click>
-
-<v-click>
-<div style="display: flex; flex-direction: column; align-items: center; gap: 0.15rem; margin: 0.3rem 0; font-size: 0.82rem;">
-  <div style="background: #1A3A4A; color: white; border-radius: 5px; padding: 0.3rem 0.8rem;">Coordinator (one turn)</div>
-  <div style="display: flex; gap: 1.5rem; color: #0D7377;">↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
-  <div style="display: flex; gap: 0.75rem;">
-    <div style="background: #1B8A5A; color: white; border-radius: 5px; padding: 0.3rem 0.6rem; font-size: 0.78rem;">Doc Analysis</div>
-    <div style="background: #1B8A5A; color: white; border-radius: 5px; padding: 0.3rem 0.6rem; font-size: 0.78rem;">Web Search</div>
-    <div style="background: #1B8A5A; color: white; border-radius: 5px; padding: 0.3rem 0.6rem; font-size: 0.78rem;">Src Verify</div>
-  </div>
-</div>
-</v-click>
-
-<v-click>
-<div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.45rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.25rem;">
-  <strong>Exam key phrase:</strong> "all parallel subagent spawning happens in one coordinator turn"
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
+<BulletReveal
+  eyebrow="Coordinator responsibilities"
+  title="The Coordinator's Three Jobs"
+  :bullets="jobsBullets"
+  footerLabel="Lecture 3.4"
+  :footerNum="3"
+  :footerTotal="8"
+/>
 
 <!--
-The hub-and-spoke architecture supports both sequential and parallel execution.
-
-Sequential: the coordinator spawns one subagent, waits for the result, then spawns the next. Use this when subagent B depends on subagent A's output.
-
-Parallel: the coordinator spawns multiple subagents in a single response turn. This is the key phrase for the exam. All parallel subagent spawning happens in one coordinator turn — multiple Task calls in one response. The coordinator then waits for all results before continuing.
-
-Parallel execution is the right choice when tasks are independent. The multi-agent research pipeline spawns document analysis, web search, and source verification subagents in parallel because their work doesn't depend on each other.
+The coordinator has exactly three jobs: decompose, delegate, and aggregate. Decompose: break the original task into pieces that subagents can handle independently. Good decomposition means each subagent has a clear, bounded responsibility with no implicit dependencies on what other subagents are doing. Delegate: spawn each subagent with its specific task and the context it needs. This means explicit context passing — subagents don't inherit the coordinator's history. Each one starts fresh. Aggregate: collect all the subagent outputs, synthesize them into a coherent response, and handle any failures gracefully. The coordinator is responsible for catching subagent errors and deciding whether to retry, skip, or surface the failure.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — Subagent Context Isolation -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
+<TwoColSlide
+  variant="antipattern-fix"
+  title="Subagent Context Isolation"
+  leftLabel="❌ What candidates assume"
+  rightLabel="✓ What actually happens"
+  footerLabel="Lecture 3.4"
+  :footerNum="4"
+  :footerTotal="8"
+>
+<template #left>
 
-<v-click>
-<div class="di-exam-subtitle">Hub-and-Spoke Exam Patterns</div>
+Coordinator holds the full conversation history →  
+**inherits** →  
+subagent "knows" everything the coordinator knows.
 
-<div class="di-exam-body">
-  Two patterns the exam tests heavily in the hub-and-spoke context.
-</div>
-</v-click>
+**Wrong.** Subagents do not see any of the coordinator's messages.
 
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Trap 1 — Sequential Spawning Presented as Parallel</div>
-  The exam will offer an answer where the coordinator spawns subagents across multiple turns. That's sequential — slower and misses the point of parallelism.
-  <br><strong>Correct:</strong> Parallel subagents are ALL spawned in ONE coordinator response turn.
-</div>
-</v-click>
+</template>
+<template #right>
 
-<v-click>
-<div class="di-trap-box" style="margin-top: 0.5rem;">
-  <div class="di-trap-label">❌ Trap 2 — Direct Subagent Communication</div>
-  If an answer choice has subagents sharing information directly with each other, it violates hub-and-spoke. In hub-and-spoke, <strong>everything goes through the coordinator</strong>.
-</div>
-</v-click>
+Coordinator passes context **explicitly** in the task prompt →  
+subagent starts with a **fresh context** containing only what was passed.
 
-<v-click>
-<div class="di-correct-box" style="margin-top: 0.5rem;">
-  <div class="di-correct-label">✓ Two Rules to Remember Cold</div>
-  1. Parallel spawning = one coordinator turn, multiple Task calls.<br>
-  2. Subagents never communicate directly — all traffic flows through the coordinator.
-</div>
-</v-click>
+**Rule:** nothing flows implicitly. Everything must be passed explicitly.
 
-<img src="/logo.png" class="di-logo" />
+</template>
+</TwoColSlide>
 
 <!--
-Two patterns the exam tests heavily in the hub-and-spoke context.
-
-First: parallel subagent spawning happens in one coordinator response. The exam will offer an answer where the coordinator spawns subagents sequentially across multiple turns. That's slower and misses the point of parallelism.
-
-Second: direct subagent-to-subagent communication is always wrong in this architecture. If an answer choice has subagents sharing information directly, it's violating hub-and-spoke. In hub-and-spoke, everything goes through the coordinator.
+One of the most important things to understand about subagents: they don't inherit the coordinator's conversation history. Each subagent starts with a completely fresh context. This means the coordinator must be explicit about what information each subagent needs. If the research pipeline has already found key facts, and the synthesis subagent needs those facts, the coordinator must explicitly include them in the synthesis subagent's task prompt. Nothing flows implicitly. Everything that matters must be passed explicitly. This is why the exam asks about "explicit context passing" — it's the mechanism that makes multi-agent systems actually work.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — The Task Tool -->
 
-<div class="di-takeaway-title">Hub-and-Spoke Architecture</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li><strong>All communication flows through the coordinator</strong> — subagents never talk directly to each other</li></v-click>
-  <v-click><li>The coordinator's three jobs: <strong>Decompose → Delegate → Aggregate</strong></li></v-click>
-  <v-click><li>Subagents have <strong>no inherited context</strong> — the coordinator must pass everything explicitly</li></v-click>
-  <v-click><li><code style="color: #A8D5C2;">allowedTools</code> must include <code style="color: #A8D5C2;">"Task"</code> for a subagent to accept its assignment</li></v-click>
-  <v-click><li><strong>Parallel spawning = all subagents spawned in one coordinator response turn</strong></li></v-click>
-  <v-click><li>Hub-and-spoke gives you centralized observability, consistent error handling, and predictable control flow</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<CodeBlockSlide
+  eyebrow="Spawning"
+  title="The Task Tool — Spawning Subagents"
+  lang="python"
+  :code="taskCode"
+  annotation="allowedTools MUST include 'Task' — it's how an agent formally accepts an assignment. No Task in allowedTools → no assignment accepted."
+  footerLabel="Lecture 3.4"
+  :footerNum="5"
+  :footerTotal="8"
+/>
 
 <!--
-To summarize the hub-and-spoke architecture:
+In Claude's agent framework, coordinators spawn subagents using the Task tool. A Task call has three key parameters: the task description — what to do — the prompt, which is the context and constraints, and allowedTools, which specifies what tools the subagent is permitted to use. The allowedTools parameter is an exam favorite. For a subagent to receive and process its task, allowedTools must include "Task". Without it, the subagent can't properly accept the task specification. Think of it this way: the Task tool is how an agent formally accepts an assignment. No Task in allowedTools means no assignment accepted.
+-->
 
-All communication flows through the coordinator — subagents never talk directly to each other.
+---
 
-The coordinator's three jobs: Decompose, Delegate, Aggregate.
+<!-- SLIDE 6 — Parallel vs Sequential -->
 
-Subagents have no inherited context — the coordinator must pass everything explicitly.
+<TwoColSlide
+  variant="compare"
+  title="Parallel vs Sequential Subagent Execution"
+  leftLabel="Sequential"
+  rightLabel="Parallel"
+  footerLabel="Lecture 3.4"
+  :footerNum="6"
+  :footerTotal="8"
+>
+<template #left>
 
-allowedTools must include "Task" for a subagent to accept its assignment.
+```
+Coordinator
+  → Subagent 1
+    → wait
+      → Subagent 2
+        → wait
+          → Subagent 3
+```
 
-Parallel spawning means all subagents are spawned in one coordinator response turn.
+Use when subagent B depends on A's output.
 
-And the reason to use this pattern: centralized observability, consistent error handling, and predictable control flow.
+</template>
+<template #right>
+
+```
+Coordinator (one turn)
+  ├─▶ Doc Analysis
+  ├─▶ Web Search
+  └─▶ Source Verify
+          (all at once)
+```
+
+**Exam key phrase:** all parallel subagent spawning happens in ONE coordinator turn.
+
+</template>
+</TwoColSlide>
+
+<!--
+The hub-and-spoke architecture supports both sequential and parallel execution. Sequential: the coordinator spawns one subagent, waits for the result, then spawns the next. Use this when subagent B depends on subagent A's output. Parallel: the coordinator spawns multiple subagents in a single response turn. This is the key phrase for the exam. All parallel subagent spawning happens in one coordinator turn — multiple Task calls in one response. The coordinator then waits for all results before continuing. Parallel execution is the right choice when tasks are independent. The multi-agent research pipeline spawns document analysis, web search, and source verification subagents in parallel because their work doesn't depend on each other.
+-->
+
+---
+
+<!-- SLIDE 7 — Exam Tip -->
+
+<AntiPatternSlide
+  eyebrow="⚡ Exam Tip"
+  title="Hub-and-Spoke Exam Patterns"
+  lang="text"
+  :badExample="examBad"
+  whyItFails="Parallel means ONE coordinator turn with multiple Task calls. Hub-and-spoke means subagents never talk to each other."
+  :fixExample="examGood"
+  footerLabel="Lecture 3.4"
+  :footerNum="7"
+  :footerTotal="8"
+/>
+
+<!--
+Two patterns the exam tests heavily in the hub-and-spoke context. First: parallel subagent spawning happens in one coordinator response. The exam will offer an answer where the coordinator spawns subagents sequentially across multiple turns. That's slower and misses the point of parallelism. Second: direct subagent-to-subagent communication is always wrong in this architecture. If an answer choice has subagents sharing information directly, it's violating hub-and-spoke. In hub-and-spoke, everything goes through the coordinator.
+-->
+
+---
+
+<!-- SLIDE 8 — Takeaways -->
+
+<BulletReveal
+  eyebrow="Takeaway"
+  title="Hub-and-Spoke Architecture"
+  :bullets="takeawayBullets"
+  footerLabel="Lecture 3.4"
+  :footerNum="8"
+  :footerTotal="8"
+/>
+
+<!--
+Six things to carry forward. All communication flows through the coordinator — subagents never talk directly to each other. The coordinator's three jobs: Decompose, Delegate, Aggregate. Subagents have no inherited context — the coordinator must pass everything explicitly. allowedTools must include "Task" for a subagent to accept its assignment. Parallel spawning equals all subagents spawned in one coordinator response turn. Hub-and-spoke gives you centralized observability, consistent error handling, and predictable control flow.
 -->

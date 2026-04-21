@@ -1,432 +1,277 @@
 ---
 theme: default
-title: "Lecture 3.7: The Task Tool: Spawning Subagents"
+title: "Lecture 3.7: The Task Tool — Spawning Subagents"
 info: |
   Claude Certified Architect – Foundations
-  Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
+<script setup>
+const capabilityBullets = [
+  { label: 'Principle of least privilege', detail: 'Each subagent only has tools required for its specific job. Doc analysis doesn\'t need web search. Web search doesn\'t need file write.' },
+  { label: 'Why it matters', detail: 'Overpowered subagent = unintended actions. Write access where read-only was meant → data corruption. Constrained = predictable, auditable, safer.' },
+  { label: 'Examples', detail: "Research: ['Task', 'web_search', 'read_url'] · Report writer: ['Task', 'write_file'] · Code reviewer: ['Task', 'read_file', 'run_tests']" },
+]
 
-<div class="di-cover-accent"></div>
+const takeawayBullets = [
+  { label: 'Task = the spawn mechanism', detail: 'The Task tool is how coordinators spawn independent subagent instances.' },
+  { label: "allowedTools must include 'Task'", detail: 'Without it, the subagent cannot properly accept its assignment.' },
+  { label: 'Each call = fresh instance', detail: 'No state persists between Task calls.' },
+  { label: 'prompt must be self-contained', detail: "It's all the subagent knows — make every assumption explicit." },
+  { label: 'Apply least privilege', detail: 'Each subagent gets only the tools needed for its specific job — nothing more.' },
+  { label: 'Multiple calls = parallel', detail: 'Multiple Task calls in one coordinator response = parallel spawning (covered in 3.8).' },
+]
 
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Claude Certified Architect – Foundations</div>
-  <div class="di-cover-title">The Task Tool:<br>Spawning Subagents</div>
-  <div class="di-cover-subtitle">Lecture 3.7 · Domain 1 — Agentic Architecture & Orchestration (27%)</div>
-</div>
-
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-In the last lecture, we covered what happens inside a subagent's context. Now let's look at the mechanism that creates subagents in the first place.
-
-The Task tool is the specific tool that coordinators use to spawn subagents in Claude's agent framework. It's not a generic API call — it's a structured primitive with specific parameters, specific behaviors, and specific constraints.
-
-Understanding the Task tool in detail is exam-critical. The allowedTools parameter in particular is a tested trap that catches candidates who understand the theory but not the implementation.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — What the Task Tool Is
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">What the Task Tool Is</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>The <strong>Task tool</strong> is the mechanism through which a coordinator Claude instance spawns a subagent Claude instance. It is the formal handoff of work in a multi-agent system.</p>
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-  <div style="flex: 1; background: white; border: 1px solid #c8e6d0; border-top: 3px solid #3CAF50; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem;">
-    <div style="font-weight: 700; color: #1A3A4A; margin-bottom: 0.3rem;">What it does</div>
-    <ul style="margin: 0; padding-left: 1.2rem;">
-      <li>Creates an independent Claude instance</li>
-      <li>Passes a task description and instructions</li>
-      <li>Constrains the subagent to specific tools</li>
-      <li>Returns the subagent's final output to the coordinator</li>
-    </ul>
-  </div>
-  <div style="flex: 1; background: white; border: 1px solid #c8e6d0; border-top: 3px solid #0D7377; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem;">
-    <div style="font-weight: 700; color: #1A3A4A; margin-bottom: 0.3rem;">What it is NOT</div>
-    <ul style="margin: 0; padding-left: 1.2rem;">
-      <li>Not a generic HTTP call to another service</li>
-      <li>Not a thread or process fork</li>
-      <li>Not a shared-memory communication channel</li>
-      <li>Not persistent — each call is independent</li>
-    </ul>
-  </div>
-</div>
-</v-click>
-
-<v-click>
-<div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.6rem;">
-  <strong>The analogy:</strong> The Task tool is Claude's native way of saying "I need a specialist to handle this part — let me formally assign the work."
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The Task tool is the mechanism through which a coordinator Claude instance spawns a subagent Claude instance. It is the formal handoff of work in a multi-agent system.
-
-What it does: creates an independent Claude instance, passes a task description and instructions, constrains the subagent to specific tools, and returns the subagent's final output to the coordinator.
-
-What it is not: it's not a generic HTTP call to another service. It's not a thread or process fork. It's not a shared-memory communication channel. And it's not persistent — each call is independent.
-
-The analogy: the Task tool is Claude's native way of saying "I need a specialist to handle this part — let me formally assign the work."
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — The Task Tool Parameters
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">The Task Tool — Key Parameters</div>
-
-<v-click>
-
-```python {all|2-3|4-11|12-17}
-task_call = {
-    "type": "tool_use",
+const taskStructCode = `task_call = {
     "name": "Task",
     "input": {
-        "description": "Analyze the following documents and extract key claims",
-        "prompt": f"""
-            You are a document analysis specialist.
-            Analyze these documents: {document_list}
-            Extract: key claims, supporting evidence, contradictions.
-            Output format: structured JSON.
-        """,
-        "allowedTools": [
-            "Task",           # ← CRITICAL: required for subagent to accept task
-            "read_file",
-            "search_documents"
-        ]
+        "description": "Short label for this subagent run",
+        "prompt":      "Complete, self-contained task specification",
+        "allowedTools": ["Task", "read_file", "search_documents"]
     }
-}
-```
+}`
 
-</v-click>
+const allowedBad = `// Missing "Task" — subagent cannot properly accept its task
+{
+  "allowedTools": ["read_file", "search_documents"]
+}`
 
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.83rem;">
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #E3A008;">
-    <strong style="color: #E3A008;"><code>allowedTools</code></strong> — controls which tools the subagent can use. Must include <code>"Task"</code> for the subagent to process its assignment.
-  </div>
-  <div style="flex: 1; background: white; border-radius: 4px; padding: 0.4rem 0.6rem; border-left: 3px solid #3CAF50;">
-    <strong style="color: #1B8A5A;"><code>prompt</code></strong> — the complete context for the subagent. This is all it knows. Make it self-contained.
-  </div>
-</div>
-</v-click>
+const allowedGood = `// "Task" present — subagent can accept and execute
+{
+  "allowedTools": ["Task", "read_file", "search_documents"]
+}`
 
-<img src="/logo.png" class="di-logo" />
+const examBad = `Two traps the exam plants
 
-<!--
-Let's look at the Task tool parameters in detail.
+Trap 1 — Missing 'Task' in allowedTools
+  Subagent fails to process its assignment; the question
+  describes unexpected behavior. Root cause: 'Task' is
+  absent from allowedTools.
 
-The Task call has a name of "Task" and an input object with three key fields.
+Trap 2 — Overly permissive allowedTools
+  'Give every subagent access to all tools for flexibility.'
+  Violates least privilege — the right answer narrows the list.`
 
-The description gives a brief label for what the subagent should do.
+const examGood = `Rule
 
-The prompt is the complete task context — everything the subagent needs to complete its work. This is all it knows, so it must be self-contained.
+Every subagent's allowedTools must include 'Task'
+PLUS only the tools needed for its specific job.
+Nothing more.`
 
-The allowedTools array specifies which tools the subagent is permitted to use. This is where the exam trap lives, which we'll cover in detail next.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — The allowedTools Requirement
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The <code style="color: #A8D5C2;">allowedTools</code> Requirement — The Critical Detail</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<v-click>
-<p>For a subagent to accept and process its task assignment, <code class="di-code-inline">"Task"</code> must be included in <code class="di-code-inline">allowedTools</code>.</p>
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-  <div style="flex: 1; background: #FFF0F0; border: 2px solid #E53E3E; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.86rem;">
-    <div style="font-weight: 700; color: #E53E3E; margin-bottom: 0.3rem;">❌ Missing "Task" in allowedTools</div>
-
-```python
-"allowedTools": ["read_file", "search_documents"]
-# No "Task" — subagent cannot properly
-# accept its task specification
-```
-
-  </div>
-  <div style="flex: 1; background: #F0FFF4; border: 2px solid #3CAF50; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.86rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.3rem;">✓ "Task" included in allowedTools</div>
-
-```python
-"allowedTools": [
-    "Task",             # ← Required
-    "read_file",
-    "search_documents"
-]
-```
-
-  </div>
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="margin-top: 0.6rem; border-left-color: #E3A008;">
-  <span class="di-step-num" style="color: #E3A008;">Why "Task" must be included</span>
-  The Task tool is how an agent formally accepts an assignment. The subagent needs Task in its allowed set to process the task specification it was spawned with. Without it, the subagent cannot properly acknowledge and execute the assignment.
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The allowedTools requirement is the most exam-tested detail of the Task tool.
-
-For a subagent to accept and process its task assignment, "Task" must be included in allowedTools.
-
-Without it, the subagent cannot properly acknowledge and execute the assignment. The Task tool is how an agent formally accepts an assignment — it needs to be in the subagent's allowed set for the mechanism to work.
-
-This trips candidates up because it seems counterintuitive. The subagent is being called via the Task tool — why does it also need Task in its own allowedTools? Because the subagent needs the ability to process task-based interactions, including its own task specification.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Constraining Subagent Capabilities
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Constraining Subagent Capabilities via allowedTools</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<v-click>
-<p><code class="di-code-inline">allowedTools</code> is also a <strong>security and predictability mechanism</strong> — not just a technical requirement.</p>
-</v-click>
-
-<v-click>
-<div class="di-step-card">
-  <span class="di-step-num">Principle of least privilege</span>
-  Each subagent should only have the tools required for its specific job. A document analysis subagent does not need web search. A web search subagent does not need file write access.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #0D7377;">
-  <span class="di-step-num" style="color: #0D7377;">Why it matters</span>
-  An overpowered subagent can take unintended actions. A subagent with write access that was meant to be read-only can corrupt data. Constrained tool sets produce predictable, auditable, and safer behavior.
-</div>
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.84rem;">
-  <div style="flex: 1; background: white; border-radius: 5px; padding: 0.5rem 0.7rem; border: 1px solid #c8e6d0;">
-    <strong style="color: #1A3A4A;">Research subagent</strong><br>
-    <code class="di-code-inline">["Task", "web_search", "read_url"]</code>
-  </div>
-  <div style="flex: 1; background: white; border-radius: 5px; padding: 0.5rem 0.7rem; border: 1px solid #c8e6d0;">
-    <strong style="color: #1A3A4A;">Report writer subagent</strong><br>
-    <code class="di-code-inline">["Task", "write_file"]</code>
-  </div>
-  <div style="flex: 1; background: white; border-radius: 5px; padding: 0.5rem 0.7rem; border: 1px solid #c8e6d0;">
-    <strong style="color: #1A3A4A;">Code reviewer subagent</strong><br>
-    <code class="di-code-inline">["Task", "read_file", "run_tests"]</code>
-  </div>
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The allowedTools parameter is also a security and predictability mechanism — not just a technical requirement.
-
-The principle of least privilege applies: each subagent should only have the tools required for its specific job. A document analysis subagent does not need web search. A web search subagent does not need file write access.
-
-Why it matters: an overpowered subagent can take unintended actions. A subagent with write access that was meant to be read-only can corrupt data. Constrained tool sets produce predictable, auditable, and safer behavior.
-
-The pattern across subagent types: a research subagent gets Task, web_search, and read_url. A report writer gets Task and write_file. A code reviewer gets Task, read_file, and run_tests. In each case, only what's needed for that job.
--->
-
----
-layout: default
-class: di-code-slide
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — Coordinator Spawning Multiple Subagents
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-code-header">Coordinator Spawning Multiple Subagents in One Turn</div>
-
-<v-click>
-
-```python {all|4-17|18-31|all}
-# Coordinator's single response contains multiple Task tool_use blocks
+const parallelCode = `# Coordinator spawns two subagents in ONE response turn
 coordinator_response_content = [
-
-    # First Task call — research subagent
     {
         "type": "tool_use",
-        "id": "task_research_01",
+        "id": "toolu_01RES",
         "name": "Task",
         "input": {
-            "description": "Web research on topic X",
-            "prompt": f"Research {topic}. Return structured findings.",
+            "description": "Research Q3 industry trends",
+            "prompt": "Find 5 sources on Q3 AI infra spend...",
             "allowedTools": ["Task", "web_search", "read_url"]
         }
     },
-
-    # Second Task call — document analysis subagent
     {
         "type": "tool_use",
-        "id": "task_docanalysis_01",
+        "id": "toolu_01DOC",
         "name": "Task",
         "input": {
-            "description": "Analyze provided documents",
-            "prompt": f"Analyze: {documents}. Extract key claims.",
-            "allowedTools": ["Task", "read_file", "search_documents"]
+            "description": "Analyze the uploaded Q3 report",
+            "prompt": "Extract revenue, margin, and growth...",
+            "allowedTools": ["Task", "read_file"]
         }
     }
-
-    # Both spawned in the SAME coordinator response turn
 ]
-```
 
-</v-click>
+# Both Task calls go out in THE SAME coordinator turn = parallel.
+# Coordinator waits for BOTH results before continuing.`
+</script>
 
-<img src="/logo.png" class="di-logo" />
+<!-- SLIDE 1 — Cover -->
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);" />
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Domain 1 &middot; Lecture 3.7</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1500px;">
+        The <span style="color: var(--sprout-500);">Task</span> Tool
+      </h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1200px; line-height:1.3;">
+        Spawning subagents — structure, constraints, and least privilege.
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Lecture 3.7</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>~8 min</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>8 slides</span>
+    </div>
+  </div>
+</Frame>
 
 <!--
-Here's what it looks like when a coordinator spawns multiple subagents in parallel — which we'll cover in depth in the next lecture.
-
-The coordinator's response content array contains multiple Task tool_use blocks. Each one has its own id, its own description, its own prompt with explicit context, and its own allowedTools array that includes "Task" plus the tools specific to that subagent's job.
-
-Both Task calls appear in the same coordinator response turn. That's the key: parallel spawning is multiple tool_use blocks in one response, not multiple separate API calls.
-
-The coordinator then waits for all Task results before continuing.
+The Task tool is the mechanism behind everything we covered in 3.4, 3.5, and 3.6. When we say "the coordinator spawns a subagent," what we mean, concretely, is "the coordinator calls the Task tool." This lecture covers what the Task tool is, its key parameters, the allowedTools requirement the exam tests, and the least-privilege principle. Get this right and the multi-agent patterns all fall into place.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — What the Task tool is / isn't -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
+<TwoColSlide
+  variant="compare"
+  title="What the Task Tool Is"
+  leftLabel="What it does"
+  rightLabel="What it is NOT"
+  footerLabel="Lecture 3.7"
+  :footerNum="2"
+  :footerTotal="8"
+>
+<template #left>
 
-<v-click>
-<div class="di-exam-subtitle">The Task Tool — Two Exam Traps</div>
+- Creates an **independent Claude instance**.
+- Passes a task description and instructions.
+- Constrains the subagent to specific tools.
+- Returns the subagent's final output to the coordinator.
 
-<div class="di-exam-body">
-  The exam tests knowledge of the Task tool through scenario-based questions about why subagents fail or behave incorrectly.
-</div>
-</v-click>
+</template>
+<template #right>
 
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Trap 1 — Missing "Task" in allowedTools</div>
-  A scenario describes a subagent that isn't processing its assignment correctly. The root cause: <code>allowedTools</code> doesn't include <code>"Task"</code>.
-  <br><strong>Fix:</strong> Add <code>"Task"</code> to the subagent's <code>allowedTools</code> list.
-</div>
-</v-click>
+- **NOT** a generic HTTP call to another service.
+- **NOT** a thread or process fork.
+- **NOT** a shared-memory communication channel.
+- **NOT** persistent — each call is independent.
 
-<v-click>
-<div class="di-trap-box" style="margin-top: 0.5rem;">
-  <div class="di-trap-label">❌ Trap 2 — Overly Permissive allowedTools</div>
-  A scenario gives every subagent access to all tools "for flexibility." This violates least privilege and creates unpredictable, hard-to-audit behavior.
-  <br><strong>Fix:</strong> Each subagent gets only the tools its specific job requires.
-</div>
-</v-click>
+*Analogy:* the Task tool is Claude's native way of saying "I need a specialist to handle this — let me formally assign the work."
 
-<v-click>
-<div class="di-correct-box" style="margin-top: 0.5rem;">
-  <div class="di-correct-label">✓ The Rule</div>
-  Every subagent's <code class="di-code-inline">allowedTools</code> must include <code class="di-code-inline">"Task"</code> plus only the tools needed for its specific job — nothing more.
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+</template>
+</TwoColSlide>
 
 <!--
-The exam tests knowledge of the Task tool through scenario-based questions about why subagents fail or behave incorrectly.
-
-Trap one: a scenario describes a subagent that isn't processing its assignment correctly. The root cause is that allowedTools doesn't include "Task". The fix: add "Task" to the subagent's allowedTools list.
-
-Trap two: a scenario gives every subagent access to all tools "for flexibility." This violates least privilege and creates unpredictable, hard-to-audit behavior. The fix: each subagent gets only the tools its specific job requires.
-
-The rule: every subagent's allowedTools must include "Task" plus only the tools needed for its specific job — nothing more.
+Let's anchor what the Task tool actually is. It does four things: creates an independent Claude instance, passes a task description and instructions, constrains the subagent to specific tools, and returns the subagent's final output to the coordinator. What it is NOT: a generic HTTP call to another service, a thread or process fork, a shared-memory communication channel, or a persistent session. Each call is independent. The analogy I like: the Task tool is Claude's native way of saying "I need a specialist to handle this — let me formally assign the work."
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — Key parameters -->
 
-<div class="di-takeaway-title">The Task Tool — What to Know Cold</div>
-
-<ul class="di-takeaway-list">
-  <v-click><li>The <strong>Task tool</strong> is the mechanism coordinators use to spawn independent subagent instances</li></v-click>
-  <v-click><li><code style="color: #A8D5C2;">allowedTools</code> must include <code style="color: #A8D5C2;">"Task"</code> — without it, the subagent cannot properly accept its assignment</li></v-click>
-  <v-click><li>Each Task call creates a <strong>fresh, independent instance</strong> — no state persists between calls</li></v-click>
-  <v-click><li>The <code style="color: #A8D5C2;">prompt</code> parameter must be self-contained — it's all the subagent knows</li></v-click>
-  <v-click><li>Apply <strong>least privilege</strong> — each subagent only gets tools needed for its specific job</li></v-click>
-  <v-click><li>Multiple Task calls in one coordinator response = parallel subagent spawning (covered in Lecture 3.8)</li></v-click>
-</ul>
-
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+<CodeBlockSlide
+  eyebrow="Structure"
+  title="The Task Tool — Key Parameters"
+  lang="python"
+  :code="taskStructCode"
+  annotation="allowedTools — which tools the subagent can use; MUST include 'Task'. prompt — complete self-contained context; it's all the subagent knows."
+  footerLabel="Lecture 3.7"
+  :footerNum="3"
+  :footerTotal="8"
+/>
 
 <!--
-To summarize what you need to know about the Task tool:
+The Task tool takes three key parameters. Description: a short label for what this subagent is doing. Prompt: the complete, self-contained task specification — objective, context, output format, constraints. This is all the subagent knows. And allowedTools: the list of tools the subagent is permitted to use. Two things the exam tests here. One: the prompt must be self-contained — because of context isolation, it's everything the subagent knows. Two: allowedTools must include "Task" or the subagent can't accept the assignment. That's the next slide.
+-->
 
-The Task tool is the mechanism coordinators use to spawn independent subagent instances.
+---
 
-allowedTools must include "Task" — without it, the subagent cannot properly accept its assignment. This is exam-critical.
+<!-- SLIDE 4 — allowedTools must include 'Task' -->
 
-Each Task call creates a fresh, independent instance — no state persists between calls.
+<AntiPatternSlide
+  eyebrow="Critical detail"
+  title="The allowedTools Requirement"
+  lang="json"
+  :badExample="allowedBad"
+  whyItFails="The Task tool is how an agent FORMALLY accepts an assignment. Without it in the allowed set, the subagent cannot acknowledge and execute the task specification."
+  :fixExample="allowedGood"
+  footerLabel="Lecture 3.7"
+  :footerNum="4"
+  :footerTotal="8"
+/>
 
-The prompt parameter must be self-contained — it's all the subagent knows. Everything needed must be included.
+<!--
+This is one of the highest-value slides in Domain 1. The allowedTools parameter MUST include "Task". If it's missing, the subagent cannot properly accept its task specification. The reason is mechanical: the Task tool is how an agent formally accepts an assignment. The subagent needs Task in its allowed set in order to process its task specification. Without it, it can't acknowledge and execute. The exam will hand you an answer where allowedTools lists everything except Task, and ask why the subagent isn't doing what's expected. Recognize the pattern on sight.
+-->
 
-Apply least privilege — each subagent only gets tools needed for its specific job.
+---
 
-And multiple Task calls in one coordinator response equals parallel subagent spawning — which we cover in the next lecture.
+<!-- SLIDE 5 — Least privilege for subagent tools -->
+
+<BulletReveal
+  eyebrow="Security"
+  title="Constraining Subagent Capabilities via allowedTools"
+  :bullets="capabilityBullets"
+  footerLabel="Lecture 3.7"
+  :footerNum="5"
+  :footerTotal="8"
+/>
+
+<!--
+Beyond the required "Task," the rest of allowedTools is where you apply the principle of least privilege. Each subagent only gets the tools required for its specific job. Document analysis doesn't need web search. Web search doesn't need file write. Why it matters: an overpowered subagent can take unintended actions. Give write access where read-only was meant and you get data corruption. Constrained allowedTools means predictable, auditable, safer behavior. Three quick examples: Research gets Task, web_search, read_url. Report writer gets Task and write_file. Code reviewer gets Task, read_file, and run_tests. Narrow lists. No "just in case" tools.
+-->
+
+---
+
+<!-- SLIDE 6 — Parallel spawning setup -->
+
+<CodeBlockSlide
+  eyebrow="Parallel spawning"
+  title="Coordinator Spawning Multiple Subagents in One Turn"
+  lang="python"
+  :code="parallelCode"
+  annotation="Both Task calls in the SAME coordinator response = parallel. Coordinator waits for ALL Task results before continuing. Covered in depth in 3.8."
+  footerLabel="Lecture 3.7"
+  :footerNum="6"
+  :footerTotal="8"
+/>
+
+<!--
+Here's what parallel spawning looks like at the Task-call level. The coordinator emits a single response whose content array contains two tool_use blocks — both with name "Task." One spawns the research subagent, the other spawns the document subagent. Each has its own description, prompt, and allowedTools list. Both Task calls are in the same coordinator response turn. That's what "parallel" means here. The coordinator then waits for both Task results before continuing. We'll dive into parallel execution in depth in 3.8.
+-->
+
+---
+
+<!-- SLIDE 7 — Exam Tip -->
+
+<AntiPatternSlide
+  eyebrow="⚡ Exam Tip"
+  title="The Task Tool — Two Exam Traps"
+  lang="text"
+  :badExample="examBad"
+  whyItFails="Task is required to accept an assignment. Every unnecessary tool expands the blast radius of a misbehaving subagent."
+  :fixExample="examGood"
+  footerLabel="Lecture 3.7"
+  :footerNum="7"
+  :footerTotal="8"
+/>
+
+<!--
+Two exam traps to watch for. Trap one: the subagent isn't processing its assignment correctly — and the root cause is that "Task" is missing from allowedTools. Trap two: an answer that hands every subagent access to all tools "for flexibility." That violates least privilege — the correct answer narrows the list. The rule the exam is looking for: every subagent's allowedTools must include "Task" plus only the tools needed for its specific job. Nothing more.
+-->
+
+---
+
+<!-- SLIDE 8 — Takeaways -->
+
+<BulletReveal
+  eyebrow="Takeaway"
+  title="The Task Tool — What to Know Cold"
+  :bullets="takeawayBullets"
+  footerLabel="Lecture 3.7"
+  :footerNum="8"
+  :footerTotal="8"
+/>
+
+<!--
+Six things to carry into 3.8. The Task tool is the mechanism coordinators use to spawn independent subagent instances. allowedTools must include "Task" — without it, the subagent cannot properly accept its assignment. Each Task call creates a fresh independent instance — no state persists. The prompt must be self-contained — it's all the subagent knows. Apply least privilege — each subagent gets only the tools needed for its specific job. Multiple Task calls in one coordinator response equals parallel spawning, which we cover next.
 -->

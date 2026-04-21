@@ -3,440 +3,277 @@ theme: default
 title: "Lecture 3.5: The Coordinator's Role: Decompose, Delegate, Aggregate"
 info: |
   Claude Certified Architect – Foundations
-  Section 3: Domain 1 — Agentic Architecture & Orchestration (27%)
+  Section 3 — Agentic Architecture & Orchestration (Domain 1, 27%)
 highlighter: shiki
 transition: fade-out
 mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
 ---
 
 <style>
-@import './style.css';
+@import './design-system.css';
 </style>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-cover-accent"></div>
-
-<div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-  <div class="di-course-label">Claude Certified Architect – Foundations</div>
-  <div class="di-cover-title">The Coordinator's Role:<br>Decompose, Delegate, Aggregate</div>
-  <div class="di-cover-subtitle">Lecture 3.5 · Domain 1 — Agentic Architecture & Orchestration (27%)</div>
-</div>
-
-<img src="/logo.png" class="di-logo-centered" />
-
-<!--
-In the last lecture, we introduced hub-and-spoke architecture and named the coordinator's three jobs.
-
-Now we're going deeper.
-
-The coordinator is the most important agent in any multi-agent system. It doesn't do the domain work — but every architectural decision that determines whether the system works correctly flows through it.
-
-In this lecture, we'll look at each of the three jobs in detail: what good decomposition looks like, how delegation works in practice, and what aggregation requires from the coordinator when subagents succeed, fail, or return partial results.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 2 — The Coordinator Is the Brain
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The Coordinator Is the Brain</div>
-
-<div class="di-body" style="margin-top: 0.75rem;">
-
-<v-click>
-<p>The coordinator never runs the actual domain work. It orchestrates the agents that do.</p>
-</v-click>
-
-<v-click>
-<div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-  <div style="flex: 1; background: white; border: 1px solid #c8e6d0; border-top: 3px solid #3CAF50; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem;">
-    <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.3rem;">What the coordinator does</div>
-    <ul style="margin: 0; padding-left: 1.2rem;">
-      <li>Receives the original user task</li>
-      <li>Decides how to split it into subtasks</li>
-      <li>Selects which subagents handle which parts</li>
-      <li>Passes the right context to each subagent</li>
-      <li>Collects and synthesizes results</li>
-    </ul>
-  </div>
-  <div style="flex: 1; background: white; border: 1px solid #ffd5a0; border-top: 3px solid #E3A008; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem;">
-    <div style="font-weight: 700; color: #E3A008; margin-bottom: 0.3rem;">What the coordinator does NOT do</div>
-    <ul style="margin: 0; padding-left: 1.2rem;">
-      <li>Browse the web</li>
-      <li>Analyze documents directly</li>
-      <li>Execute code</li>
-      <li>Write the final research report</li>
-    </ul>
-    <div style="margin-top: 0.4rem; font-size: 0.82rem; color: #1A3A4A; font-style: italic;">These are subagent responsibilities</div>
-  </div>
-</div>
-</v-click>
-
-<v-click>
-<div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.88rem; margin-top: 0.6rem;">
-  <strong>The exam implication:</strong> If an answer choice has the coordinator directly executing domain tasks instead of delegating, it's wrong.
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Let's start with the big picture: what the coordinator actually is.
-
-The coordinator never runs the actual domain work. It orchestrates the agents that do.
-
-The coordinator receives the task, decides how to split it, selects subagents, passes context, collects results, and synthesizes them. It does not browse the web. It does not analyze documents. It does not write the final output. Those are subagent responsibilities.
-
-This separation is important for the exam: if an answer choice has the coordinator directly executing domain tasks instead of delegating, that's a design violation.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 3 — Decompose: Breaking the Task Well
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Decompose — Breaking the Task Well</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<v-click>
-<p>Good decomposition produces subtasks with <strong>clear, bounded responsibilities and no implicit dependencies</strong> on each other.</p>
-</v-click>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
-
-<v-click>
-<div style="background: #FFF0F0; border: 1px solid #ffc8c8; border-top: 3px solid #E53E3E; border-radius: 6px; padding: 0.6rem 0.75rem; font-size: 0.86rem;">
-  <div style="font-weight: 700; color: #E53E3E; margin-bottom: 0.3rem;">❌ Poor Decomposition</div>
-  <ul style="margin: 0; padding-left: 1.1rem;">
-    <li>"Research agent" does research AND writes summary</li>
-    <li>Subtasks have unclear boundaries</li>
-    <li>Subagent A's output format is assumed by subagent B</li>
-    <li>One subagent is responsible for too much</li>
-  </ul>
-</div>
-</v-click>
-
-<v-click>
-<div style="background: #F0FFF4; border: 1px solid #c8e6d0; border-top: 3px solid #3CAF50; border-radius: 6px; padding: 0.6rem 0.75rem; font-size: 0.86rem;">
-  <div style="font-weight: 700; color: #1B8A5A; margin-bottom: 0.3rem;">✓ Good Decomposition</div>
-  <ul style="margin: 0; padding-left: 1.1rem;">
-    <li>Each subagent has one clearly defined job</li>
-    <li>Independent tasks can run in parallel</li>
-    <li>Dependent tasks are chained explicitly</li>
-    <li>Each subtask has a clear output contract</li>
-  </ul>
-</div>
-</v-click>
-
-</div>
-
-<v-click>
-<div class="di-step-card" style="margin-top: 0.6rem; border-left-color: #0D7377;">
-  <span class="di-step-num" style="color: #0D7377;">Dynamic selection</span>
-  The coordinator may also select subagents dynamically — choosing which specialized subagent to use based on the nature of the task. This is called <strong>dynamic subagent selection</strong> and requires the coordinator to reason about capabilities, not just dispatch blindly.
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-The first job is decompose.
-
-Good decomposition produces subtasks with clear, bounded responsibilities and no implicit dependencies on each other.
-
-Poor decomposition means one subagent has too many responsibilities, subtasks have unclear output contracts, or one subagent implicitly assumes what another will produce without the coordinator managing that dependency.
-
-Good decomposition means each subagent has one clearly defined job. Independent tasks can run in parallel. Dependent tasks are chained explicitly by the coordinator. And each subtask has a clear output contract so aggregation is straightforward.
-
-The coordinator may also do dynamic subagent selection — choosing which specialized subagent to use based on the nature of the request. This requires the coordinator to reason about capabilities.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 4 — Delegate: Explicit Context Passing
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Delegate — Explicit Context Passing</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<v-click>
-<p>Delegation is not just spawning. It's spawning with <strong>exactly the right context</strong>.</p>
-</v-click>
-
-<v-click>
-<div class="di-step-card">
-  <span class="di-step-num">Rule 1</span>
-  Subagents start with <strong>fresh context</strong>. The coordinator's conversation history is not passed down. Everything the subagent needs must be included in its task prompt.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #0D7377;">
-  <span class="di-step-num" style="color: #0D7377;">Rule 2</span>
-  The task prompt must include: the specific objective, all relevant background, output format requirements, and any constraints. If the synthesis subagent needs facts discovered by the research subagent, the <strong>coordinator injects those facts explicitly</strong>.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #1B8A5A;">
-  <span class="di-step-num" style="color: #1B8A5A;">Rule 3</span>
-  Only give each subagent the tools it needs for its specific job. A document analysis subagent doesn't need web search tools. Constrained tool sets = predictable, auditable behavior.
-</div>
-</v-click>
-
-<v-click>
-<div style="background: #FFF0F0; border-left: 3px solid #E53E3E; padding: 0.45rem 0.8rem; border-radius: 4px; font-size: 0.86rem; margin-top: 0.25rem;">
-  <strong>The delegation failure mode:</strong> Assuming the subagent "knows what you mean." It doesn't. Every assumption must be made explicit.
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Delegation is not just spawning. It's spawning with exactly the right context.
-
-Three rules for delegation:
-
-Rule one: subagents start with fresh context. The coordinator's conversation history is not passed down. Everything the subagent needs must be included in its task prompt.
-
-Rule two: the task prompt must include the specific objective, all relevant background, output format requirements, and any constraints. If the synthesis subagent needs facts discovered by the research subagent, the coordinator injects those facts explicitly. The coordinator bridges the gap between subagents.
-
-Rule three: only give each subagent the tools it needs for its specific job. A document analysis subagent doesn't need web search tools. Constrained tool sets produce predictable, auditable behavior.
-
-The delegation failure mode: assuming the subagent "knows what you mean." It doesn't. Every assumption must be made explicit.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 5 — Aggregate: Collecting and Synthesizing Results
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">Aggregate — Collecting and Synthesizing Results</div>
-
-<div class="di-body" style="margin-top: 0.5rem;">
-
-<v-click>
-<p>Aggregation is the coordinator's final responsibility — and the most complex, because subagents can fail.</p>
-</v-click>
-
-<v-click>
-<div class="di-step-card">
-  <span class="di-step-num">Happy path</span>
-  All subagents return results. The coordinator synthesizes them into a coherent output — combining, deduplicating, and formatting the final response.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #E3A008;">
-  <span class="di-step-num" style="color: #E3A008;">Partial failure</span>
-  One subagent fails or returns no result. The coordinator must decide: retry the failing subagent, proceed without that result, or surface the failure explicitly to the caller.
-</div>
-</v-click>
-
-<v-click>
-<div class="di-step-card" style="border-left-color: #E53E3E;">
-  <span class="di-step-num" style="color: #E53E3E;">Total failure</span>
-  Critical subagent fails (one whose output is required for the final response). The coordinator must surface this clearly — not return a silently incomplete result.
-</div>
-</v-click>
-
-<v-click>
-<div style="background: #FFF8E6; border-left: 3px solid #E3A008; padding: 0.45rem 0.8rem; border-radius: 4px; font-size: 0.86rem; margin-top: 0.4rem;">
-  <strong>The aggregation rule:</strong> The coordinator is the single point of error handling for all subagent outputs. Errors must be caught here — not silently dropped.
-</div>
-</v-click>
-
-</div>
-
-<img src="/logo.png" class="di-logo" />
-
-<!--
-Aggregation is the coordinator's final responsibility — and the most complex, because subagents can fail.
-
-On the happy path, all subagents return results and the coordinator synthesizes them into a coherent output, combining, deduplicating, and formatting the final response.
-
-On partial failure, one subagent fails or returns no result. The coordinator must decide: retry the failing subagent, proceed without that result, or surface the failure explicitly to the caller.
-
-On total failure, a critical subagent fails — one whose output is required for the final response. The coordinator must surface this clearly. Not return a silently incomplete result.
-
-The aggregation rule: the coordinator is the single point of error handling for all subagent outputs. Errors must be caught here — not silently dropped.
--->
-
----
-layout: default
----
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 6 — The Full Coordinator Lifecycle
-     ═════════════════════════════════════════════════════════════════════════ -->
-
-<div class="di-header">The Full Coordinator Lifecycle</div>
-
-<v-click>
-<div style="display: flex; align-items: stretch; gap: 1.5rem; margin-top: 0.5rem;">
-
-  <div style="flex: 0 0 42%; display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-    <div class="di-flow-box" style="width: 100%; font-size: 0.82rem;">Receive user task</div>
-    <div class="di-arrow">↓</div>
-    <div class="di-flow-box" style="width: 100%; font-size: 0.82rem; background: #0D7377;">Decompose into subtasks</div>
-    <div class="di-arrow">↓</div>
-    <div class="di-flow-box" style="width: 100%; font-size: 0.82rem; background: #2a4a6a;">Select subagents dynamically</div>
-    <div class="di-arrow">↓</div>
-    <div class="di-flow-tool" style="width: 100%; font-size: 0.82rem;">Spawn subagents via Task tool<br>(with explicit context)</div>
-    <div class="di-arrow">↓</div>
-    <div class="di-flow-box" style="width: 100%; font-size: 0.82rem; background: #0D7377;">Receive subagent results</div>
-    <div class="di-arrow">↓</div>
-    <div class="di-flow-stop" style="width: 100%; font-size: 0.82rem;">Aggregate → Return final output</div>
-  </div>
-
-  <div style="flex: 1; font-size: 0.88rem; color: #111928; line-height: 1.65;">
-    <v-click at="2">
-    <div class="di-step-card" style="margin-bottom: 0.4rem;">
-      <span class="di-step-num">Decompose</span> Each subtask has one owner, clear scope, explicit output contract
+<script setup>
+const delegateSteps = [
+  { number: 'Rule 1', title: 'Subagents start with fresh context', body: "The coordinator's conversation history is NOT passed down. Everything the subagent needs must be in the task prompt." },
+  { number: 'Rule 2', title: 'Task prompt must include everything', body: 'Objective, relevant background, output format, constraints. If synthesis needs research facts, the coordinator injects them explicitly.' },
+  { number: 'Rule 3', title: 'Least-privilege tools', body: 'Only give each subagent the tools it needs. Constrained tools = predictable, auditable behavior.' },
+]
+
+const aggregateSteps = [
+  { number: 'Happy path', title: 'All subagents return results', body: 'Coordinator synthesizes — combine, deduplicate, format into a single coherent output.' },
+  { number: 'Partial failure', title: 'One subagent fails or returns no result', body: 'Coordinator decides: retry, proceed without, or surface the failure to the caller.' },
+  { number: 'Total failure', title: 'A critical subagent fails', body: 'Coordinator surfaces clearly — NOT a silently incomplete result.' },
+]
+
+const takeawayBullets = [
+  { label: 'Orchestrator, never operator', detail: 'Coordinator orchestrates — it never executes domain tasks directly.' },
+  { label: 'Decompose cleanly', detail: 'Bounded subtasks with clear output contracts and no implicit dependencies.' },
+  { label: 'Delegate explicitly', detail: 'Subagents start fresh — everything they need lives in the task prompt.' },
+  { label: 'Aggregate every outcome', detail: 'Handle success, partial failure, and total failure — never drop silently.' },
+  { label: 'Dynamic selection', detail: 'Choose the right specialized subagent based on the nature of the subtask.' },
+  { label: 'Single point of error handling', detail: 'Coordinator owns error handling for all subagent outputs.' },
+]
+
+const examBad = `Two traps the exam plants
+
+Trap 1 — Coordinator doing domain work
+  'Coordinator browses the web and writes the final report.'
+  Coordinators orchestrate; they do not operate.
+
+Trap 2 — Implicit context propagation
+  'Subagent picks up where the coordinator left off.'
+  There is no implicit channel — subagents start fresh.`
+
+const examGood = `Remember
+
+Coordinator = Decompose, Delegate (with explicit context),
+              Aggregate (with error handling).
+
+Dynamic subagent selection means the coordinator
+chooses the right specialized agent based on the
+nature of the subtask.`
+</script>
+
+<!-- SLIDE 1 — Cover -->
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
+  <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);" />
+  <div style="position:relative; z-index:1; padding:110px 120px 96px; width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <img src="/assets/logo-mark.png" alt="" style="width:72px; height:auto;" />
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color: var(--mint-200);">Dyer Innovation</div>
     </div>
-    </v-click>
-    <v-click at="3">
-    <div class="di-step-card" style="border-left-color: #0D7377; margin-bottom: 0.4rem;">
-      <span class="di-step-num" style="color: #0D7377;">Select</span> Choose the right specialized subagent — not all tasks need the same agent
+    <div>
+      <div style="font-family: var(--font-body); font-size:26px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color: var(--sprout-500); margin-bottom:40px;">Domain 1 &middot; Lecture 3.5</div>
+      <h1 style="font-family: var(--font-display); font-weight:500; font-size:128px; line-height:1.02; letter-spacing:-0.025em; color: var(--paper-0); margin:0; max-width:1500px;">
+        The Coordinator's Role
+      </h1>
+      <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1200px; line-height:1.3;">
+        Decompose. Delegate. Aggregate.
+      </div>
     </div>
-    </v-click>
-    <v-click at="4">
-    <div class="di-step-card" style="border-left-color: #E3A008; margin-bottom: 0.4rem;">
-      <span class="di-step-num" style="color: #E3A008;">Spawn</span> Pass exactly what's needed — no more, no less
+    <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
+      <span>Lecture 3.5</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>~8 min</span>
+      <span style="opacity:0.4;">&middot;</span>
+      <span>8 slides</span>
     </div>
-    </v-click>
-    <v-click at="5">
-    <div class="di-step-card" style="border-left-color: #1B8A5A;">
-      <span class="di-step-num" style="color: #1B8A5A;">Aggregate</span> Handle errors, synthesize outputs, return coherent result
-    </div>
-    </v-click>
   </div>
-
-</div>
-</v-click>
-
-<img src="/logo.png" class="di-logo" />
+</Frame>
 
 <!--
-Let's put the full coordinator lifecycle together.
-
-The coordinator receives the user task. It decomposes it into subtasks with clear owners and output contracts. It selects the right specialized subagent for each subtask — dynamic subagent selection. It spawns each subagent via the Task tool, passing exactly the context needed. It receives the results. And it aggregates — handling errors, synthesizing outputs, and returning a coherent final result.
-
-Every step in this lifecycle has an architectural constraint that the exam may test.
+In 3.4 we sketched the hub-and-spoke topology. Now we zoom into the hub itself — the coordinator. This lecture walks through its three jobs in detail: how to decompose a task well, how to delegate with explicit context, and how to aggregate results across every possible outcome. Get this right and your multi-agent system is debuggable and predictable. Get it wrong and it silently returns partial nonsense.
 -->
 
 ---
-layout: default
-class: di-exam-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 7 — Exam Tip
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — Coordinator is the brain -->
 
-<div class="di-exam-banner">⚡ EXAM TIP</div>
+<TwoColSlide
+  variant="compare"
+  title="The Coordinator Is the Brain"
+  leftLabel="Does"
+  rightLabel="Does NOT do"
+  footerLabel="Lecture 3.5"
+  :footerNum="2"
+  :footerTotal="8"
+>
+<template #left>
 
-<v-click>
-<div class="di-exam-subtitle">Coordinator Responsibility Boundaries</div>
+- Receives the original user task.
+- Decides how to split it into subtasks.
+- Selects which subagents handle which parts.
+- Passes the right context to each subagent.
+- Collects and synthesizes results.
 
-<div class="di-exam-body">
-  The exam tests whether you know which responsibilities belong to the coordinator vs the subagent. Two common traps:
-</div>
-</v-click>
+</template>
+<template #right>
 
-<v-click>
-<div class="di-trap-box">
-  <div class="di-trap-label">❌ Trap 1 — Coordinator Doing Domain Work</div>
-  Answer choice shows coordinator browsing the web, analyzing documents, or writing the final report directly.
-  The coordinator <strong>delegates</strong> — it never executes domain tasks.
-</div>
-</v-click>
+- Browse the web.
+- Analyze documents directly.
+- Execute code.
+- Write the final research report.
 
-<v-click>
-<div class="di-trap-box" style="margin-top: 0.5rem;">
-  <div class="di-trap-label">❌ Trap 2 — Assuming Implicit Context Propagation</div>
-  Answer choice describes a subagent that "picks up where the coordinator left off" without the coordinator explicitly passing context.
-  Subagents start fresh — <strong>all context must be passed explicitly by the coordinator</strong>.
-</div>
-</v-click>
+*These are subagent responsibilities.*
 
-<v-click>
-<div class="di-correct-box" style="margin-top: 0.5rem;">
-  <div class="di-correct-label">✓ Remember</div>
-  Coordinator = Decompose, Delegate (with explicit context), Aggregate (with error handling).<br>
-  Dynamic subagent selection = coordinator chooses the right agent based on task nature.
-</div>
-</v-click>
+**Exam implication:** if an answer has the coordinator directly executing domain tasks instead of delegating, it's wrong.
 
-<img src="/logo.png" class="di-logo" />
+</template>
+</TwoColSlide>
 
 <!--
-The exam tests whether you know which responsibilities belong to the coordinator versus the subagent. Two common traps.
-
-Trap one: coordinator doing domain work. The answer choice shows the coordinator browsing the web, analyzing documents, or writing the final report directly. The coordinator delegates — it never executes domain tasks.
-
-Trap two: assuming implicit context propagation. The answer choice describes a subagent that "picks up where the coordinator left off" without the coordinator explicitly passing context. Subagents start fresh — all context must be passed explicitly by the coordinator.
-
-Remember: Coordinator equals Decompose, Delegate with explicit context, and Aggregate with error handling. Dynamic subagent selection means the coordinator chooses the right agent based on the nature of the task.
+The coordinator is the brain of a multi-agent system. It does five things: receives the original user task, decides how to split it into subtasks, selects which subagents handle which parts, passes the right context to each subagent, and collects and synthesizes results. It does NOT do the actual domain work — it doesn't browse the web, analyze documents directly, execute code, or write the final research report. Those are subagent responsibilities. The exam implication is direct: if an answer choice has the coordinator executing domain tasks instead of delegating, it's wrong. The coordinator orchestrates — it never operates.
 -->
 
 ---
-layout: default
-class: di-takeaway-slide
----
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SLIDE 8 — Key Takeaways
-     ═════════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — Decompose -->
 
-<div class="di-takeaway-title">The Coordinator's Role</div>
+<TwoColSlide
+  variant="antipattern-fix"
+  title="Decompose — Breaking the Task Well"
+  leftLabel="❌ Poor decomposition"
+  rightLabel="✓ Good decomposition"
+  footerLabel="Lecture 3.5"
+  :footerNum="3"
+  :footerTotal="8"
+>
+<template #left>
 
-<ul class="di-takeaway-list">
-  <v-click><li>The coordinator <strong>orchestrates</strong> — it never executes domain tasks directly</li></v-click>
-  <v-click><li><strong>Decompose:</strong> bounded subtasks with clear output contracts and no implicit dependencies</li></v-click>
-  <v-click><li><strong>Delegate:</strong> explicit context passing — subagents start fresh, so everything must be in the prompt</li></v-click>
-  <v-click><li><strong>Aggregate:</strong> handle all outcomes — success, partial failure, and total failure</li></v-click>
-  <v-click><li><strong>Dynamic subagent selection:</strong> coordinator chooses the right specialized agent based on task nature</li></v-click>
-  <v-click><li>The coordinator is the single point of error handling for all subagent outputs</li></v-click>
-</ul>
+- "Research agent" does research **AND** writes the summary.
+- Subtasks have unclear boundaries.
+- Subagent A's output format is assumed by subagent B.
+- One subagent is responsible for too much.
 
-<img src="/logo.png" class="di-logo" style="opacity: 0.75;" />
+</template>
+<template #right>
+
+- Each subagent has one clearly defined job.
+- Independent tasks can run in parallel.
+- Dependent tasks are chained explicitly.
+- Each subtask has a clear output contract.
+
+*Dynamic selection:* coordinator chooses the right specialized subagent based on the subtask — requires reasoning about capabilities.
+
+</template>
+</TwoColSlide>
 
 <!--
-To summarize the coordinator's role:
+Decompose is the first job and the easiest to get wrong. Poor decomposition bundles responsibilities — a research agent that does research AND writes the summary, subtasks with unclear boundaries, or one subagent implicitly depending on another's output format. Good decomposition gives each subagent one clearly defined job, lets independent tasks run in parallel, chains dependent tasks explicitly, and gives each subtask a clear output contract. And the coordinator doesn't have a fixed map of subtask-to-subagent. Dynamic selection means the coordinator chooses the right specialized subagent based on the nature of the subtask — which requires it to reason about capabilities.
+-->
 
-The coordinator orchestrates — it never executes domain tasks directly.
+---
 
-Decompose: bounded subtasks with clear output contracts and no implicit dependencies.
+<!-- SLIDE 4 — Delegate -->
 
-Delegate: explicit context passing — subagents start fresh, so everything must be in the prompt.
+<StepSequence
+  eyebrow="Delegation"
+  title="Delegate — Explicit Context Passing"
+  :steps="delegateSteps"
+  footerLabel="Lecture 3.5"
+  :footerNum="4"
+  :footerTotal="8"
+/>
 
-Aggregate: handle all outcomes — success, partial failure, and total failure. Errors cannot be silently dropped.
+<!--
+Delegate is the second job. Three rules. Rule one: subagents start with fresh context. The coordinator's history is NOT passed down. Everything the subagent needs must be in the task prompt. Rule two: the task prompt must include everything — objective, relevant background, output format, constraints. If the synthesis subagent needs facts from the research pipeline, the coordinator injects them explicitly. Rule three: least-privilege tools. Only give each subagent the tools it needs. Document analysis doesn't need web search. Constrained tools make for predictable, auditable behavior. The failure mode here is assuming the subagent "knows what you mean" — it doesn't. Make every assumption explicit.
+-->
 
-Dynamic subagent selection: the coordinator chooses the right specialized agent based on the nature of the task.
+---
 
-And the coordinator is the single point of error handling for all subagent outputs.
+<!-- SLIDE 5 — Aggregate -->
+
+<StepSequence
+  eyebrow="Aggregation"
+  title="Aggregate — Collecting and Synthesizing Results"
+  :steps="aggregateSteps"
+  footerLabel="Lecture 3.5"
+  :footerNum="5"
+  :footerTotal="8"
+/>
+
+<!--
+Aggregate is the third job, and the one candidates underweight. Three outcomes to handle. Happy path: all subagents return results. Coordinator synthesizes — combine, deduplicate, format. Partial failure: one subagent fails or returns no result. The coordinator decides whether to retry, proceed without, or surface to the caller. Total failure: a critical subagent fails. The coordinator surfaces clearly — not a silently incomplete result. The aggregation rule is simple: the coordinator is the single point of error handling for all subagent outputs. Errors are caught here — not silently dropped.
+-->
+
+---
+
+<!-- SLIDE 6 — Full lifecycle -->
+
+<TwoColSlide
+  variant="compare"
+  title="The Full Coordinator Lifecycle"
+  leftLabel="Flow"
+  rightLabel="Per step"
+  footerLabel="Lecture 3.5"
+  :footerNum="6"
+  :footerTotal="8"
+>
+<template #left>
+
+```
+Receive user task
+  → Decompose into subtasks
+    → Select subagents dynamically
+      → Spawn via Task tool
+        (explicit context)
+          → Receive subagent results
+            → Aggregate
+              → Return final output
+```
+
+</template>
+<template #right>
+
+- **Decompose** — each subtask has one owner, clear scope, explicit output contract.
+- **Select** — choose the right specialized subagent; not all tasks need the same agent.
+- **Spawn** — pass exactly what's needed, no more, no less.
+- **Aggregate** — handle errors, synthesize outputs, return a coherent result.
+
+</template>
+</TwoColSlide>
+
+<!--
+Put it all together and the coordinator has a clean lifecycle: receive the user task, decompose it into subtasks, select subagents dynamically, spawn them via the Task tool with explicit context, receive results, aggregate, and return the final output. At each step: decompose gives each subtask one owner and a clear output contract. Select means choosing the right specialized subagent for the subtask — not all tasks need the same agent. Spawn passes exactly what's needed, no more and no less. Aggregate handles errors, synthesizes outputs, and returns a coherent result.
+-->
+
+---
+
+<!-- SLIDE 7 — Exam Tip -->
+
+<AntiPatternSlide
+  eyebrow="⚡ Exam Tip"
+  title="Coordinator Responsibility Boundaries"
+  lang="text"
+  :badExample="examBad"
+  whyItFails="Coordinators only decompose, delegate, and aggregate. And subagents have no shared memory — everything must be passed explicitly."
+  :fixExample="examGood"
+  footerLabel="Lecture 3.5"
+  :footerNum="7"
+  :footerTotal="8"
+/>
+
+<!--
+Two traps the exam loves to plant in coordinator questions. Trap one: the coordinator doing domain work — browsing the web, writing the report directly. Coordinators orchestrate; they do not operate. Trap two: implicit context propagation — an answer that suggests the subagent "picks up where the coordinator left off" without explicit passing. That's not how isolation works. Remember: coordinator equals decompose, delegate with explicit context, and aggregate with error handling. And dynamic subagent selection means the coordinator chooses the right agent based on the nature of the subtask.
+-->
+
+---
+
+<!-- SLIDE 8 — Takeaways -->
+
+<BulletReveal
+  eyebrow="Takeaway"
+  title="The Coordinator's Role"
+  :bullets="takeawayBullets"
+  footerLabel="Lecture 3.5"
+  :footerNum="8"
+  :footerTotal="8"
+/>
+
+<!--
+Six things to carry forward. Coordinator orchestrates — it never executes domain tasks directly. Decompose into bounded subtasks with clear output contracts and no implicit dependencies. Delegate with explicit context passing — subagents start fresh and everything lives in the prompt. Aggregate handles every outcome: success, partial failure, total failure. Dynamic subagent selection means choosing the right specialized agent based on the nature of the subtask. And the coordinator is the single point of error handling for all subagent outputs.
 -->
