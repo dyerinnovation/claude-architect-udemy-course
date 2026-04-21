@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "subagent_handoff.json",
+  "title": "SubagentHandoff",
+  "description": "Structured payload every research subagent returns to the coordinator. Each handoff contains a subagent id, a coverage summary describing what was investigated, and a list of claims with explicit per-claim provenance (source URL + confidence).",
+  "type": "object",
+  "required": ["subagent_id", "sub_question", "coverage", "claims"],
+  "additionalProperties": false,
+  "properties": {
+    "subagent_id": {
+      "type": "string",
+      "description": "Stable identifier for this subagent within the run (e.g. 'subagent-1').",
+      "pattern": "^subagent-[0-9]+$"
+    },
+    "sub_question": {
+      "type": "string",
+      "description": "The focused sub-question this subagent was dispatched to answer."
+    },
+    "coverage": {
+      "type": "string",
+      "description": "One-paragraph description of what the subagent actually managed to investigate. Used by the coordinator to detect coverage gaps."
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 0,
+      "description": "List of claims produced by this subagent. May be empty if the subagent could not produce reliable findings; in that case coverage should explain why.",
+      "items": {
+        "type": "object",
+        "required": ["text", "source_url", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The claim itself — a single self-contained factual statement."
+          },
+          "source_url": {
+            "type": "string",
+            "description": "URL of the source that supports the claim. May be 'unknown' when the subagent could not attribute a source."
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Subagent's self-reported confidence in the claim, between 0 and 1."
+          },
+          "entity": {
+            "type": "string",
+            "description": "Optional canonical entity the claim is about (e.g. 'Claude Sonnet 4.5 SWE-bench'). Used by the coordinator to detect cross-subagent conflicts."
+          }
+        }
+      }
+    },
+    "error": {
+      "type": ["string", "null"],
+      "description": "If the subagent failed before producing a full handoff, a short error message. The subagent should still emit coverage + an empty claims array."
+    }
+  }
+}

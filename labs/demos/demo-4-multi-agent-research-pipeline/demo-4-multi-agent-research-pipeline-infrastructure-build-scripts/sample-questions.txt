@@ -1,0 +1,3 @@
+How do modern LLM agent memory architectures compare across short-term, long-term, and episodic designs?
+What are the trade-offs between Model Context Protocol (MCP) and plain function-calling tools when designing agent integrations?
+What is the current state of benchmark performance for frontier-model coding agents on SWE-bench, and how do reported pass@1 rates differ across recent releases?

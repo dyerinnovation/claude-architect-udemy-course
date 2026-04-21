@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "final_report.json",
+  "title": "FinalResearchReport",
+  "description": "Coordinator's aggregated output. Each claim is tagged with the subagent that produced it and its source URL. Conflicts across subagents are surfaced as their own section rather than silently resolved.",
+  "type": "object",
+  "required": ["question", "sub_questions", "claims", "conflicts", "coverage_gaps", "subagent_ids"],
+  "additionalProperties": false,
+  "properties": {
+    "question": {
+      "type": "string",
+      "description": "The original broad research question submitted to the coordinator."
+    },
+    "sub_questions": {
+      "type": "array",
+      "description": "The decomposition produced by the coordinator before dispatching subagents.",
+      "items": { "type": "string" }
+    },
+    "subagent_ids": {
+      "type": "array",
+      "description": "Identifiers of every subagent dispatched in this run (one per sub_question).",
+      "items": { "type": "string" }
+    },
+    "claims": {
+      "type": "array",
+      "description": "Aggregated claims. Every claim in the final report carries provenance — subagent_id + source_url + confidence — inherited from the subagent handoff.",
+      "items": {
+        "type": "object",
+        "required": ["text", "subagent_id", "source_url", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "text": { "type": "string" },
+          "subagent_id": { "type": "string" },
+          "source_url": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "entity": { "type": "string" }
+        }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "description": "Cross-subagent disagreements. When two subagents produce claims on the same entity with contradictory content, both claims are preserved here with their provenance — the coordinator does NOT silently pick one.",
+      "items": {
+        "type": "object",
+        "required": ["entity", "competing_claims"],
+        "additionalProperties": false,
+        "properties": {
+          "entity": { "type": "string" },
+          "competing_claims": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "required": ["text", "subagent_id", "source_url", "confidence"],
+              "additionalProperties": false,
+              "properties": {
+                "text": { "type": "string" },
+                "subagent_id": { "type": "string" },
+                "source_url": { "type": "string" },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          },
+          "resolution": {
+            "type": "string",
+            "enum": ["deferred_to_user", "highest_confidence_preferred"],
+            "description": "Documented failure-mode handling for contradictions. Demo default is 'deferred_to_user'."
+          }
+        }
+      }
+    },
+    "coverage_gaps": {
+      "type": "array",
+      "description": "Sub-questions or entities where no subagent produced reliable claims — the coordinator annotates these explicitly rather than letting the report look complete when it isn't.",
+      "items": { "type": "string" }
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of report generation."
+    }
+  }
+}
