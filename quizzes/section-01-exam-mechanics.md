@@ -1,159 +1,171 @@
-# Quiz: Exam Mechanics
+# Quiz: Section 1 — Exam Mechanics & Strategy
 
-## Question 1
-**What is the minimum passing score on the Claude Certified Architect exam?**
+**Scope**: Lecture 1.1 — the exam's five domains and their weights, the six scenarios and the six-pick-four rule, scoring (720/1000, no-penalty guessing), study paths A/B/C, and how to read the official exam guide.
 
-- A) 600 out of 1000
-- B) 680 out of 1000
-- C) 720 out of 1000
-- D) 800 out of 1000
-
-**Correct Answer**: C
-
-**Explanation**: The Claude Certified Architect exam requires a score of 720 out of 1000 to pass. This represents approximately 72%, a standard passing threshold for professional certification exams. Candidates should aim to understand the domains thoroughly rather than guess, as this score requires solid comprehension of agentic architecture, tool design, Claude Code configuration, prompt engineering, and context reliability.
-
-**Domain**: Overview
+**Format**: 10 questions — ~6 multiple choice, ~2 true/false, ~2 multi-select. Every distractor is deliberately "almost-right" per the 1.1 framing: plausible in another context, wrong here. Each question ends with an Explanation that covers why the correct answer is correct AND why each distractor fails.
 
 ---
 
-## Question 2
-**How many scenarios are presented on the exam, and how many must candidates tackle?**
+## Q1 (multiple choice) — Overview · All scenarios
 
-- A) 3 scenarios presented, must complete 2
-- B) 4 scenarios presented, must complete all 4
-- C) 6 scenarios presented, must complete 4 of them
-- D) 8 scenarios presented, must complete 6
+**Stem:**
+Your friend tells you "I just need 72% to pass, so I'll aim for a raw score of 720/1000 correct out of 1000." What's wrong with that plan?
 
-**Correct Answer**: C
+A) Nothing — 720/1000 raw correct is exactly what the exam requires.
+B) The passing score is 800/1000, not 720.
+C) 720/1000 is a scaled score, not a raw count — you can't infer the number of questions you need correct from it.
+D) The 720 applies only to Domain 1; other domains are scored separately.
 
-**Explanation**: The exam presents 6 different scenarios, and candidates must select and complete 4 of them. This design allows flexibility in choosing scenarios that play to candidates' strengths while still ensuring broad knowledge coverage. The scenario-based format tests practical judgment about architectural decisions rather than mere memorization of facts.
+**Correct Answer:** C
 
-**Domain**: Overview
-
----
-
-## Question 3
-**Is there a penalty for guessing or incorrect answers on the exam?**
-
-- A) Yes, 0.5 points are deducted for each incorrect answer
-- B) Yes, 1 point is deducted for each incorrect answer
-- C) No penalty; only correct answers earn points
-- D) No penalty; incorrect answers simply earn zero points
-
-**Correct Answer**: D
-
-**Explanation**: There is no penalty for guessing on the Claude Certified Architect exam. Incorrect answers simply contribute zero points toward the passing score, while correct answers earn full points. This is a common approach in certification exams and encourages test-takers to attempt every question rather than leave answers blank, though strategy and knowledge should guide choices rather than pure guessing.
-
-**Domain**: Overview
+### Explanation
+The 720 is a scaled score on a 100–1000 range, not a count of correct answers. Anthropic doesn't publish the raw-to-scaled mapping, so the practical takeaway is: aim for *consistent* 900+ on practice before booking — that's the only signal you can trust. (A) is the common beginner trap. (B) is a plausible-but-wrong threshold that sounds like a standard cert cutoff. (D) would be true on a domain-gated exam, but this one aggregates across all domains.
 
 ---
 
-## Question 4
-**Which domain carries the highest weight on the exam?**
+## Q2 (multiple choice) — Overview · All scenarios
 
-- A) Domain 1: Agentic Architecture (27%)
-- B) Domain 2: Tool Design and MCP (18%)
-- C) Domain 3: Claude Code Configuration (20%)
-- D) Domain 4: Prompt Engineering (20%)
+**Stem:**
+The exam presents six scenarios and you answer questions from four of them. Which statement about the four-scenario selection is correct?
 
-**Correct Answer**: A
+A) You pick which four, so focus study on your strongest four and skip the rest.
+B) Anthropic picks which four, so prepare all six equally well.
+C) All six count, but only the four with the highest score are applied.
+D) Scenarios are randomized per candidate; some candidates see more than four.
 
-**Explanation**: Domain 1 - Agentic Architecture represents 27% of the exam weight, making it the most heavily tested domain. This reflects the importance of understanding how to structure multi-step agentic systems, control flow, and subagent coordination. Candidates should dedicate significant study time to mastering concepts like stop_reason control, subagent spawning, task decomposition, and hub-and-spoke patterns.
+**Correct Answer:** B
 
-**Domain**: Overview
-
----
-
-## Question 5
-**What is the exam format for each question?**
-
-- A) Multiple choice with 2 options; first correct answer is the best answer
-- B) Multiple choice with 3 options; one correct, two distractors
-- C) Multiple choice with 4 options; one correct answer and 3 distractors
-- D) Multiple choice with 5 options; select all correct answers
-
-**Correct Answer**: C
-
-**Explanation**: Each exam question uses a multiple-choice format with exactly one correct answer and three plausible distractors. The distractors are carefully designed to reflect common misconceptions or edge cases that candidates might confuse with the correct answer. Understanding not just what is correct, but why the alternatives are wrong, is key to passing the exam.
-
-**Domain**: Overview
+### Explanation
+The six-pick-four structure is Anthropic's selection, not yours. The strategic move is to prepare for all six — whichever four appear, you're ready. (A) is the most dangerous "almost-right" trap; candidates who believe they pick rationalize skipping a domain. (C) sounds like a friendly best-of-N scoring rule but isn't how the exam works. (D) confuses six-pick-four with question randomization.
 
 ---
 
-## Question 6
-**What percentage of the exam weight does Domain 2 (Tool Design and MCP) represent?**
+## Q3 (multiple choice) — Overview · All scenarios
 
-- A) 15%
-- B) 18%
-- C) 20%
-- D) 25%
+**Stem:**
+You're down to the final 30 seconds on exam day and have three questions left unanswered. What's the right move?
 
-**Correct Answer**: B
+A) Leave them blank — a wrong answer hurts more than an empty one.
+B) Fill in all three with any guess — wrong and blank both score zero, so a guess strictly dominates blank.
+C) Skip the hardest two and only guess on the easiest one.
+D) Flag all three for review and submit — the review flag adjusts scoring.
 
-**Explanation**: Domain 2 - Tool Design and MCP comprises 18% of the total exam weight. This domain covers designing effective tools, structuring MCP configurations, managing tool scope (project vs. user level), choosing appropriate tools for tasks, and handling MCP errors and resources effectively. Note: a common mistake is confusing Domain 2's weight with Domain 3 or Domain 4 (both 20%).
+**Correct Answer:** B
 
-**Domain**: Overview
-
----
-
-## Question 7
-**What is the combined weight of Domain 3 (Claude Code Configuration) and Domain 4 (Prompt Engineering)?**
-
-- A) 38%
-- B) 40%
-- C) 42%
-- D) 45%
-
-**Correct Answer**: B
-
-**Explanation**: Domain 3 comprises 20% and Domain 4 comprises 20% of the exam, totaling 40% combined. These two domains tie for second place in exam weight (each at 20%), together making up a significant portion of the exam. Candidates who master both configuration and prompt engineering gain a major advantage.
-
-**Domain**: Overview
+### Explanation
+There is no penalty for wrong answers — wrong and blank both score zero. A random one-in-four guess gives you a 25% shot at points, which strictly beats zero. (A) is the classic standardized-test instinct from exams that *do* penalize wrong answers — wrong context, wrong answer. (C) leaves free points on the table. (D) invents a "review flag" mechanic that doesn't exist.
 
 ---
 
-## Question 8
-**What is the total weight of Domain 5 (Context Management and Reliability)?**
+## Q4 (multiple choice) — Overview · Scenarios 1, 3
 
-- A) 12%
-- B) 13%
-- C) 15%
-- D) 18%
+**Stem:**
+You have exactly five days before the exam and can only study one domain deeply. Which domain has the highest exam-weight ROI per study hour?
 
-**Correct Answer**: C
+A) Domain 1 — Agentic Architecture & Orchestration (27%)
+B) Domain 3 — Claude Code Configuration (20%)
+C) Domain 4 — Prompt Engineering (20%)
+D) Domain 5 — Context Management & Reliability (15%)
 
-**Explanation**: Domain 5 - Context Management and Reliability represents 15% of the exam weight, making it the smallest domain by weight. Despite its lower weight, it covers critical production system concepts: handling lost-in-the-middle effects, managing context degradation, escalation decision frameworks, and maintaining reliable information flows through agentic systems.
+**Correct Answer:** A
 
-**Domain**: Overview
-
----
-
-## Question 9
-**Which of the following statements about exam scenarios is most accurate?**
-
-- A) All scenarios are weighted equally toward your final score
-- B) Scenarios are weighted based on difficulty level
-- C) You must complete the 4 "easiest" scenarios to maximize your score
-- D) Scenario selection strategy should depend on your strengths and time management
-
-**Correct Answer**: D
-
-**Explanation**: While all completed scenarios likely contribute equally to scoring, the exam's design of presenting 6 and requiring 4 is specifically to accommodate different candidate backgrounds. A strategic candidate should assess all 6 scenarios quickly, identify the 4 they can answer most accurately, and focus their effort there. This approach accounts for varying expertise across the five domains.
-
-**Domain**: Overview
+### Explanation
+Domain 1 is 27% — by far the biggest single lever — and it's tested across two scenarios (1 and 3), so it can drive roughly half your exam in practice. (B) and (C) are each 20% and tempting if you have Claude Code / prompt engineering experience already, but even mastery of one 20% domain is smaller than one 27% domain. (D) is legitimately high-value-per-hour but the absolute ceiling is lower at 15%; it's not the right *single* pick when the question is exam-weight ROI.
 
 ---
 
-## Question 10
-**What is the most important preparation strategy for achieving the 720/1000 passing score?**
+## Q5 (multiple choice) — Overview
 
-- A) Memorize all definitions and terms across all five domains
-- B) Understand the architectural principles and be able to apply them to new scenarios
-- C) Practice only Domain 1 heavily since it has the highest weight
-- D) Focus exclusively on the tools and ignore the theoretical foundations
+**Stem:**
+A fellow candidate argues Domain 2 (Tool Design & MCP) deserves the most study time because tool design is "the hardest topic conceptually." What's the best exam-prep counter?
 
-**Correct Answer**: B
+A) Agree — conceptual difficulty correlates with exam weight.
+B) Disagree — study time should track exam weight, and Domain 2 is 18%, smaller than Domains 1, 3, and 4.
+C) Agree — Domain 2's error-response structure is worth 30% of the exam alone.
+D) Disagree — Domain 2 doesn't appear on the exam at all; it's covered implicitly by Domain 1.
 
-**Explanation**: The exam emphasizes applied knowledge and judgment over memorization. The scenario-based format tests whether you can evaluate trade-offs, make architectural decisions under constraints, and explain your reasoning. While knowing definitions matters, understanding the principles behind agentic architecture, tool design decisions, configuration strategies, prompt engineering techniques, and reliability patterns—and how to apply them to new situations—is what separates passing from failing scores.
+**Correct Answer:** B
 
-**Domain**: Overview
+### Explanation
+Exam weight, not perceived difficulty, should govern study allocation. Domain 2 is 18% — smaller than Domain 1 (27%) and tied-for-second Domains 3 and 4 (20% each). (A) confuses difficulty with weight. (C) invents a weight figure. (D) is outright wrong — Domain 2 is a full tested domain. Note: Domain 2 *is* worth solid study time despite being 18% — this question is about *relative* allocation.
+
+---
+
+## Q6 (true/false) — Overview · All scenarios
+
+**Stem:**
+**True or False:** Because scaled scoring compresses raw performance, a single practice-exam score of 720 is a reliable signal that you're ready to book the real thing.
+
+A) True
+B) False
+
+**Correct Answer:** B (False)
+
+### Explanation
+One passing run isn't the bar — *consistency* at 900+ is. Scaled scoring means a lucky 720 on practice can be a 650 on the real exam if the scenario mix is unfavorable. The whole point of the practice loop (take → review → retake) is to converge to a stable score *above* the cliff. The trap in this question is that 720 is the published pass line, so it *feels* like the right signal. It isn't.
+
+---
+
+## Q7 (multiple choice) — Overview · Scenarios 1, 3
+
+**Stem:**
+Which pair of scenarios maps most heavily to Domain 1 (Agentic Architecture, 27%)?
+
+A) Scenario 2 (Code Generation) and Scenario 5 (Claude Code CI/CD)
+B) Scenario 1 (Customer Support) and Scenario 3 (Multi-Agent Research)
+C) Scenario 4 (Developer Productivity) and Scenario 6 (Structured Extraction)
+D) All six scenarios weigh Domain 1 equally.
+
+**Correct Answer:** B
+
+### Explanation
+Scenarios 1 and 3 are the Domain 1 heavyweights — customer support agents and multi-agent research systems both stress the control loop, subagent coordination, and escalation. (A) are Claude-Code-centric scenarios, which lean on Domain 3. (C) is the Domain 2 + Domain 4 pair. (D) is the comforting-but-wrong generalization — scenarios are deliberately weighted toward specific domains, and knowing which is which is a study lever.
+
+---
+
+## Q8 (multi-select) — Overview · All scenarios
+
+**Stem:**
+Select ALL of the following that are true about the Claude Certified Architect exam. (Choose two.)
+
+A) Each question is multiple choice with one correct answer and three plausible distractors.
+B) Wrong answers subtract points from your score.
+C) The exam tests judgment — wrong answers are almost-right in a different context.
+D) Domain 5 is not tested because it's a supporting concept, not a domain.
+
+**Correct Answers:** A, C
+
+### Explanation
+(A) is the exam's format — 4 options, one correct, three distractors designed to be "almost-right." (C) is the 1.1 thesis restated: judgment over trivia. (B) is false — wrong answers score zero, not negative, so you always guess. (D) is false — Domain 5 is 15% of the exam, the smallest weighting but still tested. Note: multi-select questions like this one appear on the real exam — read carefully to see how many you must pick.
+
+---
+
+## Q9 (multiple choice) — Overview · All scenarios
+
+**Stem:**
+A candidate with eighteen months of Claude Code and Agent SDK experience asks which study path from Lecture 1.1 they should follow. Which answer best matches the 1.1 guidance?
+
+A) Path A — watch every lecture end-to-end because certification exams always reward exhaustive review.
+B) Path B — skim the API Bootcamp as refresher, work lectures/guides/demos end-to-end, then enter the practice loop.
+C) Path C — skip directly to booking the exam; with that much experience, practice is wasted time.
+D) No path — create a custom plan based only on your own weak areas.
+
+**Correct Answer:** B
+
+### Explanation
+Path B is explicitly for candidates with "decent hands-on experience" — skim bootcamp, work the rest, run the practice loop until 900+. (A) is Path A, meant for students *new* to the Claude API — unnecessary for an experienced practitioner. (C) is the overconfidence trap — even experienced builders need the practice loop for the exam's specific framing. (D) conflates having experience with not needing structure; Path C already is the custom-for-experienced path, and it still requires the practice loop.
+
+---
+
+## Q10 (true/false) — Overview · All scenarios
+
+**Stem:**
+**True or False:** "Almost-right is the whole trap of this exam" means the exam's distractors are designed to be technically correct in a different context — so recognizing the exact scenario the question is framing in is often the difference between the right answer and a plausible wrong one.
+
+A) True
+B) False
+
+**Correct Answer:** A (True)
+
+### Explanation
+This is the 1.1 thesis and the single most important mental frame for the exam. Distractors aren't nonsense — they're solutions that would work in *another* Claude system or *another* scenario. The skill being tested is matching the *specific* constraints of the scenario in front of you to the right architectural move. If you walk out of this course remembering only one thing, remember this.

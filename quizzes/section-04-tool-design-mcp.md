@@ -1,127 +1,173 @@
-# Quiz: Tool Design and MCP (Domain 2)
+# Quiz: Section 4 — Domain 2: Tool Design & MCP Integration (18%)
 
-## Question 1
-**What are the three tool_choice options, and when should each be used?**
+**Scope**: Section 4 lectures 4.1–4.14. Tool descriptions as the primary lever for selection reliability, the four-part description anatomy, three tool-selection failure modes, split-vs-consolidate decision rule, the three-field MCP error response (`errorCategory` / `isRetryable` / `description`) and four error categories (transient / validation / business / permission), local recovery vs propagating to coordinator, tool count per agent, `tool_choice` modes, MCP server scope (`.mcp.json` vs `~/.claude.json`), env-variable expansion, MCP resources vs tools, built-in tool selection (Grep / Glob / Read / Edit), and incremental codebase exploration.
 
-- A) auto (default, Claude decides), any (Claude must call a tool), forced (Claude chooses and must call a specific tool)
-- B) random (unpredictable), manual (user chooses), auto (Claude chooses)
-- C) strict (only tools allowed), loose (tools optional), any (tool required)
-- D) primary (main tool), secondary (backup tool), none (no tools allowed)
-
-**Correct Answer**: A
-
-**Explanation**: The three tool_choice options are: (1) "auto" - Claude decides whether to call a tool or respond naturally; (2) "any" - Claude must call a tool, but you don't specify which; (3) "forced" - Claude is constrained to call a specific tool you designate. Use "auto" for general flexibility, "any" when you need a tool call to happen but the choice is Claude's, and "forced" when a specific tool is required (e.g., forcing structured output through a specific schema). These control the agent's autonomy at execution time.
-
-**Domain**: Domain 2 - Tool Design and MCP
+**Format**: 10 questions — ~6 multiple choice, ~2 true/false, ~2 multi-select. Every distractor is "almost-right" — a fix that's proportionate in another context but not the right first move here. Domain 2 is the "almost-right" trap domain — the Lecture 1.1 frame applies most directly here.
 
 ---
 
-## Question 2
-**What are the required fields in a properly structured MCP error response?**
+## Q1 (multiple choice) — Domain 2 · Scenarios 1, 4
 
-- A) Just an error message string
-- B) errorCategory (string), isRetryable (boolean), and description (string)
-- C) errorCode (number), timestamp (ISO string), and errorMessage (string)
-- D) exception (object), stackTrace (array), and context (object)
+**Stem:**
+Your production agent exposes eight similar tools and misroutes in about 12% of cases — the agent calls `lookup_order` when it should have called `get_customer` first. Which single change is the **most proportionate** first fix?
 
-**Correct Answer**: B
+A) Add a router classifier that pre-selects the tool subset before Claude sees the request.
+B) Rewrite each tool's description to include input formats, example queries, edge cases, and the "do NOT use for..." boundary.
+C) Switch to `tool_choice: "any"` to force Claude to commit to a tool each turn.
+D) Add 3-shot examples in the system prompt showing the right tool for each input pattern.
 
-**Explanation**: MCP error responses must include three key fields: errorCategory (categorizes the type of error, e.g., "InvalidRequest", "AuthenticationFailed"), isRetryable (boolean indicating whether retrying might succeed), and description (human-readable explanation). This structure allows the agent to understand not just that an error occurred, but why and what to do about it. Tools missing these fields may confuse the agent or cause recovery strategies to fail.
+**Correct Answer:** B
 
-**Domain**: Domain 2 - Tool Design and MCP
-
----
-
-## Question 3
-**Should MCP tool definitions be stored in .mcp.json (project scope) or ~/.claude.json (user scope)?**
-
-- A) Always use ~/.claude.json for consistency across projects
-- B) Always use .mcp.json for security
-- C) Use .mcp.json for project-specific tools shared via version control; use ~/.claude.json for user personal tools
-- D) The two files are interchangeable and serve identical purposes
-
-**Correct Answer**: C
-
-**Explanation**: Project-scoped MCP tools belong in .mcp.json at the project root and are version-controlled with the project—they're shared with all team members. User-scoped tools belong in ~/.claude.json in the user's home directory—they're personal to that user and not shared. This distinction ensures team tools are consistent and discoverable while protecting personal workflows from being overwritten.
-
-**Domain**: Domain 2 - Tool Design and MCP
+### Explanation
+Tool descriptions are the #1 lever for selection reliability — they're what Claude literally reads when deciding. The proportionate fix is rewriting descriptions, especially the "do NOT use for..." boundary line. (A) pre-empts Claude's reasoning entirely and is brittle — the classic Domain 2 distractor. (C) doesn't help Claude pick the *right* tool; it just forces *a* tool call. (D) helps, but it's downstream of the root cause — fix the descriptions first, and few-shots become unnecessary. Every other lever (routers, few-shots, consolidation) is downstream of the description.
 
 ---
 
-## Question 4
-**When should you use Grep versus Glob for tool definitions?**
+## Q2 (multiple choice) — Domain 2 · Scenarios 1, 4, 6
 
-- A) Grep for searching patterns in file contents; Glob for pattern matching filenames
-- B) Glob for case-insensitive searches; Grep for case-sensitive searches
-- C) Grep when you need a tool that returns all matches; Glob when you only need the first match
-- D) They are synonymous; use either one interchangeably
+**Stem:**
+Sample Question 2 of the official exam guide asks what makes a great tool description. Which four-part anatomy matches the exam-guide answer?
 
-**Correct Answer**: A
+A) Name, return type, example output, error cases.
+B) Purpose, input formats, example queries, boundaries (when NOT to use).
+C) Summary, preconditions, postconditions, invariants.
+D) Category, permissions, rate limit, description text.
 
-**Explanation**: Glob is for matching filenames against patterns (e.g., "*.md", "src/**/*.ts")—it's about selecting which files to operate on. Grep is for searching within file contents—it's about finding patterns or text inside those files. Using Grep as a tool when you should use Glob (or vice versa) results in the wrong kind of search and confuses the agent about what data it's working with.
+**Correct Answer:** B
 
-**Domain**: Domain 2 - Tool Design and MCP
-
----
-
-## Question 5
-**What is the optimal number of tools to assign to a single agent?**
-
-- A) 1-2 tools for focused specialists
-- B) 4-5 tools for balanced capability
-- C) 8-10 tools for comprehensive coverage
-- D) As many as needed; there is no practical limit
-
-**Correct Answer**: B
-
-**Explanation**: Four to five tools provides a good balance. With fewer tools, the agent's capabilities are too constrained. With more tools, the agent faces decision paralysis and token overhead from processing tool descriptions. Research and practice show that 4-5 well-designed, complementary tools give agents strong capability without diluting focus. This also keeps the token cost of tool definitions reasonable.
-
-**Domain**: Domain 2 - Tool Design and MCP
+### Explanation
+Memorize these four: **Purpose** (one-sentence unambiguous summary), **Input formats** (what identifiers/shapes this accepts), **Example queries** (2–3 concrete uses), **Boundaries** (when to use vs. when NOT to — the "versus" clause that eliminates 80% of misroutes). (A) is an API-doc template, not a description template. (C) is contract-programming vocabulary, not tool-description structure. (D) is operational metadata, not selection-guidance content.
 
 ---
 
-## Question 6
-**What is the difference between MCP Resources and MCP Tools?**
+## Q3 (multiple choice) — Domain 2 · Scenarios 1, 3
 
-- A) Resources are static data; Tools are functions that perform actions
-- B) Resources are for reading files; Tools are for all other operations
-- C) Resources are deprecated; Tools are the modern approach
-- D) They serve the same purpose; "resource" and "tool" are just different names
+**Stem:**
+An MCP tool needs to signal "refund amount exceeds $500 limit; requires human approval." Which three-field response structure does the exam expect?
 
-**Correct Answer**: A
+A) `{ "error": "Operation failed" }`
+B) `{ "errorCode": 403, "timestamp": "...", "message": "..." }`
+C) `{ "isError": true, "errorCategory": "business", "isRetryable": false, "description": "Refund exceeds $500 limit; escalation required." }`
+D) `{ "status": "failed", "retryAfter": 0, "trace": "..." }`
 
-**Explanation**: MCP Resources represent static data or information accessible to the agent (files, API responses, cached data)—the agent can read them but not modify them through the resource interface. MCP Tools represent actions or functions the agent can invoke (running commands, making API calls, modifying data). This distinction helps organize capabilities: use Resources when the agent needs reference material, use Tools when it needs to act.
+**Correct Answer:** C
 
-**Domain**: Domain 2 - Tool Design and MCP
-
----
-
-## Question 7
-**What are the best practices for writing tool descriptions?**
-
-- A) Brief, single-word descriptions like "Read", "Write", "Calculate"
-- B) Clear, concise descriptions that explain what the tool does, when to use it, and what parameters mean
-- C) Comprehensive descriptions with full technical documentation embedded
-- D) Descriptions are optional; the tool name is sufficient
-
-**Correct Answer**: B
-
-**Explanation**: Tool descriptions should be clear and concise, explaining the tool's purpose and usage without being verbose. A good description tells the agent: (1) what the tool does, (2) when to use it (vs. similar tools), (3) what each parameter means. This level of detail helps Claude choose the right tool and use it correctly. Too brief and the agent is confused; too long and you waste tokens.
-
-**Domain**: Domain 2 - Tool Design and MCP
+### Explanation
+Every MCP error response needs three content fields: **errorCategory** (transient / validation / business / permission), **isRetryable** (boolean — tells the agent whether retry is worth attempting), and a human-readable **description**. MCP additionally uses `isError: true` as the top-level failure signal. (A) is the uniform-failure anti-pattern. (B) looks like an HTTP error and is an extremely common almost-right distractor — wrong fields entirely. (D) has superficially reasonable-sounding fields but none of the three required ones. Miss one field → pick the distractor.
 
 ---
 
-## Question 8
-**When a tool returns an empty result, how should you distinguish between "valid empty result" (tool worked, no data exists) versus "access failure" (tool couldn't execute)?**
+## Q4 (multiple choice) — Domain 2 · Scenario 1
 
-- A) Distinguish using HTTP status codes; 200 means success, 4xx/5xx means failure
-- B) Distinguish using a success field; always include explicit status indication in the response
-- C) If the result is empty, it's always a failure
-- D) If the result is empty, it's always success
+**Stem:**
+A `lookup_order` MCP tool times out. The tool returns `errorCategory: "transient"` with `isRetryable: true`. Meanwhile, a `process_refund` call fails with `errorCategory: "business"` and `isRetryable: false`. Which recovery strategy correctly handles both?
 
-**Correct Answer**: B
+A) Retry both with exponential backoff — all errors are recoverable with enough attempts.
+B) Propagate both to the coordinator — subagents should never handle errors locally.
+C) Heal the transient locally with retry + backoff; propagate the business error to the coordinator with partial results and recommended action.
+D) Swallow the transient (it'll likely resolve) and retry the business error once before escalating.
 
-**Explanation**: Always include an explicit status field in tool responses to distinguish success from failure. A search that found no results is valid (return empty with success=true), while a permission error is a failure (return with success=false and error details). Without this distinction, the agent cannot differentiate between "searched and found nothing" versus "couldn't execute the search," leading to incorrect reasoning.
+**Correct Answer:** C
 
-**Domain**: Domain 2 - Tool Design and MCP
+### Explanation
+The recovery rule: **transient and validation heal locally; business and permission propagate.** `process_refund` over $500 is a policy violation — retry will fail identically every time, and the right move is structured propagation with partial results so the coordinator or human can act. (A) ignores category semantics and turns business violations into retry storms. (B) bloats the coordinator's context with every recoverable blip. (D) swaps the logic — the transient should retry, not be swallowed; the business error should propagate, not retry.
+
+---
+
+## Q5 (multiple choice) — Domain 2 · Scenarios 3, 4
+
+**Stem:**
+A teammate proposes giving the multi-agent research coordinator 18 tools so it "has what it needs for anything." What's the right exam-aligned response?
+
+A) Approve — more tools = more capability, and Claude handles tool selection natively.
+B) Push back — selection reliability degrades past ~4–5 tools per agent; scope tools to role and route cross-role needs through the coordinator.
+C) Approve, but wrap the 18 tools in a single "mega-tool" with an `action` enum.
+D) Push back — 18 tools exceed the MCP tool-count API limit.
+
+**Correct Answer:** B
+
+### Explanation
+Selection reliability collapses past ~4–5 tools per agent — 18 tools isn't 18× capability, it's 18× "not this one" reasoning overhead. The right move is scoped distribution: coordinator gets Task + a few policy tools; search subagent gets `web_search` + `load_document`; synthesis subagent gets `verify_fact`; everything else routes through the coordinator. (A) is the "more is better" distractor — the exam hates this answer. (C) just hides 18 tools behind one dispatcher and keeps the selection overhead. (D) invents an API limit that doesn't exist.
+
+---
+
+## Q6 (multiple choice) — Domain 2 · Scenario 6
+
+**Stem:**
+You're batch-processing 100 varied documents and need Claude to pick the right extraction schema per document — but you MUST get a tool call every time (no prose responses). Which `tool_choice` value is correct?
+
+A) `"auto"` — let Claude decide whether to call a tool.
+B) `"any"` — guarantee a tool call, and let Claude pick which extraction tool matches the document.
+C) `{"type": "tool", "name": "extract_v1"}` — force the first extraction tool every time.
+D) Leave `tool_choice` unset — the default does the right thing for extraction.
+
+**Correct Answer:** B
+
+### Explanation
+`any` guarantees Claude calls *some* tool while still letting Claude pick which tool matches the document — exactly what varied-schema batch extraction needs. (A) doesn't guarantee a tool call; Claude can still return prose. (C) forces one schema regardless of fit, which defeats the per-document match. (D) is identical to `"auto"` (the default) — same problem. Scenario 6 loves this distinction: schema-compliance forcing = `any` with a set of extraction tools, not a single forced tool.
+
+---
+
+## Q7 (true/false) — Domain 2 · Scenarios 2, 4, 5
+
+**Stem:**
+**True or False:** An MCP server that's shared across the whole team should be configured in `~/.claude.json` because user scope is more secure than project scope.
+
+A) True
+B) False
+
+**Correct Answer:** B (False)
+
+### Explanation
+Team-shared MCP servers belong in `.mcp.json` at the **project root**, which is version-controlled and onboards every team member automatically. `~/.claude.json` is **user scope** — personal, not shared. Security doesn't enter the scope decision at all; secrets are handled by env-var expansion (`${GITHUB_TOKEN}`), not by choosing a different file. Putting a shared server in `~/.claude.json` is the #1 Domain 2/3 onboarding bug — new hires silently lack tools, CI silently lacks tools, and only you (who has the user-scope config) don't see the breakage.
+
+---
+
+## Q8 (multi-select) — Domain 2 · Scenarios 2, 4, 5
+
+**Stem:**
+Select ALL of the following that correctly distinguish MCP **Resources** from MCP **Tools**. (Choose two.)
+
+A) Tools perform actions or dynamic fetches — they have side effects or take parameters that drive the result.
+B) Resources expose browsable content upfront (issue lists, doc catalogs, schemas) so Claude can reference them without a tool call.
+C) Resources are deprecated; Tools are the modern replacement.
+D) Resources are for file reads only; Tools are for everything else.
+
+**Correct Answers:** A, B
+
+### Explanation
+The clean distinction: **tools DO, resources EXPOSE**. (A) captures tools — verbs, actions, parameterized. (B) captures resources — nouns, catalogs, browsable content that cuts exploratory tool calls. (C) is flatly wrong; both are first-class MCP primitives. (D) is the most tempting almost-right — it sounds like a reasonable simplification but miscategorizes file reads (which can be either — a catalog of available docs as a resource, a parameterized search as a tool).
+
+---
+
+## Q9 (multiple choice) — Domain 2 · Scenarios 2, 4, 5
+
+**Stem:**
+A developer needs Claude to find every caller of `process_refund` in a large codebase. Which built-in tool is correct?
+
+A) `Glob` — pattern-match against paths like `**/*refund*`.
+B) `Grep` — search file contents for the symbol `process_refund`.
+C) `Read` — load every file in the repo to scan for callers.
+D) `Edit` — use the find-and-replace feature to enumerate matches.
+
+**Correct Answer:** B
+
+### Explanation
+**Grep = content.** Grep searches *inside* files for text — the right tool when you need "every caller of X." (A) `Glob` matches *paths*, not content — fine for `**/*.test.tsx`, wrong for symbol callers. (C) blows through context and is the canonical exploration anti-pattern — never read-everything-upfront. (D) misuses Edit, which is for targeted changes with a unique anchor, not for discovery. Treating Grep as a file finder or Glob as a content search is a Domain 2 classic distractor.
+
+---
+
+## Q10 (multiple choice) — Domain 2 · Scenarios 2, 4, 5
+
+**Stem:**
+A shared `.mcp.json` needs a GitHub token for a GitHub MCP server, but the repo is checked into version control. Which configuration is correct?
+
+A) `"token": "ghp_abc123..."` — commit the token so new teammates have it on clone.
+B) Put the token in `.mcp.json` but add `.mcp.json` to `.gitignore` so it isn't committed.
+C) Use env-var expansion: `"env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" }`, commit the config, and load the value from each developer's `.env`.
+D) Create a second `~/.claude.json` that only holds the token and ignore `.mcp.json` for secrets.
+
+**Correct Answer:** C
+
+### Explanation
+Env-var expansion is the right pattern: commit the config (with `${GITHUB_TOKEN}` placeholders), don't commit the secret (in `.env`, gitignored). Onboarding: clone repo → `cp .env.example .env` → fill in personal token → Claude starts → server authenticates. (A) leaks credentials into git history — always wrong. (B) defeats the point of the shared config; now new hires have no MCP setup at all. (D) splits configuration across files inconsistently and still doesn't solve the per-developer-token problem. If the question mentions team sharing AND credentials, the answer is env-var expansion.
