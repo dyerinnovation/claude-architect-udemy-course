@@ -1,0 +1,21 @@
+URGENT — Pedido #PED-2024-3381 y factura Invoice #INV-2024-09921
+
+Hola soporte,
+
+Recibimos nuestro invoice pero el total no coincide con el purchase order
+(PO-77812). El PO dice 4,800 EUR pero la factura dice 4,800.00 — ¿es EUR o
+USD? El documento no lo aclara. Also, line item #3 "Servicio de instalación"
+should be 'installation service' per our contract. Muy confusing.
+
+Can you send a clarified invoice? Necesitamos cerrar el mes.
+
+Gracias / Thanks,
+Javier Morales
+AP Lead, Solaris Technical Services
+
+---
+Note for the extraction pipeline: this document mixes Spanish and English,
+references multiple IDs (ticket, PO, invoice), and has an ambiguous currency.
+The model should populate detected_pattern with something like
+"mixed_language" or "currency_ambiguous" so downstream reviewers can cluster
+similar cases for systematic fixes rather than one-off triage.

@@ -1,0 +1,113 @@
+{
+  "_comment_overview": "Extraction tool schema. This is the CONTRACT the model must match to call extract_document. Designed to demonstrate the four JSON Schema field roles called out in Domain 4 of the Claude Architect exam: required, optional, nullable, and enum+other+detail.",
+
+  "name": "extract_document",
+  "description": "Extract structured fields from a business document (invoice, receipt, support ticket, or other). Always call this tool. If a field is not present in the source document, return null for nullable fields or omit the field entirely for optional fields. Never fabricate values. If the document is ambiguous or mixes patterns, populate the detected_pattern field with a short snake_case identifier so downstream reviewers can cluster false-positive patterns.",
+
+  "input_schema": {
+    "type": "object",
+
+    "_comment_required": "REQUIRED fields — validation fails if omitted. Pick fields that MUST be known for the extraction to be usable downstream. Keep this list small; required-bloat forces the model to fabricate.",
+    "required": ["document_type", "detected_pattern"],
+
+    "properties": {
+      "document_type": {
+        "_comment": "ENUM with 'other' + detail fallback. Model MUST pick from the closed set; novel cases fall through to 'other' and MUST populate document_type_detail. This pattern prevents silent category fabrication.",
+        "type": "string",
+        "enum": ["invoice", "receipt", "support_ticket", "other"],
+        "description": "The document type. Pick from the enum. If none fit, use 'other' and populate document_type_detail."
+      },
+
+      "document_type_detail": {
+        "_comment": "OPTIONAL — only used when document_type = 'other'. Omitting this for non-other values keeps outputs clean.",
+        "type": "string",
+        "description": "Free-text description of the document type. Only set when document_type is 'other'."
+      },
+
+      "detected_pattern": {
+        "_comment": "REQUIRED — short snake_case identifier for any unusual pattern in the source. Use 'none' when the document is standard. Enables downstream false-positive cluster analysis (per exam Task Statement 4.4).",
+        "type": "string",
+        "description": "Short snake_case identifier for any unusual pattern detected in this document (e.g., 'mixed_language', 'missing_header', 'handwritten_insertion', 'currency_ambiguous'). Use 'none' if the document is standard. This field powers downstream false-positive analysis — prefer specific over general."
+      },
+
+      "customer_name": {
+        "_comment": "OPTIONAL — not all document types have a customer (e.g., internal memos). Omit when absent.",
+        "type": "string",
+        "description": "Customer or requester name. Omit the field entirely if the document has no customer concept."
+      },
+
+      "vendor_name": {
+        "_comment": "OPTIONAL — same reasoning.",
+        "type": "string",
+        "description": "Vendor or issuer name. Omit if not applicable to the document type."
+      },
+
+      "invoice_number": {
+        "_comment": "NULLABLE — the field name is always present, but the value may legitimately be null if the source document lacks an identifier. This tells the model 'return null, don't fabricate.'",
+        "type": ["string", "null"],
+        "description": "Invoice/receipt/ticket identifier. Return null if the document has no identifier — DO NOT fabricate."
+      },
+
+      "issue_date": {
+        "_comment": "NULLABLE — ISO-8601 date. Validation layer will check format; format errors are retry-resolvable.",
+        "type": ["string", "null"],
+        "description": "Issue date in YYYY-MM-DD format (ISO-8601). Return null if not present in source."
+      },
+
+      "tax_id": {
+        "_comment": "NULLABLE — canonical example of a field that may genuinely be absent. The exam tests this exact case.",
+        "type": ["string", "null"],
+        "description": "Vendor or customer tax identifier (VAT, EIN, etc). Return null if not present in source — DO NOT fabricate a plausible-looking one."
+      },
+
+      "total_amount": {
+        "_comment": "NULLABLE number. Monetary totals; validator cross-checks against line_items when both present.",
+        "type": ["number", "null"],
+        "description": "Total monetary amount. Return null if not stated."
+      },
+
+      "currency": {
+        "_comment": "NULLABLE, 3-letter ISO code when present.",
+        "type": ["string", "null"],
+        "description": "Currency as 3-letter ISO code (USD, EUR, GBP). Return null if not stated or unclear."
+      },
+
+      "line_items": {
+        "_comment": "OPTIONAL array. Omit if the document doesn't have line items (e.g., a support ticket).",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["description"],
+          "properties": {
+            "description": {"type": "string"},
+            "quantity": {"type": ["number", "null"]},
+            "unit_price": {"type": ["number", "null"]},
+            "total_price": {"type": ["number", "null"]}
+          }
+        },
+        "description": "List of line items on the document. Omit the field entirely if not applicable."
+      },
+
+      "issue_summary": {
+        "_comment": "OPTIONAL — for support tickets; free-text one-liner.",
+        "type": "string",
+        "description": "One-sentence summary of the issue. Only populate for support tickets."
+      },
+
+      "severity": {
+        "_comment": "OPTIONAL ENUM for support tickets. No 'other' fallback here — severity classification MUST fit the three-bucket scheme the downstream team uses.",
+        "type": "string",
+        "enum": ["low", "medium", "high"],
+        "description": "Severity classification for support tickets. Only populate for support tickets."
+      },
+
+      "confidence": {
+        "_comment": "NULLABLE number in [0,1]. Model-reported self-confidence — used downstream to route low-confidence items to human review.",
+        "type": ["number", "null"],
+        "description": "Self-reported extraction confidence in [0.0, 1.0]. Return null only if confidence is indeterminate."
+      }
+    },
+
+    "additionalProperties": false
+  }
+}

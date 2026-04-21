@@ -1,0 +1,25 @@
+INVOICE
+
+Invoice #: INV-2024-08814
+Date: 2024-09-03
+
+Bill From:
+Blue Harbor Logistics, Inc.
+2211 Seaport Drive, Boston, MA 02210
+Tax ID (EIN): 82-1938471
+
+Bill To:
+Acme Manufacturing Co.
+500 Industrial Parkway, Detroit, MI 48226
+
+Items:
+  Freight delivery - container #BHL-88   Qty: 1    @ $2,450.00   $2,450.00
+  Fuel surcharge                         Qty: 1    @   $310.00     $310.00
+  Customs processing fee                 Qty: 1    @   $180.00     $180.00
+
+Subtotal:         $2,940.00
+Tax (6.25% MA):     $183.75
+Total:            $3,123.75 USD
+
+Payment terms: Net 30
+Due date: 2024-10-03

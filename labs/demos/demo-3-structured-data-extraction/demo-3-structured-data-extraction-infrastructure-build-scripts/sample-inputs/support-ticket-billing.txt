@@ -1,0 +1,17 @@
+SUPPORT TICKET
+
+Ticket ID: SUP-2024-11203
+Opened: 2024-09-18 09:47 AM PDT
+Requester: Melissa Ortega (melissa.ortega@bright-apparel.com)
+Customer Account: Bright Apparel Co. (Acct #44812)
+
+Subject: Duplicate charge on invoice INV-2024-08510
+
+Description:
+Hi team — we received two identical charges of $1,275.00 on our September
+statement, both referencing invoice INV-2024-08510. The invoice total
+should be $1,275.00 (single charge), not $2,550.00. Please investigate
+and refund the duplicate. This is blocking our AP close for September.
+
+Severity: HIGH — blocks month-end close, CFO is asking.
+Preferred contact: email.

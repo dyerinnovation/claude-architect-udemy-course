@@ -1,0 +1,26 @@
+INVOICE
+
+Invoice Number: 2024-Q3-0471
+Issued: September 14, 2024
+
+From:
+Greenleaf Consulting LLC
+88 Arbor Way, Suite 210
+Portland, OR 97205
+
+To:
+Northwest Data Systems
+1400 Riverfront Ave, Seattle, WA 98101
+
+Services Rendered:
+  Architecture advisory (September, 20 hrs)       $4,500.00
+  Vendor risk assessment (written report)         $1,200.00
+
+Subtotal:   $5,700.00
+Total Due:  $5,700.00 USD
+
+Payment terms: Net 15
+
+(Note: no tax ID is listed anywhere in this document. A prompt-only
+extractor will often hallucinate one. The tool_use schema with nullable
+tax_id should return null for this field — verify that in the output.)

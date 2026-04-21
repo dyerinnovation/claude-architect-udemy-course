@@ -1,0 +1,23 @@
+===== RECEIPT =====
+  Harbor Coffee Roasters
+  214 Pier St
+  [phone ink smudged]
+
+  09/22/2024   3:14 PM
+
+  Drip Coffee (Large)    $4.75
+  Almond Croissant       $5.50
+  [line item unreadable — water damage]
+
+  SUBTOTAL:   $??.??
+  Tax:        $0.91
+  TOTAL:      $12.41
+
+  Thanks! Come back soon.
+===================
+
+(Partial-information receipt. No invoice number. Subtotal is illegible. The
+extraction should return null for invoice_number and null for total_amount
+only if truly unreadable — here the TOTAL line is legible so total_amount =
+12.41. The model should also populate detected_pattern with something like
+"partial_unreadable" and flag lower confidence.)
