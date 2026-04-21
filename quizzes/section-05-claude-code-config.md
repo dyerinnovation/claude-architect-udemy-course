@@ -1,127 +1,169 @@
 # Quiz: Claude Code Configuration (Domain 3)
 
+Domain 3 - Claude Code Configuration & Workflows (20% of exam). Primary scenarios: 2, 4, 5.
+
+---
+
 ## Question 1
-**Where do project-scoped slash commands live in Claude Code?**
+**A new teammate clones the repo and runs Claude Code. They report that none of the coding-style conventions the rest of the team depends on are being applied. Which CLAUDE.md configuration mistake is the most likely cause?**
 
-- A) In ~/.claude/commands/ (user home directory)
-- B) In .claude/commands/ at the project root
-- C) In the .claude.json file at the project root
-- D) In a global registry managed by Claude Code
+- A) The conventions were written into `~/.claude/CLAUDE.md` on the original author's machine instead of committed to the repo
+- B) The project CLAUDE.md is too long and `@import` isn't being used
+- C) The project CLAUDE.md is missing `context: fork` in its frontmatter
+- D) The teammate hasn't run `/compact` yet, so older conventions aren't loaded
 
-**Correct Answer**: B
+**Correct Answer**: A
 
-**Explanation**: Project-scoped slash commands are defined in .claude/commands/ directory at the project root. These commands are version-controlled and shared with all team members working on the project. User-scoped commands, by contrast, live in ~/.claude/commands/ in the user's home directory and are personal. This distinction allows teams to define project-specific workflows while individuals maintain personal productivity enhancements.
+### Explanation
+`~/.claude/CLAUDE.md` is user-scoped and machine-local, so anything authored there never reaches the repo. The "new teammate doesn't get conventions" bug is almost always a CLAUDE.md that lives at the wrong hierarchy level. (B) is a real CLAUDE.md problem but doesn't explain a totally missing convention — the teammate would still see something. (C) is nonsense: `context: fork` is a SKILL.md frontmatter option, not a CLAUDE.md property. (D) `/compact` condenses session history; it has nothing to do with loading conventions.
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 2, 4, 5 · **Format**: Multiple choice
 
 ---
 
 ## Question 2
-**What is the purpose of the context: fork instruction in Claude Code?**
+**True or False: `.claude/rules/testing.md` with frontmatter `paths: ["**/*.test.tsx"]` will be loaded into Claude's context on every session, regardless of which files the user is editing.**
 
-- A) To run commands in parallel branches
-- B) To create a separate git branch
-- C) To isolate verbose tool output and prevent it from cluttering the agent's context window
-- D) To spawn a new Claude session
+- A) True
+- B) False
 
-**Correct Answer**: C
+**Correct Answer**: B (False)
 
-**Explanation**: The "context: fork" instruction in Claude Code skill frontmatter tells Claude to run that block in a separate execution context. This is useful for operations that generate verbose output (like full test suites or large log files) that would consume many tokens if included in the main context. The results are processed, but the detailed output stays isolated, preserving tokens for the main task.
+### Explanation
+Path-scoped rules in `.claude/rules/` with a `paths:` glob only load conditionally — when the files being edited match the glob. That's the whole point of the pattern: ship test-file conventions that live quietly until Claude touches a matching file. If you want a rule to load every session, use `@import` from CLAUDE.md instead. The almost-right trap is conflating `.claude/rules/` (conditional) with `@import` (always-on).
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 2, 5 · **Format**: True/False
 
 ---
 
 ## Question 3
-**When should you use Plan mode versus direct execution in Claude Code?**
+**A team wants a `/review` slash command available to every developer who clones the repo. Where should the command file live?**
 
-- A) Always use Plan mode; it's safer and more predictable
-- B) Always use direct execution; Plan mode adds unnecessary delays
-- C) Use Plan mode for complex, risky, or exploratory tasks; use direct execution for straightforward, well-understood tasks
-- D) The choice depends on your mood and time availability
+- A) `~/.claude/commands/review.md` on each developer's machine
+- B) `.claude/commands/review.md` at the project root, committed to git
+- C) `.claude.json` under a `commands` key at the project root
+- D) `CLAUDE.md` at the project root, with the command body as a fenced code block
 
-**Correct Answer**: C
+**Correct Answer**: B
 
-**Explanation**: Plan mode asks Claude to outline its approach before executing, which is valuable for complex tasks (refactoring large codebases, destructive operations, multi-step workflows) where a misstep is costly. Direct execution is appropriate for straightforward tasks (renaming a file, running a single test, viewing code) where the path is clear and consequences are minimal. Plan mode adds latency but reduces risk; weigh accordingly.
+### Explanation
+Project-scoped commands live in `.claude/commands/` at the repo root and ship with the repository — exactly what "available when any developer clones the repo" requires. (A) is the personal location and ships with nothing. (C) isn't a real configuration path; `.claude.json` doesn't define slash commands. (D) confuses surfaces — CLAUDE.md carries standards and context, not invokable commands.
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 2, 5 · **Format**: Multiple choice
 
 ---
 
 ## Question 4
-**How do Claude Code rules work, and where are they stored?**
+**Which two SKILL.md frontmatter fields do the following jobs? Select all that apply.**
 
-- A) Rules are regex patterns stored in .claude/rules.txt
-- B) Rules are YAML with frontmatter paths stored in .claude/rules/ directory files
-- C) Rules are defined in .claude.json as a rules array
-- D) Rules are managed through the Claude Code GUI and cannot be version-controlled
+- A) `context: fork` — runs the skill in an isolated sub-context so verbose tool output doesn't pollute the main session
+- B) `allowed-tools` — restricts which tools the skill may invoke, acting as a safety rail against destructive actions
+- C) `description` — prompts the user interactively when arguments are missing
+- D) `argument-hint` — enforces a JSON schema on the skill's return value
 
-**Correct Answer**: B
+**Correct Answer**: A and B (multi-select)
 
-**Explanation**: Rules in Claude Code are stored as separate files in the .claude/rules/ directory, each with YAML frontmatter that includes a path pattern (which files/paths the rule applies to) and the rule content. This structure allows granular, file-specific configuration—you can have different rules for different parts of your project. Rules are version-controlled and shared with the team.
+### Explanation
+`context: fork` isolates the skill's execution context so the main session receives only the skill's final output, not 40 tool-call receipts. `allowed-tools` scopes the tool surface — a "generate report" skill with `allowed-tools: [Read, Write]` can't shell out. (C) swaps the jobs: `description` is how Claude decides when to invoke the skill (same rules as tool descriptions); the interactive prompt on missing args comes from `argument-hint`. (D) is fabricated — `argument-hint` is a UX string, not a schema enforcer.
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 2, 4, 5 · **Format**: Multi-select
 
 ---
 
 ## Question 5
-**What is the purpose of the -p flag when running Claude Code in CI/CD?**
+**A team is migrating a monolith to microservices across roughly 40 files. Which Claude Code execution mode fits, and why?**
 
-- A) To enable parallel execution of multiple tasks
-- B) To indicate project mode; required for non-interactive environments
-- C) To set the project path explicitly
-- D) To purge cache before running
+- A) Direct execution — the task is well-defined, so planning adds unnecessary latency
+- B) Direct execution with a pre-written checklist pasted into the prompt
+- C) Plan mode — architectural decisions with multiple valid approaches deserve a reviewable plan before any file changes
+- D) Plan mode only for the first file, then direct execution for the other 39
 
-**Correct Answer**: B
+**Correct Answer**: C
 
-**Explanation**: The -p (or --project) flag is required when running Claude Code in CI/CD pipelines or other non-interactive environments. It tells Claude Code to operate in project mode, respecting .claude/ configuration files and understanding the project context. Without -p in a CI/CD environment, Claude Code may not properly load configuration or understand the project structure.
+### Explanation
+The plan-mode test is "is there more than one reasonable way to do this?" A monolith-to-microservices split has many valid decompositions, interface boundaries, and migration orders — exactly the shape plan mode is built for. (A) is the classic distractor: experienced developers assume direct execution is always faster, but on architectural work the time saved in planning is paid back many times in avoided rework. (B) doesn't change anything — a pasted checklist still skips the written, reviewable plan. (D) would commit you to an approach based on how the first file happened to go, not on the architecture.
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 2, 4, 5 · **Format**: Multiple choice
 
 ---
 
 ## Question 6
-**How does the CLAUDE.md hierarchy work in Claude Code?**
+**A CI pipeline invokes `claude "Analyze this PR for security issues"` and the job hangs forever without producing output. Which single change is the correct fix?**
 
-- A) Only one CLAUDE.md file exists; it's ignored if no rules are defined
-- B) CLAUDE.md files at different levels (user, project, directory) are merged, with more specific levels overriding broader ones
-- C) Each CLAUDE.md applies only to its directory; there is no inheritance
-- D) CLAUDE.md files are not supported in modern Claude Code versions
+- A) Set the `CLAUDE_HEADLESS=1` environment variable before the call
+- B) Pipe `/dev/null` into stdin: `claude "..." < /dev/null`
+- C) Add the `-p` flag: `claude -p "Analyze this PR for security issues"`
+- D) Add the `--batch` flag to route through the Message Batches API
 
-**Correct Answer**: B
+**Correct Answer**: C
 
-**Explanation**: Claude Code supports CLAUDE.md files at multiple levels: user-level (~/.CLAUDE.md), project-level (.CLAUDE.md at project root), and directory-level (CLAUDE.md in subdirectories). These are merged hierarchically, with more specific contexts overriding broader ones. This allows global conventions, project-specific standards, and directory-specific guidance to coexist without conflict.
+### Explanation
+The `-p` flag runs Claude Code non-interactively — exactly what CI needs. Without it, Claude Code opens an interactive session and waits for input that never comes. (A) `CLAUDE_HEADLESS` is not a real environment variable — it's one of the exam's classic plausible-but-fake distractors. (B) redirecting stdin doesn't tell Claude Code it's in a pipeline; the session still initializes expecting interactive input. (D) `--batch` isn't the mechanism either; Message Batches is a distinct API for bulk async jobs, not a flag for `claude` CLI CI invocations.
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 5 · **Format**: Multiple choice
 
 ---
 
 ## Question 7
-**What should and should not be shared via version control when using Claude Code?**
+**A team wants CI/CD output from Claude Code to match a stable JSON shape so downstream tooling can parse it reliably. Which flag combination enforces that?**
 
-- A) Share .claude/rules/ and CLAUDE.md (team standards); don't share ~/.claude/ (personal configuration)
-- B) Share everything in .claude/ directory; don't share any CLAUDE.md files
-- C) Don't version control any Claude Code files; they're all personal
-- D) Share all files; there is no distinction between personal and shared configuration
+- A) `--output-format json` alone
+- B) `--output-format json --json-schema ./review-schema.json`
+- C) `--p --json` followed by a regex post-processing step
+- D) `--structured --validate-schema`
 
-**Correct Answer**: A
+**Correct Answer**: B
 
-**Explanation**: Version-control your project-scoped configuration (.claude/rules/, .claude/commands/, project CLAUDE.md) to ensure team consistency. Don't version-control user-scoped configuration (~/.claude/, personal CLAUDE.md, personal API keys). This keeps shared team standards in git while respecting individual developer workflows and protecting personal credentials.
+### Explanation
+`--output-format json` emits structured JSON, but doesn't enforce a specific shape — fields can drift between runs. Pairing it with `--json-schema ./schema.json` pins the output to a contract: downstream parsers don't break when a prompt tweak shifts the fields. (A) alone is common and subtly wrong — it answers "is this JSON?" not "does it match my contract?" (C) `--p` isn't a flag (it's `-p`), and regex post-processing is the thing you're trying to avoid. (D) neither flag exists.
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 5 · **Format**: Multiple choice
 
 ---
 
 ## Question 8
-**What is the primary purpose of the /memory command in Claude Code?**
+**True or False: Code review in Claude Code is most reliable when the same session that generated the code also reviews it, because the session has full context on the author's intent.**
 
-- A) To cache tool results for faster retrieval
-- B) To store and retrieve conversation history across sessions
-- C) To save important context or decisions for future reference within a session
-- D) To optimize RAM usage during long-running tasks
+- A) True
+- B) False
 
-**Correct Answer**: C
+**Correct Answer**: B (False)
 
-**Explanation**: The /memory command allows you to explicitly save important information (key decisions, context, findings) that you want to reference later in the same session. This is useful for long, complex sessions where you need to maintain continuity or refer back to earlier conclusions. It's not persistent across sessions (that would be conversation history) but rather a way to manage context within a session.
+### Explanation
+The opposite is true: the generating session is the worst session to review in, because it carries the reasoning context that justified the code in the first place and is biased toward ratifying it. A fresh session — or a CI run, which is naturally fresh — reviews without that self-justification bias. This is the same principle as multi-instance review in Domain 4 (Lecture 6.14), rendered at the Claude Code surface.
 
-**Domain**: Domain 3 - Claude Code Configuration
+**Domain**: Domain 3 · **Scenarios**: 5 · **Format**: True/False
+
+---
+
+## Question 9
+**A skill that brainstorms refactors produces 35 tool calls and roughly 8,000 tokens of exploration output. The main session slows down for the rest of the task. What's the right fix?**
+
+- A) Rewrite the skill's description so Claude invokes it less often
+- B) Add `context: fork` to the SKILL.md frontmatter so the skill runs in an isolated context and returns only a summary
+- C) Lower the skill's `allowed-tools` list so fewer tools are callable
+- D) Delete the skill and use `/compact` at the end of every session instead
+
+**Correct Answer**: B
+
+### Explanation
+`context: fork` is the direct fix for "verbose skill pollutes main context." The skill still does its work; the main session receives the distilled output rather than the 35-call transcript. (A) reduces how often pollution happens but doesn't fix it when the skill does run. (C) cuts the tool surface but may break the skill's function without addressing the context bloat. (D) `/compact` is reactive — it condenses after the damage is done, and loses fidelity in the process.
+
+**Domain**: Domain 3 · **Scenarios**: 2, 4 · **Format**: Multiple choice
+
+---
+
+## Question 10
+**Which of the following are valid uses of `/memory` and `/compact`? Select all that apply.**
+
+- A) Run `/memory` to list which CLAUDE.md files Claude currently sees in this session — a diagnostic when conventions seem missing
+- B) Run `/compact` mid-decision, right when critical state is still in motion, to free up tokens
+- C) Run `/compact` at a natural phase boundary (after a design review, before implementation) to reclaim context with minimal loss of active state
+- D) Run `/memory` to persist conversation history across sessions permanently
+
+**Correct Answer**: A and C (multi-select)
+
+### Explanation
+`/memory` is a diagnostic — it shows the CLAUDE.md files loaded into the current session, which is your first move when a new teammate says "Claude doesn't know our conventions." `/compact` reclaims context by summarizing older turns, and the right time to run it is at a phase boundary where the working state is stable. (B) inverts the rule — compacting mid-decision can erase exactly the state you're about to act on. (D) is a common misconception: `/memory` is session-scoped introspection, not cross-session persistence.
+
+**Domain**: Domain 3 · **Scenarios**: 2, 4 · **Format**: Multi-select
