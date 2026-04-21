@@ -1,0 +1,216 @@
+---
+theme: default
+title: "Lecture 7.5: Escalation Decision Framework"
+info: |
+  Claude Certified Architect – Foundations
+  Section 7 — Context & Reliability (Domain 5, 15%)
+highlighter: shiki
+transition: fade-out
+mdc: true
+canvasWidth: 1920
+aspectRatio: 16/9
+---
+
+<style>
+@import './design-system.css';
+</style>
+
+<script setup>
+const triggerBullets = [
+  { label: 'Customer explicitly asks', detail: 'Immediate hand-off. No investigation first.' },
+  { label: 'Policy is ambiguous or silent', detail: 'Rulebook doesn\'t cover it → a human decides.' },
+  { label: 'Agent cannot make meaningful progress', detail: 'Actually blocked — not just "this is taking a while."' },
+]
+
+const nonTriggerBullets = [
+  { label: 'Sentiment / tone', detail: 'Frustration ≠ complexity.' },
+  { label: 'Self-reported confidence score', detail: 'Uncalibrated — agent is blind to its own miss.' },
+  { label: 'Long conversation length', detail: 'Length is not complexity.' },
+  { label: 'Case complexity alone', detail: 'Only when the agent can\'t progress.' },
+]
+
+const promptCode = `# System prompt — escalation criteria
+
+Escalate when:
+1. Customer uses phrases like "let me speak to a human,"
+   "this is unacceptable, give me a manager."
+2. The policy page referenced doesn't cover this scenario.
+3. You have attempted resolution but cannot progress.
+
+DO NOT escalate on:
+- Frustrated tone alone.
+- Long conversation length.
+- Your own uncertainty about the answer.
+
+# Few-shot examples
+
+User: "This is frustrating — my order is still not here."
+Correct: Acknowledge + attempt resolution. Do NOT escalate.
+
+User: "Is there someone else I can talk to?"
+Correct: Escalate. This is a human request.
+
+User: "The policy page says nothing about expired warranties."
+Correct: Escalate. Policy ambiguity.`
+</script>
+
+<Frame bg="var(--forest-900)" color="var(--mint-100)">
+  <div class="di-cover">
+    <div class="di-cover__eyebrow">Domain 5 · Lecture 7.5</div>
+    <div class="di-cover__title">Escalation Decision Framework</div>
+    <div class="di-cover__subtitle">When to escalate vs resolve</div>
+  </div>
+</Frame>
+
+<style scoped>
+.di-cover { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 32px; }
+.di-cover__eyebrow { font-family: var(--font-body); font-size: 28px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sprout-500); }
+.di-cover__title { font-family: var(--font-display); font-size: 124px; line-height: 1.02; letter-spacing: -0.025em; color: var(--paper-0); max-width: 1500px; }
+.di-cover__subtitle { font-family: var(--font-display); font-size: 44px; color: var(--mint-200); font-style: italic; }
+</style>
+
+<!--
+Lecture 7.5. The escalation decision framework. This is where Scenario 1 lives or dies. The exam tests this with Sample Question 3, and the wrong answers are specifically designed to look empathetic while being exam-wrong. Let's walk through it carefully.
+
+Heads-up: this lecture pairs directly with 7.14. Something I tell you in 7.5 is "always wrong" — self-reported confidence for routing. Something I tell you in 7.14 is "actually right, in a different context" — calibrated confidence for routing. The two lectures look contradictory unless you hold them together. I'll flag the reconciliation again in 7.14. For now, focus on the escalation case — Scenario 1, customer support.
+-->
+
+---
+
+<BulletReveal
+  title="Escalate when..."
+  :bullets="triggerBullets"
+/>
+
+<!--
+Three valid escalation triggers. One: the customer explicitly asks for a human. That's an immediate hand-off — no investigation, no "let me try to help first." Two: the policy is ambiguous or silent on this case. If the rulebook doesn't cover it, a human decides. Three: the agent cannot make meaningful progress. Not "this is taking a while" — actual blocked, actual no next step.
+
+Three triggers. Memorize them in that order. They're the only three that are exam-correct. Every other proposed trigger is a distractor.
+-->
+
+---
+
+<BulletReveal
+  title="Do NOT use"
+  :bullets="nonTriggerBullets"
+/>
+
+<!--
+What's not a trigger? Sentiment and tone. Self-reported confidence score. Long conversation length. Case complexity alone. Write those down as the wrong-answers-to-recognize list. Every one of them will appear as a distractor on this exam, and every one of them looks reasonable in isolation. That's the trap.
+
+Sentiment looks like care. Confidence looks like self-awareness. Conversation length looks like evidence of struggle. Complexity looks like a legitimate reason. None of them are the right trigger.
+-->
+
+---
+
+<ConceptHero
+  leadLine="Frustration ≠ complexity"
+  concept="Tone is not signal."
+  supportLine="Acknowledge frustration; offer resolution; escalate only if they reiterate."
+/>
+
+<!--
+Frustration does not equal complexity. A frustrated customer may have a perfectly simple issue — they're just having a bad day, or they got bounced between systems before reaching the agent, or their expectation mismatched reality in a simple way you can still resolve.
+
+Routing on sentiment sends simple cases to human queues that are meant for genuinely hard problems. That's bad service AND bad architecture — the human reviewer is suddenly fielding "I'm mad about my order" cases that the agent could have fixed in two turns, while genuine edge cases wait in the same queue.
+
+The right move: acknowledge the frustration, offer to resolve, and only escalate if the customer reiterates a preference for a human. Sentiment goes into tone. Escalation goes on the three triggers. We'll sharpen this further in 7.7.
+-->
+
+---
+
+<CalloutBox variant="warn" title="Self-reported confidence is uncalibrated (Sample Q3)">
+
+Agents are already wrongly confident on hard cases. Self-report can't detect its own miss.
+
+<p>Hold onto this. <strong>We'll revisit in 7.14 for a very different context</strong> — extraction pipelines with a labeled validation set — where calibrated confidence DOES work. But for escalation in Scenario 1, without calibration data, self-report is a distractor. Same phrase, two contexts, two opposite exam answers. The reconciliation is in 7.14.</p>
+
+</CalloutBox>
+
+<!--
+Self-reported confidence is uncalibrated. This is Sample Question 3 territory. Agents are already wrongly confident on the cases they get wrong — that's literally how miscalibration works. "Let the model escalate when confidence is low" assumes the model can detect its own failure mode. It can't. The low-confidence cases are sometimes easy; the high-confidence wrong cases are the scary ones. Self-report is blind to its own misses.
+
+Hold onto this. We're going to revisit it in 7.14 for a very different context — extraction pipelines with a labeled validation set — where calibrated confidence DOES work. But for escalation in Scenario 1, without calibration data, self-report is a distractor. Full stop. Same phrase, two contexts, two opposite exam answers. The reconciliation is in 7.14.
+-->
+
+---
+
+<CodeBlockSlide
+  title="Escalation criteria in the system prompt"
+  lang="text"
+  :code="promptCode"
+  annotation="Explicit criteria + 2–3 few-shot examples = calibrated router. No confidence score needed."
+/>
+
+<!--
+The right pattern in the system prompt: explicit criteria, written out, plus two or three few-shot examples of edge cases. "Escalate when the customer uses phrases like 'let me speak to a human,' 'this is unacceptable — give me a manager,' or when the policy page referenced doesn't cover this scenario." Explicit. In writing. Visible to the model every turn.
+
+The criteria do the heavy lifting for clear cases. The few-shots handle the ambiguity. Between them, you get a calibrated router without needing any model-reported confidence number at all.
+-->
+
+---
+
+<CalloutBox variant="tip" title="Few-shots for edge cases — callback to 6.4">
+
+Same pattern from 6.4 — ambiguous scenarios get example-driven training. Here the ambiguity is "escalate or not?"
+
+Pairs that work well:
+<ul>
+<li>"This is frustrating" (no human ask) → do NOT escalate; acknowledge + offer resolution.</li>
+<li>"Is there someone else I can talk to?" → escalate; that's a human request.</li>
+</ul>
+
+</CalloutBox>
+
+<!--
+Few-shot examples handle the ambiguous cases. This is the same pattern we covered in 6.4 — ambiguous scenarios get example-driven training. Here the ambiguity is specifically "escalate or not?" — so your few-shots are pairs: customer phrasing, correct decision. Two or three is enough. The model learns the edge cases from the examples; it learns the bright-line cases from the criteria.
+
+Real pairs that work well: "customer says 'this is frustrating' without asking for a human" paired with "do NOT escalate; acknowledge and offer resolution." "Customer asks 'is there someone else I can talk to'" paired with "escalate; this is a human request." The few-shots force the model to pattern-match against concrete examples rather than interpret ambiguous phrases on its own.
+-->
+
+---
+
+<CalloutBox variant="tip" title="Sample Q3">
+
+Explicit criteria + few-shots wins. Sentiment analysis and confidence scoring are both distractors — known-wrong on this exam.
+
+<p>Recognize by ingredients: multi-turn customer support, first-contact resolution target, agent deciding when to hand off. Explicit-criteria-plus-few-shots is the answer. Every time.</p>
+
+</CalloutBox>
+
+<!--
+Sample Question 3 is the canonical form. The right answer combines explicit criteria plus few-shots. The distractors are: sentiment analysis for automatic escalation (known-wrong on this exam), confidence-score routing (known-wrong for this use case), and "escalate all long conversations" (length is not complexity). Explicit criteria plus few-shots wins. Every time.
+
+Recognize the question by its symptoms — multi-turn customer support, first-contact resolution target, agent deciding when to hand off. If those ingredients are in the prompt, the answer is the explicit-criteria-plus-few-shots pattern.
+-->
+
+---
+
+<BigQuote
+  lead="Continuity"
+  quote="This is where Scenario 1 lives or dies. <em>80% first-contact resolution</em> depends on this calibration."
+  attribution="Escalate too aggressively → overwhelm the queue. Too conservatively → frustrated customers stuck."
+/>
+
+<!--
+This is where Scenario 1 lives or dies. Eighty-percent first-contact resolution — a common target in customer support architectures — depends on this calibration. Escalate too aggressively and you overwhelm the human queue. Escalate too conservatively and frustrated customers stay stuck with the bot. The three triggers give you the discipline to land in the middle.
+-->
+
+---
+
+<Frame bg="var(--mint-100)">
+  <Eyebrow>Closing</Eyebrow>
+  <SlideTitle>Next up: 7.6 — Honoring Explicit Customer Requests for Human Agents.</SlideTitle>
+
+  <div class="closing-body">
+    <p>The first of the three triggers, zoomed in — because the exam has a very specific position on what "honor" means in practice, and the distractor is particularly slippery.</p>
+  </div>
+</Frame>
+
+<style scoped>
+.closing-body { margin-top: 56px; font-family: var(--font-body); font-size: 30px; line-height: 1.5; color: var(--forest-500); max-width: 1400px; }
+</style>
+
+<!--
+Next up: 7.6, honoring explicit customer requests for human agents. This is the first of the three triggers, zoomed in — because the exam has a very specific position on what "honor" means in practice, and the distractor there is particularly slippery. See you there.
+-->
