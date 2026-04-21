@@ -50,31 +50,35 @@ const palette = computed(() => {
     <SlideTitle>{{ title }}</SlideTitle>
 
     <div class="tc">
-      <section
-        class="tc__col"
-        :style="{ background: palette.leftBg, borderColor: palette.leftBorder }"
-      >
-        <div class="tc__label" :style="{ color: palette.leftAccent }">
-          <span class="tc__dot" :style="{ background: palette.leftAccent }" />
-          {{ leftLabel }}
-        </div>
-        <div class="tc__body">
-          <slot name="left" />
-        </div>
-      </section>
+      <v-clicks>
+        <section
+          class="tc__col"
+          :style="{ background: palette.leftBg, borderColor: palette.leftBorder }"
+        >
+          <div class="tc__label" :style="{ color: palette.leftAccent }">
+            <span class="tc__dot" :style="{ background: palette.leftAccent }" />
+            {{ leftLabel }}
+          </div>
+          <div class="tc__body">
+            <slot name="left" />
+          </div>
+        </section>
+      </v-clicks>
 
-      <section
-        class="tc__col"
-        :style="{ background: palette.rightBg, borderColor: palette.rightBorder }"
-      >
-        <div class="tc__label" :style="{ color: palette.rightAccent }">
-          <span class="tc__dot" :style="{ background: palette.rightAccent }" />
-          {{ rightLabel }}
-        </div>
-        <div class="tc__body">
-          <slot name="right" />
-        </div>
-      </section>
+      <v-clicks>
+        <section
+          class="tc__col"
+          :style="{ background: palette.rightBg, borderColor: palette.rightBorder }"
+        >
+          <div class="tc__label" :style="{ color: palette.rightAccent }">
+            <span class="tc__dot" :style="{ background: palette.rightAccent }" />
+            {{ rightLabel }}
+          </div>
+          <div class="tc__body">
+            <slot name="right" />
+          </div>
+        </section>
+      </v-clicks>
     </div>
 
     <SlideFooter :label="footerLabel" :num="footerNum" :total="footerTotal" />
@@ -104,7 +108,7 @@ const palette = computed(() => {
   align-items: center;
   gap: 12px;
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -137,7 +141,7 @@ const palette = computed(() => {
 .tc__body :deep(code),
 .tc__body :deep(pre) {
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 24px;
 }
 .tc__body :deep(pre) {
   background: var(--forest-900);

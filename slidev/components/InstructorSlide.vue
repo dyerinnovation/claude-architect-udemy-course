@@ -115,7 +115,7 @@ const education = [
 }
 .instructor__loc {
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 24px;
   color: var(--forest-500);
   margin-top: 8px;
   letter-spacing: 0.04em;
@@ -166,7 +166,7 @@ const education = [
 }
 .instructor__cert {
   font-family: var(--font-body);
-  font-size: 20px;
+  font-size: 24px;
   color: var(--forest-800);
   padding: 8px 0;
   border-top: 1px solid var(--paper-200);
@@ -184,14 +184,14 @@ const education = [
 }
 .instructor__edu-h {
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--forest-800);
   line-height: 1.3;
 }
 .instructor__edu-b {
   font-family: var(--font-body);
-  font-size: 20px;
+  font-size: 24px;
   color: var(--forest-500);
   line-height: 1.4;
   margin-top: 4px;

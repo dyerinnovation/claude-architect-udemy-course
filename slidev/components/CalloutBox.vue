@@ -105,7 +105,7 @@ const v = computed(() => VARIANTS[props.variant] || VARIANTS.tip)
 }
 .cb__label {
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -121,7 +121,7 @@ const v = computed(() => VARIANTS[props.variant] || VARIANTS.tip)
 }
 .cb__slot {
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.5;
   color: var(--forest-800);
 }

@@ -52,7 +52,7 @@ defineProps({
 }
 .sf__type {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
   color: var(--teal-600);
   background: var(--teal-50);
@@ -61,7 +61,7 @@ defineProps({
 }
 .sf__badge {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -76,14 +76,14 @@ defineProps({
 }
 .sf__desc {
   font-family: var(--font-body);
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1.5;
   color: var(--forest-500);
   margin-top: 4px;
 }
 .sf__example {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 24px;
   color: var(--forest-500);
   display: flex;
   align-items: center;
@@ -91,7 +91,7 @@ defineProps({
 }
 .sf__example-label {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -99,7 +99,7 @@ defineProps({
 }
 .sf__example code {
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: 24px;
   background: var(--bg-sunk);
   padding: 2px 8px;
   border-radius: 4px;

@@ -30,13 +30,14 @@ const nodes = computed(() => props.steps.slice(0, 6))
 
     <div class="fd">
       <template v-for="(step, i) in nodes" :key="i">
-        <div class="fd__node">
+        <div v-click="i + 1" class="fd__node">
           <div class="fd__num">{{ String(i + 1).padStart(2, '0') }}</div>
           <div class="fd__label">{{ step.label }}</div>
           <div v-if="step.sublabel" class="fd__sub">{{ step.sublabel }}</div>
         </div>
         <div
           v-if="i < nodes.length - 1"
+          v-click="i + 1"
           class="fd__arrow"
           aria-hidden="true"
         >
@@ -78,7 +79,7 @@ const nodes = computed(() => props.steps.slice(0, 6))
 }
 .fd__num {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--teal-600);
   letter-spacing: 0.08em;
@@ -93,7 +94,7 @@ const nodes = computed(() => props.steps.slice(0, 6))
 }
 .fd__sub {
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.4;
   color: var(--forest-500);
 }

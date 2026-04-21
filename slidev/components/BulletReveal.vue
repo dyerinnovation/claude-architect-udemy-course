@@ -88,7 +88,7 @@ const rows = computed(() => props.bullets.slice(0, 6))
 }
 .br__detail {
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.45;
   color: var(--forest-500);
   margin-top: 8px;

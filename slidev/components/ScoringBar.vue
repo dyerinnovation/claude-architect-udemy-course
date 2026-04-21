@@ -202,7 +202,7 @@ const b4 = 100 - pct(900)         // 900..1000 (mastery)
 }
 .zone-body {
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   color: var(--forest-500, #427065);
   line-height: 1.4;
   padding-right: 20px;

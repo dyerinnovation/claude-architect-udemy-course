@@ -157,7 +157,7 @@ const guides = [
 }
 .sg-tag {
   font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -173,7 +173,7 @@ const guides = [
 .sg-footer {
   margin-top: auto;
   font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-  font-size: 14px;
+  font-size: 20px;
   color: var(--forest-500);
   letter-spacing: 0.1em;
   text-transform: uppercase;

@@ -237,7 +237,7 @@ const stepStatus = (step) => step[props.pathKey]
 }
 .pc-pill {
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -247,7 +247,7 @@ const stepStatus = (step) => step[props.pathKey]
 }
 .pc-skip {
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--forest-500);
   letter-spacing: 0.12em;
@@ -267,7 +267,7 @@ const stepStatus = (step) => step[props.pathKey]
   top: -14px;
   left: 24px;
   font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: #fff;
   padding: 4px 12px;
@@ -293,7 +293,7 @@ const stepStatus = (step) => step[props.pathKey]
 }
 .pc-loop-num {
   font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.05em;
 }
@@ -307,7 +307,7 @@ const stepStatus = (step) => step[props.pathKey]
 }
 .pc-loop-detail {
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--forest-500);
   line-height: 1.35;
 }

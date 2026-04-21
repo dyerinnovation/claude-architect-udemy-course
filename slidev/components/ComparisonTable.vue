@@ -45,12 +45,13 @@ function cellHighlight(cell) {
         </div>
 
         <template v-for="(row, ri) in rows" :key="`r-${ri}`">
-          <div class="ct__row-label">
+          <div v-click="ri + 1" class="ct__row-label">
             {{ row.label }}
           </div>
           <div
             v-for="(cell, ci) in row.cells"
             :key="`c-${ri}-${ci}`"
+            v-click="ri + 1"
             class="ct__cell"
             :class="`ct__cell--${cellHighlight(cell)}`"
           >
@@ -85,7 +86,7 @@ function cellHighlight(cell) {
   background: var(--forest-800);
   color: var(--mint-100);
   font-family: var(--font-body);
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -112,7 +113,7 @@ function cellHighlight(cell) {
   background: var(--paper-0);
   padding: 18px 22px;
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.4;
   color: var(--forest-800);
   display: flex;

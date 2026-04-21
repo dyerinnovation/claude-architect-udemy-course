@@ -178,7 +178,7 @@ const border = (v) => v === 2
   display: flex;
   gap: 40px;
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   color: var(--forest-500);
 }
 .sm-leg {

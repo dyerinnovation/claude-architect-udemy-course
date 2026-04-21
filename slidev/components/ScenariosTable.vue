@@ -116,7 +116,7 @@ const rows = [
   letter-spacing: -0.01em;
 }
 .st-domains {
-  font-size: 22px;
+  font-size: 24px;
   color: var(--forest-500, #427065);
   font-weight: 500;
 }

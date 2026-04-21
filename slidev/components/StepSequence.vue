@@ -118,7 +118,7 @@ function numberFor(step, i) {
 }
 .ss__body {
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.45;
   color: var(--forest-500);
 }

@@ -158,7 +158,7 @@ const signSize = props.pct.length > 2 ? '72px' : '100px'
 }
 .df-keypoint-label {
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -183,7 +183,7 @@ const signSize = props.pct.length > 2 ? '72px' : '100px'
 .df-scenarios {
   margin-top: 28px;
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   color: var(--forest-500);
   letter-spacing: 0.04em;
 }

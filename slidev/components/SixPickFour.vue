@@ -204,7 +204,7 @@ function badgeVisible(i) {
   top: -14px;
   right: 20px;
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--paper-0, #ffffff);
   background: var(--sprout-500, #5bb42e);
@@ -217,7 +217,7 @@ function badgeVisible(i) {
 .footnote {
   margin-top: 36px;
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   color: var(--forest-500, #427065);
   text-align: center;
   font-style: italic;

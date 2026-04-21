@@ -46,50 +46,52 @@ const tagTail = (tag) => tag.split(' · ')[1]
     <h1 class="slide-title">Eleven sections. Three phases. One exam.</h1>
 
     <div class="cr-stack">
-      <div
-        v-for="phase in phases"
-        :key="phase.tag"
-        class="cr-phase"
-        :style="{
-          background: phase.bg,
-          borderLeftColor: phase.color,
-        }"
-      >
-        <div class="cr-phase-head">
-          <div
-            class="cr-phase-tag"
-            :style="{ color: phase.color }"
-          >
-            {{ tagHead(phase.tag) }}
-          </div>
-          <div class="cr-phase-name">
-            {{ tagTail(phase.tag) }}
-          </div>
-        </div>
+      <v-clicks>
         <div
-          class="cr-phase-sections"
-          :style="{ gridTemplateColumns: gridCols(phase.sections.length) }"
+          v-for="phase in phases"
+          :key="phase.tag"
+          class="cr-phase"
+          :style="{
+            background: phase.bg,
+            borderLeftColor: phase.color,
+          }"
         >
-          <div
-            v-for="s in phase.sections"
-            :key="s.n"
-            class="cr-card"
-          >
+          <div class="cr-phase-head">
             <div
-              class="cr-card-num"
+              class="cr-phase-tag"
               :style="{ color: phase.color }"
             >
-              &sect; {{ s.n }}
+              {{ tagHead(phase.tag) }}
             </div>
-            <div class="cr-card-name">
-              {{ s.name }}
+            <div class="cr-phase-name">
+              {{ tagTail(phase.tag) }}
             </div>
-            <div class="cr-card-detail">
-              {{ s.detail }}
+          </div>
+          <div
+            class="cr-phase-sections"
+            :style="{ gridTemplateColumns: gridCols(phase.sections.length) }"
+          >
+            <div
+              v-for="s in phase.sections"
+              :key="s.n"
+              class="cr-card"
+            >
+              <div
+                class="cr-card-num"
+                :style="{ color: phase.color }"
+              >
+                &sect; {{ s.n }}
+              </div>
+              <div class="cr-card-name">
+                {{ s.name }}
+              </div>
+              <div class="cr-card-detail">
+                {{ s.detail }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </v-clicks>
     </div>
 
     <div class="cr-footnote">
@@ -127,7 +129,7 @@ const tagTail = (tag) => tag.split(' · ')[1]
 }
 .cr-phase-tag {
   font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -157,13 +159,13 @@ const tagTail = (tag) => tag.split(' · ')[1]
 }
 .cr-card-num {
   font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.06em;
 }
 .cr-card-name {
   font-family: 'Newsreader', 'Iowan Old Style', Georgia, serif;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 500;
   color: var(--forest-800);
   line-height: 1.15;
@@ -171,7 +173,7 @@ const tagTail = (tag) => tag.split(' · ')[1]
 }
 .cr-card-detail {
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 20px;
   color: var(--forest-500);
   line-height: 1.3;
 }
@@ -179,7 +181,7 @@ const tagTail = (tag) => tag.split(' · ')[1]
   margin-top: 14px;
   font-family: 'Newsreader', 'Iowan Old Style', Georgia, serif;
   font-style: italic;
-  font-size: 22px;
+  font-size: 24px;
   color: var(--forest-500);
   line-height: 1.4;
   max-width: 1600px;
