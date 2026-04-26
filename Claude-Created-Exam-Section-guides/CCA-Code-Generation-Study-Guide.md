@@ -13,9 +13,18 @@ Domain 5: Context Management & Reliability (15%)
 
 ## Exam Context
 
-This guide covers the **Code Generation with Claude Code** scenario, one of six scenarios on the CCA Foundations exam. It maps primarily to **Domain 3: Claude Code Configuration & Workflows (20%)** with overlap into **Domain 5: Context Management & Reliability (15%)** and light secondary touches into **Domain 1: Agentic Patterns** when subagents and context isolation come up.
+This guide covers the **Code Generation with Claude Code** scenario, one of six scenarios on the CCA Foundations exam.
 
-> **Key Insight:** The exam tests architectural judgment in production scenarios — not trivia. Every question drops you into a realistic situation and asks you to pick the correct configuration mechanism. The key skill is knowing which mechanism solves a given problem.
+**Domain mapping:**
+- **Primary:** Domain 3 — Claude Code Configuration & Workflows (20%)
+- **Secondary:** Domain 5 — Context Management & Reliability (15%)
+- **Light touch:** Domain 1 — Agentic Patterns (when subagents and context isolation come up)
+
+> **Key Insight**
+> - The exam tests architectural judgment in production scenarios — not trivia
+> - Every question drops you into a realistic situation
+> - You must pick the correct configuration mechanism for the problem
+> - Key skill: knowing which mechanism solves a given problem
 
 ---
 
@@ -44,7 +53,12 @@ your-project/
 
 ### @import Syntax
 
-The `@import` syntax lets you reference external files from `CLAUDE.md` to keep it modular. This is especially useful for pulling in personal preferences without cluttering the shared project file, or for selectively including standards relevant to specific packages.
+The `@import` syntax lets you reference external files from `CLAUDE.md` to keep it modular.
+
+**Why use it:**
+- Pull in personal preferences without cluttering the shared project file
+- Selectively include standards relevant to specific packages
+- Keep `CLAUDE.md` focused and modular
 
 **Example: Importing Personal Preferences**
 
@@ -59,7 +73,10 @@ The `@import` syntax lets you reference external files from `CLAUDE.md` to keep 
 - @~/.claude/my-project-instructions.md
 ```
 
-The first time Claude Code encounters external imports in a project, it shows an approval dialog listing the files. If you decline, the imports stay disabled and the dialog does not appear again.
+**First-time import behavior:**
+- Claude Code shows an approval dialog listing all external imports
+- If you decline, the imports stay disabled
+- The dialog does not appear again after the initial decision
 
 **Example: Per-Package Standards**
 
@@ -73,7 +90,11 @@ The first time Claude Code encounters external imports in a project, it shows an
 - @../../standards/accessibility.md
 ```
 
-> **Exam scenario:** A monorepo with multiple packages, each maintained by different teams with different applicable standards. Using `@import` lets each package's `CLAUDE.md` selectively include only the relevant standards files, rather than dumping everything into one root file.
+> **Exam scenario**
+> - Monorepo with multiple packages, each maintained by different teams
+> - Each team has different applicable standards
+> - Use `@import` so each package's `CLAUDE.md` selectively includes only the relevant standards files
+> - Avoids dumping everything into one root file
 
 ### /memory Command
 
@@ -85,7 +106,10 @@ The `/memory` command shows which memory files (CLAUDE.md files, rules, imports)
 - Claude behaves inconsistently across sessions — run `/memory` to verify which files are loaded
 - After adding new `.claude/rules/` files — confirm they're being picked up
 
-> **Exam pattern:** "A new team member clones the repo but Claude doesn't follow the project conventions." The likely root cause is that the instructions are in user-level config rather than project-level. Use `/memory` to diagnose.
+> **Exam pattern**
+> - Symptom: "A new team member clones the repo but Claude doesn't follow the project conventions"
+> - Likely root cause: instructions are in user-level config rather than project-level
+> - Diagnostic: use `/memory` to verify which files are loaded
 
 ---
 
@@ -109,7 +133,10 @@ The `/memory` command shows which memory files (CLAUDE.md files, rules, imports)
 
 ### Key Exam Scenario
 
-> **Pattern:** "Context X is useful when doing Task Y in Directory Z, but not for other tasks in Directory Z." The answer is always a skill, because path-scoped rules can't distinguish tasks within the same directory.
+> **Pattern**
+> - Symptom: "Context X is useful when doing Task Y in Directory Z, but not for other tasks in Directory Z"
+> - Answer: always a skill
+> - Why: path-scoped rules can't distinguish tasks within the same directory
 
 ---
 
@@ -140,7 +167,11 @@ paths: **/*.test.ts, **/*.test.tsx
 - Mock external dependencies
 ```
 
-> **Why globs matter:** Globs match file *identity* (what a file is) rather than file *location* (where it lives). This distinction matters for co-located test files — a `CLAUDE.md` in a subdirectory applies to everything there, but `**/*.test.*` targets only test files wherever they are.
+> **Why globs matter**
+> - Globs match file *identity* (what a file is), not file *location* (where it lives)
+> - This distinction matters for co-located test files
+> - A `CLAUDE.md` in a subdirectory applies to everything there
+> - `**/*.test.*` targets only test files wherever they are
 
 ### Rules vs. Subdirectory CLAUDE.md Files
 
@@ -222,7 +253,10 @@ allowed-tools: Read Write Bash(git *)
 allowed-tools: Read mcp__linear__create_issue
 ```
 
-> **Exam pattern:** When a skill accidentally triggers destructive operations, the answer is restricting `allowed-tools` to only what the skill needs.
+> **Exam pattern**
+> - Symptom: a skill accidentally triggers destructive operations
+> - Answer: restrict `allowed-tools` to only what the skill needs
+> - Principle: least-privilege enforcement
 
 ### Skill Scope & Sharing
 
@@ -231,7 +265,10 @@ allowed-tools: Read mcp__linear__create_issue
 | `.claude/skills/` (project) | Team — all developers on the project | Yes |
 | `~/.claude/skills/` (user) | Personal — all your projects | No |
 
-> **Exam trap:** If a skill should be available to every developer who clones the repo, it goes in the project's `.claude/skills/`. Personal customizations go in `~/.claude/skills/` with a distinct name to avoid collision.
+> **Exam trap**
+> - Skills for every developer who clones the repo → project's `.claude/skills/`
+> - Personal customizations → `~/.claude/skills/`
+> - Use a distinct name for personal skills to avoid collision with team skills
 
 ---
 
@@ -260,7 +297,11 @@ A read-only operating mode where Claude can analyze the codebase, ask questions,
 | Small, well-defined feature addition | Direct | Clear scope, low risk |
 | Implementing from an approved plan | Direct | Planning already done |
 
-> **Decision Heuristic:** The more files affected and the more irreversible the architectural decisions, the more valuable plan mode becomes. Can you describe the exact diff in one sentence? → Direct execution. Can't? → Plan first.
+> **Decision Heuristic**
+> - The more files affected, the more valuable plan mode becomes
+> - The more irreversible the architectural decisions, the more valuable plan mode becomes
+> - Can you describe the exact diff in one sentence? → Direct execution
+> - Can't describe the exact diff? → Plan first
 
 ---
 
@@ -268,19 +309,34 @@ A read-only operating mode where Claude can analyze the codebase, ask questions,
 
 ### The Explore Subagent
 
-When a phase of work generates lots of verbose output (discovery, analysis) that isn't needed in the main conversation afterward, delegate it to a subagent. The subagent gets its own context window, does the heavy work, and returns only a summary.
+When a phase of work generates lots of verbose output (discovery, analysis) that isn't needed in the main conversation afterward, delegate it to a subagent.
 
-> **Exam pattern:** "Phase 1 generates verbose output and context is filling up before Phase 2." → Use the Explore subagent (or `context: fork` in a skill) to isolate Phase 1.
+**How it works:**
+- The subagent gets its own context window
+- It does the heavy work in isolation
+- It returns only a summary to the main conversation
+
+> **Exam pattern**
+> - Symptom: "Phase 1 generates verbose output and context is filling up before Phase 2"
+> - Answer: use the Explore subagent (or `context: fork` in a skill) to isolate Phase 1
 
 ### /compact
 
 Compresses conversation history to free up context space. Useful but lossy — details may be lost. It's a band-aid, not an architectural solution.
 
-> **Exam trap:** `/compact` is rarely the best answer. It's typically a distractor when the real answer is context isolation (subagents or `context: fork`).
+> **Exam trap**
+> - `/compact` is rarely the best answer
+> - It's typically a distractor
+> - Real answer is usually context isolation (subagents or `context: fork`)
 
 ### Context Contamination
 
-When exploratory or verbose output from one task influences subsequent tasks in the same session. Symptoms: Claude references abandoned approaches, maintains outdated assumptions, or loses track of the original task.
+When exploratory or verbose output from one task influences subsequent tasks in the same session.
+
+**Symptoms:**
+- Claude references abandoned approaches
+- Claude maintains outdated assumptions
+- Claude loses track of the original task
 
 **Solution:** Always use `context: fork` for exploratory or analytical skills.
 
@@ -304,7 +360,11 @@ For team-shared MCP integrations (like a GitHub server), configure in the projec
 }
 ```
 
-> **Exam pattern:** "Team needs consistent tooling without committing credentials." → Project-scoped `.mcp.json` with `${ENV_VAR}` expansion. Config structure is shared via version control; secrets are injected via environment variables.
+> **Exam pattern**
+> - Symptom: "Team needs consistent tooling without committing credentials"
+> - Answer: project-scoped `.mcp.json` with `${ENV_VAR}` expansion
+> - Config structure is shared via version control
+> - Secrets are injected via environment variables
 
 ---
 
@@ -349,7 +409,10 @@ test('handles null values in migration', () => {
 // Claude now has concrete, unambiguous feedback to fix.
 ```
 
-> **Why this works:** Test failures are precise, unambiguous specifications. Telling Claude "handle nulls properly" is vague. Showing it "expected UNKNOWN, received null" is exact.
+> **Why this works**
+> - Test failures are precise, unambiguous specifications
+> - Telling Claude "handle nulls properly" is vague
+> - Showing it "expected UNKNOWN, received null" is exact
 
 ### The Interview Pattern
 
@@ -365,9 +428,19 @@ consistency requirements, and anything else I should
 consider.'
 ```
 
-Claude might surface considerations like: What happens when the cache is down? Do you need cache-aside or write-through? What's the consistency tolerance? Should stale data ever be served? These questions prevent costly rework from missed requirements.
+Claude might surface considerations like:
 
-> **Exam pattern:** When implementing in an unfamiliar domain where requirements might be incomplete, the interview pattern is the right first step — before plan mode, before direct execution. It surfaces the unknown unknowns.
+- What happens when the cache is down?
+- Do you need cache-aside or write-through?
+- What's the consistency tolerance?
+- Should stale data ever be served?
+
+These questions prevent costly rework from missed requirements.
+
+> **Exam pattern**
+> - Use case: implementing in an unfamiliar domain where requirements might be incomplete
+> - Interview pattern is the right first step — before plan mode, before direct execution
+> - Purpose: surfaces the unknown unknowns
 
 ### Sequential vs. Parallel Issue Resolution
 
@@ -379,17 +452,27 @@ When multiple issues need fixing, the order and grouping of your feedback to Cla
 | Issues are independent (fixing A has no effect on B) | Fix sequentially, one at a time | Each fix gets full attention without distraction |
 | Mix of interacting and independent issues | Group interacting issues together; fix groups sequentially | Best of both approaches |
 
-**Example:** If a function has both a null handling bug AND a separate performance issue in an unrelated code path, fix them sequentially. But if the null handling bug causes a cascade that also affects the return type validation, describe both in one message so Claude can see the connection.
+**Example:**
+- Function has a null handling bug AND a separate performance issue in an unrelated code path → fix sequentially
+- Null handling bug causes a cascade that also affects the return type validation → describe both in one message so Claude can see the connection
 
 ---
 
 ## 9. CI/CD Pipeline Integration
 
-> **This section covers Task Statement 3.6.** A full exam scenario (Scenario 5: Claude Code for Continuous Integration) is dedicated to this topic, and the `-p` flag question appears as a documented sample question.
+> **This section covers Task Statement 3.6**
+> - Full exam scenario dedicated to this topic: Scenario 5 — Claude Code for Continuous Integration
+> - The `-p` flag question appears as a documented sample question
 
 ### The -p Flag: Non-Interactive Mode
 
-The `-p` (or `--print`) flag runs Claude Code in non-interactive mode. It processes the prompt, outputs the result to stdout, and exits without waiting for user input. Without it, CI jobs hang indefinitely waiting for interactive input.
+The `-p` (or `--print`) flag runs Claude Code in non-interactive mode.
+
+**Behavior:**
+- Processes the prompt
+- Outputs the result to stdout
+- Exits without waiting for user input
+- Without it, CI jobs hang indefinitely waiting for interactive input
 
 **Basic CI Usage:**
 
@@ -401,7 +484,11 @@ claude "Analyze this PR for security issues"
 claude -p "Analyze this PR for security issues"
 ```
 
-> **Exam trap:** Distractors include `CLAUDE_HEADLESS=true` (doesn't exist), `--batch` flag (doesn't exist), and stdin redirect from `/dev/null` (Unix workaround, not the correct approach). The `-p` flag is the documented, correct answer.
+> **Exam trap — common distractors**
+> - `CLAUDE_HEADLESS=true` — doesn't exist
+> - `--batch` flag — doesn't exist
+> - stdin redirect from `/dev/null` — Unix workaround, not the correct approach
+> - Correct answer: the `-p` flag is the documented, official solution
 
 ### Structured CI Output
 
@@ -424,17 +511,37 @@ claude -p \
   "Review this PR for bugs and security issues"
 ```
 
-The JSON output can then be parsed by your CI pipeline to create inline PR comments at the exact file and line where each issue was found. The `--json-schema` flag is also a common D3/D4 integration point in any non-interactive automation: GitHub Actions, GitLab pipelines, pre-commit hooks, and webhook handlers all benefit from contracting the output shape up front. Treat the schema as a typed boundary between Claude and your downstream parser — once the schema is fixed, your CI logic can rely on field types, enum values, and required keys without defensive parsing.
+**What the JSON output enables:**
+- Parse in your CI pipeline to create inline PR comments at the exact file and line where each issue was found
+- `--json-schema` is a common D3/D4 integration point for any non-interactive automation
+- Compatible automation surfaces: GitHub Actions, GitLab pipelines, pre-commit hooks, webhook handlers
+- All benefit from contracting the output shape up front
+
+**Schema as a typed boundary:**
+- Treat the schema as a typed boundary between Claude and your downstream parser
+- Once the schema is fixed, CI logic can rely on field types, enum values, and required keys
+- No defensive parsing needed
 
 ### Session Context Isolation for Code Review
 
-> **Key principle:** The same Claude session that generated code is LESS effective at reviewing its own changes. It retains reasoning context that makes it less likely to question its own decisions. Use an independent review instance.
+> **Key principle**
+> - The same Claude session that generated code is LESS effective at reviewing its own changes
+> - It retains reasoning context that makes it less likely to question its own decisions
+> - Use an independent review instance
 
-This is why CI-based code review is valuable even when the developer used Claude Code to write the code. The CI review instance has no memory of the generation reasoning, so it evaluates the code on its own merits — the same way a human reviewer would.
+**Why CI-based code review still matters:**
+- Valuable even when the developer used Claude Code to write the code
+- CI review instance has no memory of the generation reasoning
+- Evaluates the code on its own merits — the same way a human reviewer would
 
 ### Avoiding Duplicate Review Comments
 
-When re-running reviews after new commits, include prior review findings in context and instruct Claude to report ONLY new or still-unaddressed issues. Without this, developers see the same comments repeated on every push, eroding trust in the review system.
+When re-running reviews after new commits:
+
+- Include prior review findings in context
+- Instruct Claude to report ONLY new or still-unaddressed issues
+- Without this, developers see the same comments repeated on every push
+- Result: erodes trust in the review system
 
 **Example CI Script Pattern:**
 
