@@ -11,19 +11,36 @@ April 2026
 
 ## 1. Why Structured Output Matters in Production
 
-Free-form text from a language model is useful for humans and almost useless for code. The moment your application needs to do anything with Claude's response — store it, route it, validate it, sum it, hand it to another service — you need a guarantee about its shape. Without that guarantee you get the production failure mode every team eventually discovers: the model returned `customerName` on Monday, `customer_name` on Tuesday, and `{"customer": {"name": "..."}}` on Wednesday, and your ETL job has been silently dropping records ever since.
+Free-form text from a language model is useful for humans and almost useless for code. The moment your application needs to do anything with Claude's response — store it, route it, validate it, sum it, hand it to another service — you need a guarantee about its shape.
 
-Structured output is the discipline of removing that ambiguity. It is not one technique — it is a stack of decisions: the precision of your prompt, the contract you express through a tool schema, the way you force the model to honor that contract, the validation layer that catches the cases where it didn't, and the review architecture that catches the cases validation can't see. Every layer in that stack is a separate exam topic, and the exam tests whether you can pick the right layer for a given failure.
+**The classic production failure mode:**
+- Model returned `customerName` on Monday
+- `customer_name` on Tuesday
+- `{"customer": {"name": "..."}}` on Wednesday
+- Your ETL job has been silently dropping records ever since
 
-The unifying mental model is this: **Claude is a probabilistic component.** Your job as the architect is to wrap that component in deterministic guardrails so that the system as a whole behaves predictably even when individual responses don't. The rest of this guide walks the stack from the prompt up.
+Structured output is the discipline of removing that ambiguity. It is not one technique — it is a **stack of decisions**:
+
+- The precision of your prompt
+- The contract you express through a tool schema
+- The way you force the model to honor that contract
+- The validation layer that catches the cases where it didn't
+- The review architecture that catches the cases validation can't see
+
+Every layer in that stack is a separate exam topic, and the exam tests whether you can pick the right layer for a given failure.
+
+**Unifying mental model: Claude is a probabilistic component.** Your job as the architect is to wrap that component in deterministic guardrails so that the system as a whole behaves predictably even when individual responses don't. The rest of this guide walks the stack from the prompt up.
 
 ---
 
 ## 2. Explicit Criteria vs Vague Instructions
 
-The single highest-leverage change you can make to most prompts is replacing vague qualitative language with explicit, behaviorally-defined criteria. Vague instructions feel like they should work because they read like English directions you'd give a human. They don't, because the model has no shared context for what your team means by "be careful" or "only flag important things."
+The single highest-leverage change you can make to most prompts is replacing vague qualitative language with explicit, behaviorally-defined criteria. Vague instructions feel like they should work because they read like English directions you'd give a human — but the model has no shared context for what your team means by "be careful" or "only flag important things."
 
-The trap to avoid is the conservatism instruction. Telling Claude to "be conservative" or "only report high-confidence findings" does not improve precision in any measurable way. It either has no effect, or it suppresses true positives along with false ones, leaving you worse off.
+**Trap: the conservatism instruction.**
+- Telling Claude to "be conservative" or "only report high-confidence findings" does not improve precision in any measurable way
+- It either has no effect, OR
+- It suppresses true positives along with false ones, leaving you worse off
 
 Replace each vague phrase with a behavioral rule that names the input pattern, the output, and the boundary case:
 
@@ -50,17 +67,28 @@ Severity levels (with concrete examples in the few-shot block below):
 """
 ```
 
-When false positives spike on a specific category, the right move is to **temporarily disable that category** while you fix the criteria. Leaving a noisy detector on while you tune it erodes developer trust faster than the eventual fix can rebuild it.
+**When false positives spike on a specific category:**
+- Temporarily disable that category while you fix the criteria
+- Leaving a noisy detector on while you tune it erodes developer trust faster than the eventual fix can rebuild it
 
-Explicit criteria are also the foundation for everything downstream. Few-shot examples need a vocabulary to label, schemas need a categorical space to encode, and review prompts need a target to evaluate against. If you cannot write down the criteria, you do not yet have a problem statement worth shipping.
+**Why explicit criteria are foundational for the whole stack:**
+- Few-shot examples need a vocabulary to label
+- Schemas need a categorical space to encode
+- Review prompts need a target to evaluate against
+- If you cannot write down the criteria, you do not yet have a problem statement worth shipping
 
 ---
 
 ## 3. `tool_use` for JSON Schemas — The Most Reliable Structured Output
 
-The most reliable way to get structured output from Claude is not to ask for JSON in the prompt. It is to declare a tool with a JSON schema and let the model "call" that tool. The schema becomes the contract; the model's job is to fill it in.
+The most reliable way to get structured output from Claude is **not** to ask for JSON in the prompt. It is to declare a tool with a JSON schema and let the model "call" that tool. The schema becomes the contract; the model's job is to fill it in.
 
-This works because the API treats tool input as a typed object the model has to construct, not as free-form generation that happens to look like JSON. The model can no longer return `{"name": "Acme"` with a missing brace, or wrap the JSON in markdown fences, or preface it with "Sure, here's the JSON:". Those are all syntax errors that tool use eliminates by construction.
+**Why this works:** the API treats tool input as a typed object the model has to construct, not as free-form generation that happens to look like JSON.
+
+**Failure modes eliminated by construction:**
+- `{"name": "Acme"` with a missing brace
+- JSON wrapped in markdown fences
+- Preambles like "Sure, here's the JSON:"
 
 A minimal extraction tool looks like this:
 
@@ -111,9 +139,17 @@ response = client.messages.create(
 extraction = next(b.input for b in response.content if b.type == "tool_use")
 ```
 
-Notice that the schema is doing several jobs at once: it tells the model which fields to look for, which are required, which may be null, and which belong to a closed set of values. Each of those signals is enforced before the response leaves the API. The model can still produce semantically wrong values — that's a separate problem covered later — but it cannot produce structurally wrong ones.
+**The schema does several jobs at once:**
+- Tells the model which fields to look for
+- Which are required
+- Which may be null
+- Which belong to a closed set of values
 
-When you compare this to "please return JSON in the following format" prompting, the failure rate on schema conformance drops by roughly an order of magnitude in practice. There is no production reason to use prompt-only JSON when tool use is available.
+Each of those signals is enforced before the response leaves the API. The model can still produce semantically wrong values — that's a separate problem covered later — but it cannot produce structurally wrong ones.
+
+**Bottom line:**
+- Compared to "please return JSON in the following format" prompting, schema-conformance failure rate drops by roughly an order of magnitude in practice
+- There is no production reason to use prompt-only JSON when tool use is available
 
 ---
 
@@ -137,25 +173,42 @@ Do you need a structured response on every call?
          └── Several → "any"  (must call one, model picks)
 ```
 
-Two anti-patterns worth flagging. First, `"auto"` is not "almost always calls the tool." It is "the model may decide a text response is more appropriate." If your downstream consumer assumes a tool input dict, `"auto"` will eventually surprise you. Second, do not use forced tool selection (`{"type": "tool", ...}`) in cases where the document type is unknown and you actually need the model to discriminate — that's what `"any"` is for.
+**Two anti-patterns worth flagging:**
+- `"auto"` is **not** "almost always calls the tool." It is "the model may decide a text response is more appropriate." If your downstream consumer assumes a tool input dict, `"auto"` will eventually surprise you.
+- Do **not** use forced tool selection (`{"type": "tool", ...}`) when the document type is unknown and you actually need the model to discriminate — that's what `"any"` is for.
 
-The exam scenario to watch for: a question describes an extraction pipeline that "occasionally returns plain text" and asks how to fix it. The answer is almost always "switch from `auto` to `any` (or forced)." Do not pick the option that proposes a stricter prompt or a retry loop — those don't address the root cause.
+**Exam scenario to watch for:**
+- A question describes an extraction pipeline that "occasionally returns plain text" and asks how to fix it
+- Answer: switch from `auto` to `any` (or forced)
+- Distractors to reject: stricter prompt, retry loop — these don't address the root cause
 
 ---
 
 ## 5. Schema Design: Required, Optional, Nullable, Enum + `"other"`
 
-Schema design is where most teams accidentally re-introduce the problems tool use was supposed to solve. The four dimensions you need to get right are required vs optional, optional vs nullable, closed enum vs open enum, and how you handle the long tail.
+Schema design is where most teams accidentally re-introduce the problems tool use was supposed to solve.
+
+**Four dimensions to get right:**
+- Required vs optional
+- Optional vs nullable
+- Closed enum vs open enum
+- How you handle the long tail
 
 ### Required vs optional
 
-A field is **required** when the document is malformed without it — every invoice has a total. A field is **optional** (omitted from the `required` list) when the field's absence from the document is meaningful and you'd rather see it missing than fabricated.
+- **Required** — the document is malformed without it (every invoice has a total)
+- **Optional** (omitted from `required` list) — the field's absence is meaningful and you'd rather see it missing than fabricated
 
 ### Nullable vs absent
 
-These are not the same thing. **Optional** means "the model may omit the key." **Nullable** means "the key must be present, but its value may be `null`." The distinction matters for downstream code: nullable forces every consumer to handle the null case explicitly, while optional lets consumers `.get()` and move on.
+- **Optional** — "the model may omit the key"
+- **Nullable** — "the key must be present, but its value may be `null`"
+- Why it matters: nullable forces every consumer to handle the null case explicitly; optional lets consumers `.get()` and move on
 
-The exam-favored pattern: declare a field as `["string", "null"]` when the source document might genuinely lack it, and the model's instruction is "use null instead of guessing." This is the single most effective anti-fabrication pattern in the schema toolkit.
+**Exam-favored pattern:**
+- Declare a field as `["string", "null"]` when the source document might genuinely lack it
+- Pair with the instruction "use null instead of guessing"
+- This is the single most effective anti-fabrication pattern in the schema toolkit
 
 ```json
 {
@@ -182,19 +235,34 @@ Closed enums are clean until the day a real document doesn't fit any of your cat
 }
 ```
 
-Now the model has a graceful degradation path. Downstream you can monitor the rate of `"other"` responses and use them to discover the categories you missed. A related pattern for ambiguous inputs is an `"unclear"` enum value, which signals to the human reviewer that the model recognized the ambiguity rather than guessing through it.
+**Why this works:**
+- The model has a graceful degradation path
+- Downstream, monitor the rate of `"other"` responses to discover categories you missed
+- For ambiguous inputs, add an `"unclear"` enum value — signals the human reviewer that the model recognized the ambiguity rather than guessing through it
 
-The trap to avoid is a closed enum with no escape valve in a domain you don't fully understand. Add `"other"` from day one — it costs nothing and prevents a class of failures that's hard to debug after the fact.
+**Trap to avoid:**
+- A closed enum with no escape valve in a domain you don't fully understand
+- Add `"other"` from day one — it costs nothing and prevents a class of failures that's hard to debug after the fact
 
 ---
 
 ## 6. Syntax Errors vs Semantic Errors — What Tool Use Solves and What It Doesn't
 
-Tool use eliminates **syntax errors**: malformed JSON, missing required fields, wrong types, values outside the enum. Those are gone the moment you wire up the schema. Treat them as a solved problem.
+**Tool use eliminates syntax errors:**
+- Malformed JSON
+- Missing required fields
+- Wrong types
+- Values outside the enum
 
-Tool use does not eliminate **semantic errors**: line items that don't sum to the stated total, a date in the right format but the wrong year, an address parsed into the wrong fields, a fabricated tax ID for a document that didn't have one. The schema is satisfied; the values are wrong.
+These are gone the moment you wire up the schema. Treat them as a solved problem.
 
-This is the most consistently tested distinction in the structured-output portion of the exam, and it appears in two flavors:
+**Tool use does NOT eliminate semantic errors:**
+- Line items that don't sum to the stated total
+- A date in the right format but the wrong year
+- An address parsed into the wrong fields
+- A fabricated tax ID for a document that didn't have one
+
+The schema is satisfied; the values are wrong. This is the most consistently tested distinction in the structured-output portion of the exam, and it appears in two flavors:
 
 | Problem | Category | What actually fixes it |
 |---|---|---|
@@ -216,7 +284,10 @@ The self-correction pattern that helps with semantic errors is to add **derived 
 }
 ```
 
-When `totals_match` is `false`, you have a semantic error the schema couldn't have caught. Route those rows to human review. The schema didn't fix the error — but it surfaced it instead of letting it through silently.
+**When `totals_match` is `false`:**
+- You have a semantic error the schema couldn't have caught
+- Route those rows to human review
+- The schema didn't fix the error — but it surfaced it instead of letting it through silently
 
 ---
 
@@ -252,7 +323,9 @@ def extract_with_retry(document: str, max_retries: int = 2):
     raise RuntimeError("Extraction did not validate after retries.")
 ```
 
-The decision rule is the load-bearing part. Retries only help when **the information is in the source document** and the model formatted it wrong. Retries do not help when **the information is absent**.
+**Decision rule (load-bearing):**
+- Retries help when the information is in the source document and the model formatted it wrong
+- Retries do NOT help when the information is absent
 
 | Failure | Information present? | Retry helps? |
 |---|---|---|
@@ -262,9 +335,13 @@ The decision rule is the load-bearing part. Retries only help when **the informa
 | `tax_id` was never in the document; model invented one | No | No — the retry will invent a different one |
 | Document is a scan with the relevant region cut off | No | No |
 
-For the second class, the right answer is to allow `null` in the schema, instruct the model to use it, and treat persistent retry failures as a signal to route the document to human review. Looping more times against missing information just burns tokens.
+**For the second class (information absent), the right answer:**
+- Allow `null` in the schema
+- Instruct the model to use it
+- Treat persistent retry failures as a signal to route the document to human review
+- Looping more times against missing information just burns tokens
 
-The exam will offer "increase the retry count" as a distractor for information-absent failures. Reject it.
+**Exam distractor:** "increase the retry count" for information-absent failures. Reject it.
 
 ---
 
@@ -298,9 +375,15 @@ Once your extraction pipeline is running at scale, you'll have a steady drip of 
 }
 ```
 
-When you analyze a week of false positives and see that 60% of them carry `detected_pattern: "currency_symbol_in_amount_field"`, you have a fix target: update the prompt or schema description to handle currency symbols explicitly. Without `detected_pattern`, you'd be staring at sixty unrelated-looking errors.
+**Why this is high-leverage:**
+- Analyze a week of false positives and see that 60% carry `detected_pattern: "currency_symbol_in_amount_field"` → you have a fix target
+- Update the prompt or schema description to handle currency symbols explicitly
+- Without `detected_pattern`, you'd be staring at sixty unrelated-looking errors
 
-This is also the pattern that makes calibrated human review feasible. Confidence scores alone are unreliable as escalation signals — they're famously poorly calibrated. But confidence paired with a pattern label gives reviewers a reason to trust or distrust each finding, and gives engineers a way to measure improvement over time.
+**Why it makes calibrated human review feasible:**
+- Confidence scores alone are unreliable as escalation signals — they're famously poorly calibrated
+- Confidence paired with a pattern label gives reviewers a reason to trust or distrust each finding
+- And gives engineers a way to measure improvement over time
 
 ---
 
@@ -329,7 +412,9 @@ The decision matrix:
 | Nightly test-case generation from yesterday's commits | Batch |
 | Backfilling extractions across a 100k-document archive | Batch |
 
-The math you need to be ready to do: if your SLA is 30 hours and a batch takes up to 24, you can submit every 4 hours and still meet the SLA with a buffer. If your SLA is 4 hours, you cannot use the Batch API at all — even a fast batch can miss that window.
+**The math you need to be ready to do:**
+- SLA = 30 hours, batch up to 24 hours → submit every 4 hours and still meet the SLA with a buffer
+- SLA = 4 hours → you cannot use the Batch API at all (even a fast batch can miss that window)
 
 ### Failure handling with `custom_id`
 
@@ -349,15 +434,24 @@ if failed:
     client.messages.batches.create(requests=failed)
 ```
 
-The `custom_id` is the join key between your input batch and the output stream. Without it, you cannot tell which response goes with which input. This is non-negotiable for any batch workload — generate a deterministic ID per input and persist it.
+**`custom_id` rules:**
+- It's the join key between your input batch and the output stream
+- Without it, you cannot tell which response goes with which input
+- Non-negotiable for any batch workload — generate a deterministic ID per input and persist it
 
 ---
 
 ## 10. Multi-Instance Review (Why 2 Claude Instances Beat Self-Review)
 
-Asking Claude to review its own output is a popular pattern that doesn't work as well as it sounds. The model that just generated the response carries the reasoning context that produced it, and that context biases it toward agreeing with the choice it already made. Self-review catches some surface errors, but it consistently misses the deeper "the whole approach is wrong" failures.
+**Why self-review under-performs:**
+- The model that just generated the response carries the reasoning context that produced it
+- That context biases it toward agreeing with the choice it already made
+- Self-review catches some surface errors but consistently misses deeper "the whole approach is wrong" failures
 
-The fix is structural, not prompt-based: spin up a **second Claude instance** with no exposure to the generation reasoning, give it only the artifact and a review rubric, and let it critique fresh.
+**The fix is structural, not prompt-based:**
+- Spin up a second Claude instance with no exposure to the generation reasoning
+- Give it only the artifact and a review rubric
+- Let it critique fresh
 
 ```python
 def two_instance_review(diff: str) -> dict:
@@ -382,15 +476,25 @@ def two_instance_review(diff: str) -> dict:
     return merge(findings, parse_review(review))
 ```
 
-Two design notes. First, the review instance must not see the generation conversation — that's the whole point. If you accidentally pass the generation transcript into the review prompt, you've reproduced self-review with extra steps. Second, extended thinking on the original instance is not a substitute. More thinking from the same instance still has the same context bias. The independence is what's load-bearing.
+**Two design notes:**
+- The review instance must NOT see the generation conversation — that's the whole point. If you accidentally pass the generation transcript into the review prompt, you've reproduced self-review with extra steps.
+- Extended thinking on the original instance is not a substitute. More thinking from the same instance still has the same context bias. The independence is what's load-bearing.
 
-The exam phrasing to recognize: a question describing inconsistent code review, attention dilution, or "the model misses obvious bugs in its own generated code" is asking about multi-instance review. Distractors include "increase the temperature," "use extended thinking," and "add more few-shot examples." All wrong. The answer is the structural separation.
+**Exam phrasing to recognize:**
+- "Inconsistent code review," "attention dilution," or "the model misses obvious bugs in its own generated code" → multi-instance review
+- Distractors to reject: "increase the temperature," "use extended thinking," "add more few-shot examples"
+- The correct answer is the structural separation
 
 ---
 
 ## 11. Multi-Pass Review: Per-File + Cross-File Integration
 
-A 14-file pull request reviewed in a single pass produces inconsistent findings, missed bugs in middle files, and contradictory observations across files. The cause is attention dilution: the model can hold a few hundred lines of code in sharp focus, but at multi-thousand-line scope it starts skimming. Throwing more context window at the problem doesn't fix attention quality.
+**The single-pass failure mode on a 14-file PR:**
+- Inconsistent findings
+- Missed bugs in middle files
+- Contradictory observations across files
+
+**Cause:** attention dilution. The model can hold a few hundred lines of code in sharp focus, but at multi-thousand-line scope it starts skimming. Throwing more context window at the problem doesn't fix attention quality.
 
 The pattern that does fix it is a **two-pass structure**:
 
@@ -410,7 +514,11 @@ def multi_pass_review(pr_files: list[File]) -> Review:
     return Review(per_file=per_file, cross_file=cross_file)
 ```
 
-Two distractors the exam likes for this scenario. The first is "use a model with a larger context window" — context size is not the constraint, attention quality is. The second is "require consensus across multiple runs before reporting a finding" — consensus suppresses intermittent-but-real bugs along with the noise. Per-file plus cross-file is the right answer because it matches the structure of where bugs actually live.
+**Two distractors the exam likes for this scenario:**
+- "Use a model with a larger context window" — context size is not the constraint, attention quality is
+- "Require consensus across multiple runs before reporting a finding" — consensus suppresses intermittent-but-real bugs along with the noise
+
+Per-file plus cross-file is the right answer because it matches the structure of where bugs actually live.
 
 ---
 
@@ -485,4 +593,11 @@ Did validation fail?
 | Values outside the enum | Plausible-but-incorrect categorization |
 | Markdown fences around the JSON | Date in valid format but wrong year |
 
-When the failure is in the right column, the fix is somewhere else in the stack: nullable fields, derived self-check fields, validation-retry, multi-instance review, or human-in-the-loop routing. Match the layer to the failure and the system holds together.
+**When the failure is in the right column, the fix is somewhere else in the stack:**
+- Nullable fields
+- Derived self-check fields
+- Validation-retry
+- Multi-instance review
+- Human-in-the-loop routing
+
+Match the layer to the failure and the system holds together.
