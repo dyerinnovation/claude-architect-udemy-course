@@ -1,0 +1,126 @@
+/* Dyer Innovation — Study Guide print stylesheet
+   Tokens mirror slidev/design-system.css */
+
+@page {
+  size: Letter;
+  margin: 1in;
+  @bottom-center {
+    content: "D Y E R   I N N O V A T I O N  ·  Page " counter(page) " of " counter(pages);
+    font-family: Newsreader, "Times New Roman", serif;
+    font-size: 9pt;
+    color: #14706D;
+    letter-spacing: 0.04em;
+  }
+}
+
+body {
+  font-family: Geist, Inter, "Helvetica Neue", sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #1a1f1d;
+  background: #ffffff;
+  max-width: 100%;
+}
+
+h1 {
+  font-family: Newsreader, "Times New Roman", serif;
+  font-size: 28pt;
+  font-weight: 700;
+  color: #294843;
+  page-break-before: always;
+  margin-top: 0;
+  letter-spacing: -0.01em;
+}
+h1:first-of-type { page-break-before: avoid; }
+
+h2 {
+  font-family: Newsreader, "Times New Roman", serif;
+  font-size: 20pt;
+  font-weight: 600;
+  color: #14706D;
+  margin-top: 1.4em;
+  letter-spacing: -0.005em;
+}
+
+h3 {
+  font-family: Newsreader, "Times New Roman", serif;
+  font-size: 16pt;
+  font-weight: 600;
+  color: #14706D;
+  margin-top: 1.2em;
+}
+
+p, li { orphans: 2; widows: 2; }
+
+code {
+  font-family: "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  background: #f4f7f4;
+  color: #294843;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #d6dfd9;
+}
+
+pre {
+  background: #f4f7f4;
+  padding: 12pt;
+  border-radius: 6px;
+  border-left: 3px solid #14706D;
+  page-break-inside: avoid;
+  font-size: 9.5pt;
+  line-height: 1.4;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  border: 0;
+  color: #294843;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+th, td {
+  text-align: left;
+  padding: 6pt 8pt;
+  border-bottom: 1px solid #d6dfd9;
+  vertical-align: top;
+}
+
+th {
+  background: #f4f7f4;
+  color: #294843;
+  font-weight: 600;
+  border-bottom: 2px solid #14706D;
+}
+
+blockquote {
+  margin: 1em 0;
+  padding: 8pt 14pt;
+  border-left: 3px solid #14706D;
+  color: #335953;
+  font-style: italic;
+  background: #f4f7f4;
+  page-break-inside: avoid;
+}
+
+a {
+  color: #14706D;
+  text-decoration: underline;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #d6dfd9;
+  margin: 1.5em 0;
+}
+
+ul, ol { margin: 0.5em 0; padding-left: 1.5em; }
+li { margin: 0.25em 0; }
