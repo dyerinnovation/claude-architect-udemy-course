@@ -1,3 +1,5 @@
+# Claude Certified Architect — Foundations: Customer Support Study Guide
+
 **Claude Certified Architect**
 
 **Exam Study Guide**
@@ -8,25 +10,21 @@ Scenario 1: Customer Support Resolution Agent
 
 ## 1. Scenario Overview
 
-Scenario 1 of the Anthropic Claude Certified Architect exam centers on a
-customer support resolution agent built with the Claude Agent SDK. The
-agent handles high-ambiguity requests like returns, billing disputes,
-and account issues. It has access to backend systems through custom MCP
-tools: `get_customer`, `lookup_order`, `process_refund`, and
-`escalate_to_human`. The target is 80%+ first-contact resolution while
-knowing when to escalate.
+**The scenario at a glance:**
 
-This guide covers the dominant exam domains for this scenario:
-**Domain 1 (Agentic Architecture & Orchestration)** and **Domain 5
-(Context Management & Reliability)**, with **Domain 4 (Prompt
-Engineering)** touchpoints around tool selection and escalation framing.
-Domain 2 (Tool Design & MCP Integration) appears as supporting material
-for structured error responses and tool description quality.
+- Scenario 1 of the Anthropic Claude Certified Architect exam centers on a customer support resolution agent built with the Claude Agent SDK
+- The agent handles high-ambiguity requests like returns, billing disputes, and account issues
+- It has access to backend systems through custom MCP tools: `get_customer`, `lookup_order`, `process_refund`, and `escalate_to_human`
+- Target: 80%+ first-contact resolution while knowing when to escalate
 
-The scenario tests one decision repeatedly: pick the right *level* of
-intervention. Not every problem needs an architectural change; not every
-problem can be fixed with a better prompt. Knowing which is which is the
-core skill the exam evaluates here.
+**Domains covered:**
+
+- **Domain 1 (Agentic Architecture & Orchestration)** — dominant
+- **Domain 5 (Context Management & Reliability)** — dominant
+- **Domain 4 (Prompt Engineering)** — touchpoints around tool selection and escalation framing
+- **Domain 2 (Tool Design & MCP Integration)** — supporting material for structured error responses and tool description quality
+
+**Core skill the exam evaluates:** pick the right *level* of intervention. Not every problem needs an architectural change; not every problem can be fixed with a better prompt. Knowing which is which is the central decision repeatedly tested.
 
 ## 2. The Intervention Hierarchy
 
@@ -41,20 +39,22 @@ level of intervention. There is an implicit hierarchy the exam expects:
 | 4 | Programmatic hooks | Hard business rule that must NEVER be violated | Identity verification before refunds: a prerequisite gate |
 | 5 | Architectural changes | Simpler fixes tried and failed, or fundamental capability gap | Preprocessing layer, separate classifier, model tier upgrade |
 
-> **Exam Decision Rule**
->
-> Always ask: has the simplest proportionate fix been tried? The
-> question will tell you if lower-level fixes have already been
-> attempted. If not, start at the lowest applicable level. Only escalate
-> to architectural solutions when the problem requires enforcement
-> guarantees or simpler fixes are explicitly ruled out.
+**Exam Decision Rule**
+
+- Always ask: has the simplest proportionate fix been tried?
+- The question will tell you if lower-level fixes have already been attempted
+- If not, start at the lowest applicable level
+- Only escalate to architectural solutions when:
+  - The problem requires enforcement guarantees, OR
+  - Simpler fixes are explicitly ruled out
 
 ### Key Distinction: Skill Gap vs Safety Constraint
 
-This is the fundamental fork in the exam's decision tree. A **skill
-gap** means the agent doesn't know the right pattern. A **safety
-constraint** means the agent must be prevented from violating a rule.
-Each demands a different category of solution.
+The fundamental fork in the exam's decision tree:
+
+- **Skill gap** = the agent doesn't know the right pattern
+- **Safety constraint** = the agent must be prevented from violating a rule
+- Each demands a different category of solution
 
 | Skill Gap (Prompt-Level Fix) | Safety Constraint (Programmatic Fix) |
 |------------------------------|--------------------------------------|
@@ -65,18 +65,20 @@ Each demands a different category of solution.
 
 ## 3. Few-Shot Examples vs Architectural Decomposition
 
-A common exam pattern: an agent already handles individual concerns at
-high accuracy (e.g., 94%) but underperforms on multi-concern messages
-(e.g., 58% tool-selection accuracy). The intuitive move is a
-preprocessing layer with a separate model call to decompose the message.
-That is over-engineering for this failure mode.
+**Common exam pattern:**
 
-The agent has the underlying capability; it just lacks pattern guidance
-for the multi-concern case. **Few-shot examples are the proportionate,
-low-cost fix** because they teach the model a decomposition pattern it
-can then generalize to novel multi-concern combinations. A preprocessing
-layer is appropriate only when simpler fixes have been tried and failed,
-or when the agent fundamentally cannot decompose without external help.
+- Agent handles individual concerns at high accuracy (e.g., 94%)
+- Agent underperforms on multi-concern messages (e.g., 58% tool-selection accuracy)
+- Intuitive but wrong move: preprocessing layer with a separate model call to decompose the message
+- That is over-engineering for this failure mode
+
+**Why few-shot examples are the right fix:**
+
+- The agent has the underlying capability; it just lacks pattern guidance for the multi-concern case
+- **Few-shot examples are the proportionate, low-cost fix** — they teach the model a decomposition pattern it can generalize to novel multi-concern combinations
+- A preprocessing layer is appropriate only when:
+  - Simpler fixes have been tried and failed, OR
+  - The agent fundamentally cannot decompose without external help
 
 ## 4. Valid Escalation Triggers: Policy Gaps vs Discomfort
 
@@ -102,21 +104,22 @@ reasonable but fails the validity test:
 | The request has multiple parts | Multi-concern requests are within agent capability | Decompose and handle each concern |
 | Customer might change their mind | Speculating about future feelings is not actionable | Process the stated request per policy |
 
-> **Exam Pattern**
->
-> When a question asks about escalation, check if the scenario describes
-> a POLICY GAP (policy is silent or ambiguous on the specific request).
-> If yes, that's almost always the correct escalation trigger. If the
-> other options describe emotional discomfort, prediction of customer
-> behavior, or self-assessed confidence, they're distractors.
+**Exam Pattern**
+
+- When a question asks about escalation, check if the scenario describes a POLICY GAP (policy is silent or ambiguous on the specific request)
+- If yes, that's almost always the correct escalation trigger
+- If the other options describe any of the following, they're distractors:
+  - Emotional discomfort
+  - Prediction of customer behavior
+  - Self-assessed confidence
 
 ## 5. The Evaluator-Optimizer Pattern
 
-The evaluator-optimizer pattern adds a self-critique step before the
-agent presents its response. The agent generates a draft, then evaluates
-that draft against specific completeness criteria (e.g., does it include
-policy context, timelines, and next steps?), and revises as needed
-before sending.
+The evaluator-optimizer pattern adds a self-critique step before the agent presents its response. The flow:
+
+- Agent generates a draft
+- Agent evaluates that draft against specific completeness criteria (e.g., does it include policy context, timelines, and next steps?)
+- Agent revises as needed before sending
 
 ### When To Use Each Approach
 
@@ -128,30 +131,30 @@ before sending.
 | Static: same examples for every request | Dynamic: adapts criteria evaluation to each individual response |
 | Best for: format consistency, tool selection patterns, escalation calibration | Best for: response completeness, quality assurance, catching case-specific omissions |
 
-> **Key Signal in the Question**
->
-> The phrase "specific context gaps vary by case" is the decisive clue.
-> When variability is the problem, static examples can't cover it. You
-> need a dynamic quality check — that's the evaluator-optimizer pattern.
->
-> Few-shot examples are a CHECKLIST of known patterns. The
-> evaluator-optimizer is a REVIEWER who reads each response fresh.
+**Key Signal in the Question**
+
+- The phrase "specific context gaps vary by case" is the decisive clue
+- When variability is the problem, static examples can't cover it
+- You need a dynamic quality check — that's the evaluator-optimizer pattern
+- Mental model:
+  - Few-shot examples = a CHECKLIST of known patterns
+  - Evaluator-optimizer = a REVIEWER who reads each response fresh
 
 ## 6. Structured Error Responses for MCP Tools (Domain 2, Task 2.2)
 
-When an MCP tool fails and returns a generic response like "Operation
-failed" or "Error occurred," the agent has no way to make an intelligent
-recovery decision. It cannot distinguish between a temporary network
-timeout (worth retrying), an invalid input (needs correction), a policy
-violation (should explain to customer), or a permission issue (needs
-escalation). Generic errors force the agent into a one-size-fits-all
-failure response.
+**Why generic errors fail the agent:**
+
+- When an MCP tool returns "Operation failed" or "Error occurred," the agent cannot make an intelligent recovery decision
+- It cannot distinguish between:
+  - A temporary network timeout (worth retrying)
+  - An invalid input (needs correction)
+  - A policy violation (should explain to customer)
+  - A permission issue (needs escalation)
+- Generic errors force the agent into a one-size-fits-all failure response
 
 ### The Structured Error Response Pattern
 
-Every MCP tool should return structured error metadata that enables the
-agent to take the right next action. The standard pattern includes
-three key fields:
+Every MCP tool should return structured error metadata that enables the agent to take the right next action. The standard pattern includes three key fields:
 
 | Field | Purpose | Example Values |
 |-------|---------|----------------|
@@ -172,26 +175,24 @@ Each error category maps to a distinct agent response pattern:
 
 ### Applied Example: process_refund Error Response
 
-When the agent calls `process_refund` for a $750 return, instead of a
-generic "Refund failed," the tool should return structured metadata
-like: `errorCategory: "business"`, `isRetryable: false`,
-`description: "Refund amount of $750 exceeds the $500 automatic approval limit. This refund requires manager authorization."`
-The agent can then tell the customer: "I can see your refund qualifies,
-but because it's above our automatic approval threshold, I need to route
-this to a manager for authorization. Let me transfer you now." This is
-dramatically better than: "I'm sorry, I wasn't able to process your
-refund. Let me transfer you to someone who can help."
+When the agent calls `process_refund` for a $750 return:
+
+- **Generic (bad) response:** "Refund failed"
+- **Structured (good) response:**
+  - `errorCategory: "business"`
+  - `isRetryable: false`
+  - `description: "Refund amount of $750 exceeds the $500 automatic approval limit. This refund requires manager authorization."`
+- **Resulting customer message (good):** "I can see your refund qualifies, but because it's above our automatic approval threshold, I need to route this to a manager for authorization. Let me transfer you now."
+- **Resulting customer message (bad, with generic error):** "I'm sorry, I wasn't able to process your refund. Let me transfer you to someone who can help."
 
 ### Anti-Pattern: Access Failure vs Valid Empty Results
 
-A critical distinction the exam tests: a tool that times out (access
-failure) is fundamentally different from a tool that successfully
-queries but finds no matching records (valid empty result). If
-`get_customer` times out and returns an empty result marked as success,
-the agent might tell the customer "we don't have an account for you"
-when the real answer is "our system is temporarily unavailable." Always
-use the `isError` flag to distinguish these cases. An empty result from
-a successful query is NOT an error.
+**Critical distinction the exam tests:**
+
+- A tool that times out (access failure) is fundamentally different from a tool that successfully queries but finds no matching records (valid empty result)
+- Example: if `get_customer` times out and returns an empty result marked as success, the agent might tell the customer "we don't have an account for you" when the real answer is "our system is temporarily unavailable"
+- Always use the `isError` flag to distinguish these cases
+- An empty result from a successful query is NOT an error
 
 ## 7. Structured Handoff Summaries (Domain 1, Task 1.4)
 
@@ -201,11 +202,10 @@ pattern.
 
 ### Why Handoff Summaries Matter
 
-When the agent escalates to a human, that human agent typically does not
-have access to the full conversation transcript. They receive a queue
-ticket. Without a structured summary, the human agent must re-ask the
-customer every question the AI agent already answered, creating a
-terrible customer experience.
+- When the agent escalates to a human, the human agent typically does NOT have access to the full conversation transcript
+- They receive a queue ticket
+- Without a structured summary, the human agent must re-ask the customer every question the AI agent already answered
+- Result: terrible customer experience
 
 ### The Required Handoff Fields
 
@@ -218,14 +218,16 @@ terrible customer experience.
 
 ### Applied Example
 
-Instead of escalating with just "Customer needs help with a refund," the
-agent should compile: Customer ID: CUST-48291. Root Cause: Customer was
-charged twice for Order #7834 ($129.99 each) due to a payment processing
-error on March 3. One charge is confirmed duplicate. Recommended Action:
-Process refund of $129.99 for the duplicate charge. Customer has been
-informed the refund will take 5–7 business days. This lets the human
-agent resolve the case in one interaction instead of starting from
-scratch.
+**Bad escalation:** "Customer needs help with a refund."
+
+**Good escalation (compiled handoff):**
+
+- **Customer ID:** CUST-48291
+- **Root Cause:** Customer was charged twice for Order #7834 ($129.99 each) due to a payment processing error on March 3. One charge is confirmed duplicate.
+- **Recommended Action:** Process refund of $129.99 for the duplicate charge
+- **Customer Communication:** Customer has been informed the refund will take 5–7 business days
+
+This lets the human agent resolve the case in one interaction instead of starting from scratch.
 
 ## 8. Outbound Tool Call Interception (Domain 1, Task 1.5)
 
@@ -243,95 +245,76 @@ intercepting outgoing tool calls BEFORE execution to enforce policy.
 
 ### Applied Example: Refund Threshold Enforcement
 
-Business policy says refunds over $500 require human approval. The agent
-calls `process_refund` with `amount: $750`. A pre-call interception hook
-catches this before the refund executes, blocks the call, and redirects
-to the escalation workflow. The agent never successfully calls
-`process_refund` for the $750 — the hook guarantees the policy is
-enforced regardless of what the model decides. This is different from a
-prerequisite gate (which ensures steps happen in order). This is a
-parameter-based policy check (which ensures specific values don't
-violate business rules).
+- Business policy: refunds over $500 require human approval
+- Agent calls `process_refund` with `amount: $750`
+- A pre-call interception hook catches this before the refund executes, blocks the call, and redirects to the escalation workflow
+- The agent never successfully calls `process_refund` for the $750
+- The hook guarantees policy enforcement regardless of what the model decides
+- **Distinction from prerequisite gate:**
+  - Prerequisite gate = ensures steps happen in order
+  - Pre-call interception = parameter-based policy check (specific values don't violate business rules)
 
-> **Exam Distinction: Three Programmatic Mechanisms**
->
-> **Prerequisite gate:** Ensures Step A completes before Step B can
-> start (identity verification before refund).
->
-> **PostToolUse hook:** Transforms tool results after execution (data
-> format normalization).
->
-> **Pre-call interception:** Blocks or redirects tool calls before
-> execution based on parameters (refund amount exceeds policy limit).
->
-> All three are programmatic enforcement. The exam may test whether you
-> can pick the right one for a given scenario.
+**Exam Distinction: Three Programmatic Mechanisms**
+
+- **Prerequisite gate:** Ensures Step A completes before Step B can start (identity verification before refund)
+- **PostToolUse hook:** Transforms tool results after execution (data format normalization)
+- **Pre-call interception:** Blocks or redirects tool calls before execution based on parameters (refund amount exceeds policy limit)
+- All three are programmatic enforcement — the exam may test whether you can pick the right one for a given scenario
 
 ## 9. Trimming Verbose Tool Outputs (Domain 5, Task 5.1)
 
-When `lookup_order` returns a full order record, it might include 40+
-fields: internal IDs, warehouse codes, shipping carrier details, tax
-calculations, audit timestamps, and more. The agent only needs 5 fields
-for the current task (order status, item name, amount, date, return
-eligibility). If these verbose results accumulate across multiple tool
-calls in a long conversation, they consume a disproportionate share of
-the context window, crowding out actual conversation content.
+**The problem:**
+
+- `lookup_order` may return a full order record with 40+ fields: internal IDs, warehouse codes, shipping carrier details, tax calculations, audit timestamps, etc.
+- The agent only needs ~5 fields for the current task (order status, item name, amount, date, return eligibility)
+- If verbose results accumulate across multiple tool calls in a long conversation, they consume a disproportionate share of the context window
+- Result: actual conversation content gets crowded out
 
 ### The Solution: Trim Before Accumulation
 
-Use a PostToolUse hook or result filtering step to trim tool outputs to
-only the fields relevant to the agent's task before they enter the
-conversation context. For a return-related query, keep: `order_id`,
-`status`, `item_name`, `amount`, `purchase_date`, `return_eligible`.
-Drop: `internal_warehouse_id`, `tax_breakdown`,
-`shipping_tracking_events`, `audit_log`, etc.
+- Use a PostToolUse hook or result filtering step to trim tool outputs to only the fields relevant to the agent's task before they enter the conversation context
+- For a return-related query:
+  - **Keep:** `order_id`, `status`, `item_name`, `amount`, `purchase_date`, `return_eligible`
+  - **Drop:** `internal_warehouse_id`, `tax_breakdown`, `shipping_tracking_events`, `audit_log`, etc.
 
 ### Relationship to Case Facts Block
 
-These two patterns work together. Trimming verbose outputs prevents
-context bloat from tool results. The case facts block prevents critical
-data loss from summarization. Together, they manage both ends of the
-context management problem: too much irrelevant data coming in, and too
-little critical data being preserved.
+These two patterns work together to manage both ends of the context management problem:
+
+- **Trimming verbose outputs** → prevents context bloat from tool results (too much irrelevant data coming in)
+- **Case facts block** → prevents critical data loss from summarization (too little critical data being preserved)
 
 ## 10. Position-Aware Context Organization (Domain 5, Task 5.1)
 
-Models reliably process information at the beginning and end of long
-inputs but may miss or underweight findings from middle sections — the
-"lost in the middle" effect. In a long customer support conversation or
-a large aggregated input, critical details buried in the middle are
-more likely to be overlooked than details at the start or end.
+**The "lost in the middle" effect:**
+
+- Models reliably process information at the beginning and end of long inputs
+- Models may miss or underweight findings from middle sections
+- In a long customer support conversation or large aggregated input, critical details buried in the middle are more likely to be overlooked than details at the start or end
 
 ### The Mitigation
 
-Place key findings summaries at the BEGINNING of aggregated inputs.
-Organize detailed results with explicit section headers so the model can
-navigate rather than scanning linearly. When passing results from
-multiple tool calls or subagents, lead with a summary of key facts
-before presenting the full details. This gives the model the most
-important information in the position where it's most reliably
-processed.
+- Place key findings summaries at the BEGINNING of aggregated inputs
+- Organize detailed results with explicit section headers so the model can navigate rather than scanning linearly
+- When passing results from multiple tool calls or subagents, lead with a summary of key facts before presenting the full details
+- This puts the most important information in the position where it's most reliably processed
 
 ## 11. Handling Frustrated Customers (Domain 5, Task 5.2)
 
-When a customer is visibly frustrated (angry language, expressing
-dissatisfaction) but their actual issue is something the agent can
-resolve (standard return, billing correction, status update), the
-correct pattern is:
+**Scenario:** customer is visibly frustrated (angry language, expressing dissatisfaction) but their actual issue is something the agent can resolve (standard return, billing correction, status update).
 
-- **Step 1:** Acknowledge the frustration explicitly ("I understand
-  this is frustrating")
-- **Step 2:** Offer to resolve the issue ("Let me look into this and
-  get it fixed for you right now")
-- **Step 3:** Only escalate if the customer reiterates their preference
-  for a human AFTER you've offered to help
+**Correct pattern:**
 
-The key insight is that frustration alone is NOT an escalation trigger.
-The agent should attempt resolution first. Many frustrated customers are
-satisfied when their issue gets resolved quickly, regardless of whether
-a human or AI does it. But if the customer explicitly says "no, I want a
-person," honor that immediately — do not attempt to convince them
-otherwise.
+- **Step 1:** Acknowledge the frustration explicitly ("I understand this is frustrating")
+- **Step 2:** Offer to resolve the issue ("Let me look into this and get it fixed for you right now")
+- **Step 3:** Only escalate if the customer reiterates their preference for a human AFTER you've offered to help
+
+**Key insights:**
+
+- Frustration alone is NOT an escalation trigger
+- The agent should attempt resolution first
+- Many frustrated customers are satisfied when their issue gets resolved quickly, regardless of whether a human or AI does it
+- But if the customer explicitly says "no, I want a person," honor that immediately — do not attempt to convince them otherwise
 
 ## 12. Key Patterns Reference
 
@@ -356,11 +339,12 @@ the canonical control signal for agentic loops.
 
 ### 12.2 Programmatic Enforcement vs Prompt Guidance (Domain 1, Tasks 1.4 & 1.5)
 
-This is one of the most frequently tested distinctions in the entire
-exam. The decision rule is simple: if the consequence of a miss is
-real-world harm (financial, legal, safety), use programmatic
-enforcement. If the consequence is quality degradation, use prompt-level
-guidance.
+One of the most frequently tested distinctions in the entire exam.
+
+**Decision rule:**
+
+- Consequence of a miss = real-world harm (financial, legal, safety) → **programmatic enforcement**
+- Consequence of a miss = quality degradation → **prompt-level guidance**
 
 **Programmatic Enforcement Mechanisms**
 
@@ -399,13 +383,9 @@ first.
 
 **System Prompt Keyword Interference**
 
-Keywords in system prompts can override well-written tool descriptions.
-For example, if the system prompt says "when the customer mentions their
-account, verify their identity first," the word "account" can trigger
-`get_customer` even when `lookup_order` is more appropriate. When a
-consistent keyword-triggered misrouting pattern persists despite good
-tool descriptions, examine the system prompt for keyword-sensitive
-instructions.
+- Keywords in system prompts can override well-written tool descriptions
+- Example: if the system prompt says "when the customer mentions their account, verify their identity first," the word "account" can trigger `get_customer` even when `lookup_order` is more appropriate
+- When a consistent keyword-triggered misrouting pattern persists despite good tool descriptions, examine the system prompt for keyword-sensitive instructions
 
 ### 12.4 Few-Shot Prompting Best Practices (Domain 4, Task 4.2)
 
@@ -419,33 +399,25 @@ instructions.
 - Enable generalization to novel patterns, not just pattern matching
   against examples
 
-> **When Few-Shot Examples Are the Right Answer**
->
-> The agent has the underlying capability but lacks pattern guidance
-> for a specific situation.
->
-> The failure mode involves inconsistency or ambiguity in judgment, not
-> a hard safety constraint.
->
-> The question describes a "skill gap" not a "safety constraint."
->
-> Simpler fixes (tool descriptions) have already been addressed or
-> aren't the root cause.
+**When Few-Shot Examples Are the Right Answer**
+
+- The agent has the underlying capability but lacks pattern guidance for a specific situation
+- The failure mode involves inconsistency or ambiguity in judgment, not a hard safety constraint
+- The question describes a "skill gap" not a "safety constraint"
+- Simpler fixes (tool descriptions) have already been addressed or aren't the root cause
 
 ### 12.5 Context Management Patterns (Domain 5, Task 5.1)
 
 **Progressive Summarization Risks**
 
-When context reaches capacity and older turns are summarized, specific
-transactional facts (amounts, dates, order numbers, percentages) get
-condensed into vague summaries like "discussed promotional pricing."
-This causes the agent to respond with incorrect values when customers
-reference earlier details.
+- When context reaches capacity, older turns get summarized
+- Specific transactional facts (amounts, dates, order numbers, percentages) get condensed into vague summaries like "discussed promotional pricing"
+- Result: the agent responds with incorrect values when customers reference earlier details
 
 **The Solution: Structured Case Facts Block**
 
-Extract transactional facts into a persistent block that lives outside
-the summarized history. This creates two separate layers of context:
+- Extract transactional facts into a persistent block that lives outside the summarized history
+- This creates two separate layers of context (see table below)
 
 | Summarized History | Case Facts Block (Persistent) |
 |--------------------|-------------------------------|
@@ -474,19 +446,20 @@ handling patterns:
 
 **Parallel Tool Requests**
 
-Claude can request multiple tools in a single turn. If the agent needs
-both customer info and order info, prompt it to batch both requests in
-one turn. The orchestration code should execute all requested tools and
-return all results together before the next API call. This reduces
-unnecessary round-trips.
+- Claude can request multiple tools in a single turn
+- If the agent needs both customer info and order info, prompt it to batch both requests in one turn
+- Orchestration code should execute all requested tools and return all results together before the next API call
+- Benefit: reduces unnecessary round-trips
 
 **Multi-Concern Decomposition**
 
-For complex requests with multiple concerns (e.g., billing dispute +
-shipping update + cancellation), the agent should decompose the request
-into distinct concerns, fetch shared context once (customer ID, account
-info), then investigate each concern using that shared context before
-synthesizing a unified resolution. This avoids redundant data gathering.
+For complex requests with multiple concerns (e.g., billing dispute + shipping update + cancellation), the agent should:
+
+- Decompose the request into distinct concerns
+- Fetch shared context once (customer ID, account info)
+- Investigate each concern using that shared context
+- Synthesize a unified resolution
+- Benefit: avoids redundant data gathering
 
 ## 13. Core Terminology & Technology
 
