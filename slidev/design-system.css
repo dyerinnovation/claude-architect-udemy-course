@@ -238,6 +238,19 @@ code { background: var(--bg-sunk); padding: 1px 6px; border-radius: var(--r-xs);
 pre { background: var(--forest-900); color: var(--mint-100); padding: var(--s-6); border-radius: var(--r-md); overflow: auto; line-height: var(--lh-snug); }
 pre code { background: transparent; padding: 0; border: 0; color: inherit; }
 
+/* Slidev v51 ships .slidev-layout :not(pre) > code (specificity 0,2,1) which
+   sets a dark --slidev-code-background and leaves the inherited text color —
+   that's the "invisible inline code" bug. Match the selector to win, and
+   force both background and color from our design tokens. */
+.slidev-layout :not(pre) > code {
+  background: var(--bg-sunk);
+  color: var(--forest-700);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: var(--r-xs);
+  font-weight: var(--w-medium);
+}
+
 small { font-size: var(--text-xs); color: var(--fg-muted); }
 strong { font-weight: var(--w-semibold); color: var(--fg); }
 em { font-style: italic; }
