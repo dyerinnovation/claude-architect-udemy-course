@@ -69,10 +69,6 @@ The system uses a hub-and-spoke topology with a Coordinator Agent at the center.
 - Subagents operate with isolated context — they do not inherit the coordinator's conversation history automatically
 - The coordinator must explicitly include relevant findings in each subagent's prompt
 
----
-
-# PART I — Core Architectural Patterns
-
 ## 2. Architectural Patterns
 
 These patterns represent the core mental models the CCA expects across
@@ -155,10 +151,6 @@ These require fundamentally different coordinator responses.
 **Coordinator planning:**
 - When all agents succeed but output is incomplete, the root cause is the coordinator's task decomposition
 - Partition research space upfront to prevent overlap
-
----
-
-# PART II — Deep Domain Coverage
 
 ## 3. The Agentic Loop Lifecycle (Task 1.1)
 
@@ -595,11 +587,9 @@ Different content types should be rendered appropriately in synthesis outputs:
 
 **Anti-pattern:** Converting everything to a uniform format (e.g., all bullet points) loses the natural structure that makes each content type readable.
 
----
-
-# PART III — Quick Reference and Anti-Patterns
-
 ## 16. Anti-Patterns to Recognize on Sight
+
+The eleven failure modes below are the patterns the exam reaches for when constructing distractor answers. Each describes the surface symptom, the underlying mistake, and why the correct architectural answer rejects it.
 
 | Anti-Pattern | What It Looks Like | Why It's Wrong |
 |---|---|---|
@@ -615,6 +605,8 @@ Different content types should be rendered appropriately in synthesis outputs:
 | **Raw confidence trust** | Using model's self-reported confidence without calibration | LLM confidence is poorly calibrated; calibrate against labeled validation data |
 
 ## 17. Core Terminology
+
+The vocabulary below appears throughout the exam — knowing each term cold lets you parse the question stem quickly and reject answer choices that misuse the API surface.
 
 | Term | Definition |
 |---|---|
