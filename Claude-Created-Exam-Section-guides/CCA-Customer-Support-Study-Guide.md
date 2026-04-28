@@ -1,12 +1,13 @@
-# Claude Certified Architect — Foundations: Customer Support Study Guide
-
-**Claude Certified Architect**
-
-**Exam Study Guide**
-
-Scenario 1: Customer Support Resolution Agent
-
-*Concepts, Patterns & Decision Frameworks*
+---
+title: "Customer Support Resolution Agent"
+eyebrow: "Claude Certified Architect · Scenario 1"
+subtitle: "A study guide for the intervention hierarchy, valid escalation triggers, structured error and handoff patterns, and context management for long support conversations."
+scenario_num: "01"
+focus_list: ["Intervention hierarchy (descriptions to architecture)", "Valid vs invalid escalation triggers", "Structured error responses for MCP tools", "Case facts block for context preservation"]
+version: "v1 · CCA-CS-01"
+last_updated: "April 27, 2026"
+closing_quote: "Pick the right level of intervention. Not every problem needs an architectural change; not every problem can be fixed with a better prompt. Knowing which is which is the central decision repeatedly tested."
+---
 
 ## 1. Scenario Overview
 
