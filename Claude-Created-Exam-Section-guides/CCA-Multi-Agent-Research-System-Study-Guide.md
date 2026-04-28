@@ -1,18 +1,18 @@
-# Claude Certified Architect — Foundations: Multi-Agent Research System Study Guide
+---
+title: "Multi-Agent Research System"
+eyebrow: "Claude Certified Architect · Scenario 4"
+subtitle: "A study guide for hub-and-spoke orchestration, subagent context isolation, MCP structured errors, and provenance through synthesis."
+scenario_num: "04"
+focus_list:
+  - "Hub-and-spoke orchestration & the agentic loop"
+  - "Subagent spawning & isolated context passing"
+  - "MCP structured error responses & tool_choice"
+  - "Provenance, claim-source mappings & confidence calibration"
+version: "v1 · CCA-MAR-04"
+last_updated: "April 27, 2026"
+---
 
-**CLAUDE CERTIFIED ARCHITECT**
-
-**FOUNDATIONS EXAM**
-
-Multi-Agent Research System
-
-Comprehensive Scenario Study Guide
-
-*Covers Domain 1 (Agentic Architecture & Orchestration, 27%), Domain 2
-(Tool Design & MCP Integration, 18%), and Domain 5 (Context Management &
-Reliability, 15%)*
-
-## 1. Exam Context & This Scenario
+## 1. Exam Context and This Scenario
 
 The Claude Certified Architect — Foundations (CCA-F) is a 60-question,
 120-minute proctored exam covering five weighted domains. The
@@ -212,7 +212,7 @@ Coordinator sends: "Research the impact of AI on healthcare."
 - Terminate on `"end_turn"`
 - Deterministic and model-driven
 
-## 4. Subagent Spawning & Context Passing (Task 1.3)
+## 4. Subagent Spawning and Context Passing (Task 1.3)
 
 ### The Task Tool
 
@@ -319,7 +319,7 @@ These hooks intercept *outgoing* tool calls before they execute. They enforce bu
 - Any answer that relies on prompt instructions for a business rule requiring guaranteed compliance is wrong
 - The exam consistently tests whether you choose programmatic enforcement (hooks, prerequisite gates) over prompt-based guidance for critical rules
 
-## 6. Programmatic Prerequisites & Handoffs (Task 1.4)
+## 6. Programmatic Prerequisites and Handoffs (Task 1.4)
 
 ### Prerequisite Gates
 
@@ -380,7 +380,7 @@ The coordinator follows this loop:
 
 **Exam tip:** Recognize this pattern versus a single-pass pipeline.
 
-## 8. Session State, Resumption & Forking (Task 1.7)
+## 8. Session State, Resumption, and Forking (Task 1.7)
 
 These are Claude Code-specific features that apply when the research
 system uses Claude Code as the execution environment.
@@ -535,7 +535,7 @@ For long-running research pipelines, design structured state persistence:
 - This compresses the conversation history while preserving the essential information
 - Know that this exists as a tool for managing context in long sessions
 
-## 14. Human Review Workflows & Confidence (Task 5.5)
+## 14. Human Review Workflows and Confidence (Task 5.5)
 
 This task statement applies when the research system needs human
 oversight for quality assurance.
@@ -597,7 +597,7 @@ Different content types should be rendered appropriately in synthesis outputs:
 
 ---
 
-# PART III — Quick Reference & Anti-Patterns
+# PART III — Quick Reference and Anti-Patterns
 
 ## 16. Anti-Patterns to Recognize on Sight
 
