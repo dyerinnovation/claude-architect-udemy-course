@@ -1,12 +1,12 @@
-# Claude Certified Architect — Foundations
-
-## Domain 4 Study Guide: Structured Output
-
-*A primer on the prompt-engineering and structured-output skills that make Claude usable as a backend component in production systems.*
-
-Prepared for Jonathan
-April 2026
-
+---
+title: "Structured Output Mastery"
+eyebrow: "Claude Certified Architect · Domain 4"
+subtitle: "A study guide for JSON Schema design, tool_use vs tool_choice, validation-retry loops, and the Message Batches API."
+scenario_num: "04"
+focus_list: ["JSON Schema design (required/optional/nullable/enum)", "tool_use vs tool_choice", "Validation-retry loops", "Message Batches API"]
+version: "v1 · CCA-SO-04"
+last_updated: "April 27, 2026"
+closing_quote: "A language model is a probabilistic component. Your job as the architect is to wrap it in deterministic guardrails so the system behaves predictably even when individual responses don't."
 ---
 
 ## 1. Why Structured Output Matters in Production
