@@ -1,10 +1,14 @@
-# Claude Certified Architect — Foundations: Study Guide
+---
+title: "Claude Code for Continuous Integration"
+eyebrow: "Claude Certified Architect · Scenario 5"
+subtitle: "A study guide for prompt-based output control, CLI flag awareness, severity calibration, and validation-retry loops in CI/CD pipelines."
+scenario_num: "05"
+focus_list: ["Prompt vs CLI flags vs CLAUDE.md for output control", "Synchronous vs Message Batches API selection", "Validation-retry loops: when they work, when they don't", "Multi-instance review and the self-review limitation"]
+version: "v1 · CCA-CI-05"
+last_updated: "April 27, 2026"
+---
 
-**Scenario 5: Claude Code for Continuous Integration**
-
-*Coverage: Prompt-Based Output Control • CLI Flag Awareness • Severity Calibration • Inline Reasoning • Structured Output for CI*
-
-## 1. Scenario Overview & Exam Positioning
+## 1. Scenario Overview and Exam Positioning
 
 The Claude Code for CI/CD scenario places you as the architect of an automated code review and analysis pipeline. You integrate Claude Code into continuous integration workflows:
 
@@ -31,7 +35,7 @@ The Claude Code for CI/CD scenario places you as the architect of an automated c
 - Recurring architectural patterns
 - Structured-output and validation tooling that Domain 4 leans on heavily
 
-## 2. Core Terminology & Definitions
+## 2. Core Terminology and Definitions
 
 ### Claude Code CLI Flags
 
@@ -87,7 +91,7 @@ In CI/CD, CLAUDE.md serves a specific role: providing project context.
 
 ## 3. Key Concept Deep Dives
 
-### 3.1 Controlling Output Format: Prompt vs CLI Flags vs CLAUDE.md
+### Controlling Output Format: Prompt vs CLI Flags vs CLAUDE.md
 
 **Domain:** 3 + 4
 
@@ -111,7 +115,7 @@ Three distinct mechanisms for influencing Claude Code output in CI:
 - Prompt — middle layer: task-specific instructions including output format
 - CLI flags — innermost layer: metadata wrapper and execution parameters
 
-### 3.2 Latency Sensitivity: Synchronous vs Batch API
+### Latency Sensitivity: Synchronous vs Batch API
 
 **Domain:** 3 + 5
 
@@ -126,7 +130,7 @@ Three distinct mechanisms for influencing Claude Code output in CI:
 - If a workflow needs real-time responses, use synchronous calls
 - Don't build a fallback for something that should never be batched
 
-### 3.3 Prompt Precision: Explicit Criteria vs Vague Instructions
+### Prompt Precision: Explicit Criteria vs Vague Instructions
 
 **Domain:** 4
 
@@ -146,7 +150,7 @@ Three distinct mechanisms for influencing Claude Code output in CI:
 >   - Reduce false negatives by telling Claude exactly what to look for
 > - **Rule of thumb:** if Claude is flagging wrong things AND missing right things, the prompt is too vague
 
-### 3.4 Inline Reasoning for Developer Trust
+### Inline Reasoning for Developer Trust
 
 **Domain:** 4 + 5
 
@@ -167,7 +171,7 @@ Three distinct mechanisms for influencing Claude Code output in CI:
 > - Inline reasoning helps with INVESTIGATION TIME — how long each one takes to evaluate
 > - Always match the solution to the specific bottleneck stated in the question
 
-### 3.5 Validation-Retry Loops: When They Work and When They Don't
+### Validation-Retry Loops: When They Work and When They Don't
 
 **Domain:** 4
 
@@ -198,7 +202,7 @@ The exam tests whether candidates can distinguish two failure categories.
 - When the underlying failure is information-absent, additional retries waste tokens and produce confidently fabricated values
 - That outcome is worse than an honest null
 
-### 3.6 The `detected_pattern` Field for False Positive Analysis
+### The `detected_pattern` Field for False Positive Analysis
 
 **Domain:** 4
 
@@ -231,7 +235,7 @@ finding:
 - You stop flagging magic numbers in config paths and the trust problem disappears, without sacrificing the high-value category
 - This is the data-driven mechanism behind the trust-erosion fix in Section 5.3
 
-### 3.7 Multi-Instance Review: Why Two Claude Instances Beat Self-Review
+### Multi-Instance Review: Why Two Claude Instances Beat Self-Review
 
 **Domain:** 5
 
@@ -298,7 +302,7 @@ The exam repeatedly tests selection of the right prompting technique for the rig
 
 ## 5. CI/CD Architecture Patterns
 
-### 5.1 Self-Review Limitation Pattern
+### Self-Review Limitation Pattern
 
 - The same Claude session that generated code retains its reasoning context
 - When asked to review its own output, it re-traverses the same logic path and reaches the same conclusion
@@ -314,7 +318,7 @@ The exam repeatedly tests selection of the right prompting technique for the rig
 - More context doesn't fix a judgment issue
 - Only a fresh perspective introduces genuinely independent evaluation
 
-### 5.2 Incremental Review Pattern
+### Incremental Review Pattern
 
 - When a review runs again after new commits, without prior context it produces duplicate findings on already-fixed code
 - **Fix:** include prior review findings in the prompt and instruct Claude to only report new or still-unaddressed issues
@@ -324,7 +328,7 @@ The exam repeatedly tests selection of the right prompting technique for the rig
 - Scope restriction to latest files only (misses cross-file impacts)
 - Skipping intermediate reviews (loses feedback loop)
 
-### 5.3 Trust Erosion Pattern
+### Trust Erosion Pattern
 
 - High false positive rates in some finding categories undermine trust across ALL categories
 - Developers start ignoring everything, including accurate findings
@@ -334,7 +338,7 @@ The exam repeatedly tests selection of the right prompting technique for the rig
 - In automated review systems, precision (low false positives) matters more than recall for developer trust
 - Remove the noise source immediately rather than gradually improving it while trust continues to erode
 
-### 5.4 Attention Dilution Pattern
+### Attention Dilution Pattern
 
 - When a single-pass review of many files produces inconsistent depth, contradictory feedback, and missed bugs, the root cause is attention dilution
 - Too much content for consistent analysis in one pass
@@ -406,7 +410,7 @@ This requires real-time back-and-forth.
 
 Domain 4 leans heavily on the mechanics of producing reliable structured output.
 
-### 8.1 CLAUDE.md for CI Test Generation Quality
+### CLAUDE.md for CI Test Generation Quality
 
 - When Claude Code runs in CI to generate tests, it reads CLAUDE.md for project context
 - Higher-quality, more relevant tests result when CLAUDE.md includes:
@@ -433,7 +437,7 @@ Domain 4 leans heavily on the mechanics of producing reliable structured output.
 - A question may present CLAUDE.md as a distractor for output formatting (wrong) versus a correct answer for test quality context (right)
 - CLAUDE.md provides project context and standards, NOT per-task output format instructions
 
-### 8.2 `tool_use` with JSON Schemas for Guaranteed Structured Output
+### `tool_use` with JSON Schemas for Guaranteed Structured Output
 
 **The pattern**
 - Don't prompt Claude to "respond in JSON format" — that can produce malformed JSON, markdown-wrapped JSON, or extra explanatory text
@@ -458,7 +462,7 @@ Domain 4 leans heavily on the mechanics of producing reliable structured output.
 - Every finding has the correct structure
 - Claude might still put a line number from the wrong file — that's a semantic error caught by validation
 
-### 8.3 `tool_choice` Configuration Options
+### `tool_choice` Configuration Options
 
 | `tool_choice` Value | Behavior | CI/CD Use Case |
 |---|---|---|
@@ -471,7 +475,7 @@ Domain 4 leans heavily on the mechanics of producing reliable structured output.
 - With `tool_choice: "auto"`, Claude can choose to return text
 - Switching to `"any"` forces it to always call a tool, guaranteeing structured output
 
-### 8.4 Nullable/Optional Schema Fields to Prevent Hallucination
+### Nullable/Optional Schema Fields to Prevent Hallucination
 
 - When a JSON schema marks fields as required, Claude will fabricate data rather than leave a required field empty
 - Example: if a code review finding might not have a suggested fix, making `suggested_fix` nullable means Claude returns null instead of inventing a fix
@@ -485,7 +489,7 @@ Domain 4 leans heavily on the mechanics of producing reliable structured output.
 - While that can help, the root fix is schema design: make fields nullable so the model isn't structurally forced to fill them
 - Schema design is the programmatic fix; few-shot is the probabilistic fix
 
-### 8.5 Retry-with-Error-Feedback Pattern
+### Retry-with-Error-Feedback Pattern
 
 When structured output fails validation, don't retry blindly. Send a follow-up request that includes:
 
@@ -501,7 +505,7 @@ Claude uses the error message to self-correct. This is fundamentally different f
 - Finding #3 references `src/utils/helpers.ts` but that file wasn't changed
 - The retry prompt includes: "Finding #3 references `src/utils/helpers.ts`, but this file is not in the PR diff. The changed files are: [list]. Please re-extract finding #3 with the correct file path."
 
-### 8.6 Batch Submission Frequency from SLA Constraints
+### Batch Submission Frequency from SLA Constraints
 
 - The Message Batches API can take up to 24 hours to process
 - If the business has an SLA requiring results within a certain window, calculate how often to submit batches to guarantee meeting the SLA in the worst case
@@ -521,7 +525,7 @@ Claude uses the error message to self-correct. This is fundamentally different f
 - The exam rewards worst-case planning, not optimistic estimates
 - Always calculate using the maximum 24-hour window
 
-### 8.7 Handling Batch Failures by `custom_id`
+### Handling Batch Failures by `custom_id`
 
 - When a batch of 100 requests is submitted, each with a unique `custom_id`, some may fail while others succeed
 - Identify failures by `custom_id` and resubmit only those, potentially with modifications
@@ -538,7 +542,7 @@ Claude uses the error message to self-correct. This is fundamentally different f
 - Add error feedback to the 3 validation failures and resubmit
 - Total: 2 batch submissions instead of re-running all 100
 
-### 8.8 Prompt Refinement Before Batch Processing
+### Prompt Refinement Before Batch Processing
 
 **The pattern**
 - Before submitting an expensive batch of 1,000 documents, test the prompt on a small representative sample (20–50 documents)
@@ -554,7 +558,7 @@ Claude uses the error message to self-correct. This is fundamentally different f
 - When batch results have a high failure rate, the distractor "resubmit all failed documents" is wrong
 - Correct answer: "refine the prompt on a sample before resubmitting" — the underlying prompt issue causes the same failures again
 
-### 8.9 Verification Passes with Confidence Self-Reporting
+### Verification Passes with Confidence Self-Reporting
 
 - After the initial review pass generates findings, run a second verification pass where Claude evaluates each finding and assigns a confidence level
 - Confidence self-reporting is a **routing mechanism** (distinct from inline reasoning in Section 3.4, which reduces developer investigation time):
@@ -579,7 +583,7 @@ Claude uses the error message to self-correct. This is fundamentally different f
 - Confidence scores should be calibrated using labeled validation sets
 - Don't treat raw confidence scores as reliable without calibration
 
-### 8.10 CLI Flags: `--append-system-prompt`, `--allowedTools`, `--dangerously-skip-permissions`
+### CLI Flags: `--append-system-prompt`, `--allowedTools`, `--dangerously-skip-permissions`
 
 Additional CLI flags from the exam guide's Technologies and Concepts appendix for the CI/CD scenario:
 
