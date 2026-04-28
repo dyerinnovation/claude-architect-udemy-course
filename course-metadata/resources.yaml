@@ -1,0 +1,28 @@
+# Lecture-resource attachments for udemy-resource-uploader.
+#
+# Source-of-truth for what downloadable resources are attached to which
+# lectures in the Udemy dashboard. Re-running udemy-resource-uploader
+# against this file should produce zero drift (idempotent — skips already-
+# attached files).
+#
+# Last reconciled with the dashboard: 2026-04-27 (5 PDFs on Lecture 1.1).
+#
+# Display names: Udemy does NOT expose an inline rename for Downloadable
+# File assets. Filenames render verbatim. To change the visible name,
+# rename the source file on disk and re-upload (then delete the original
+# attachment manually — the skill is additive-only).
+
+attachments:
+  - section: 1
+    lecture: 1.1
+    files:
+      - path: Claude-Created-Exam-Section-guides/CCA-CI-Study-Guide.pdf
+        display_name: "CCA-CI-Study-Guide.pdf"  # Scenario 5 — Continuous Integration
+      - path: Claude-Created-Exam-Section-guides/CCA-Code-Generation-Study-Guide.pdf
+        display_name: "CCA-Code-Generation-Study-Guide.pdf"  # Scenario 5 — Code Generation
+      - path: Claude-Created-Exam-Section-guides/CCA-Customer-Support-Study-Guide.pdf
+        display_name: "CCA-Customer-Support-Study-Guide.pdf"  # Scenario 1
+      - path: Claude-Created-Exam-Section-guides/CCA-Multi-Agent-Research-System-Study-Guide.pdf
+        display_name: "CCA-Multi-Agent-Research-System-Study-Guide.pdf"  # Scenario 4
+      - path: Claude-Created-Exam-Section-guides/CCA-Structured-Output-Study-Guide.pdf
+        display_name: "CCA-Structured-Output-Study-Guide.pdf"  # Domain 4
