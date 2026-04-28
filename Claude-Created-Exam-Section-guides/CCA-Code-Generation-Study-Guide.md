@@ -93,11 +93,13 @@ The `@import` syntax lets you reference external files from `CLAUDE.md` to keep 
 > - Use `@import` so each package's `CLAUDE.md` selectively includes only the relevant standards files
 > - Avoids dumping everything into one root file
 
+<!-- pagebreak -->
+
 ### /memory Command
 
 The `/memory` command shows which memory files (CLAUDE.md files, rules, imports) are currently loaded in your session. It is the primary diagnostic tool when Claude isn't following expected instructions.
 
-**When to use `/memory`:**
+#### When to use `/memory`
 
 - A new team member reports that Claude isn't following project conventions — run `/memory` to check if instructions are in user-level (`~/.claude/CLAUDE.md`) instead of project-level
 - Claude behaves inconsistently across sessions — run `/memory` to verify which files are loaded
