@@ -1,14 +1,11 @@
-# Claude Certified Architect — Foundations Certification
-
-## Code Generation with Claude Code
-
-**Study Guide & Exam Reference**
-
-Domain 3: Claude Code Configuration & Workflows (20%)
-Domain 5: Context Management & Reliability (15%)
-
-*March 2026*
-
+---
+title: "Code Generation with Claude Code"
+eyebrow: "Claude Certified Architect · Scenario 5"
+subtitle: "A study guide for the three-tier instruction model, context isolation via fork, plan-mode discipline, and non-interactive CI execution."
+scenario_num: "05"
+focus_list: ["Three-tier instruction model (CLAUDE.md / rules / skills)", "context: fork for sub-agent isolation", "Plan mode vs. direct execution", "Non-interactive CI mode (the -p flag)"]
+version: "v1 · CCA-CG-05"
+last_updated: "April 27, 2026"
 ---
 
 ## Exam Context

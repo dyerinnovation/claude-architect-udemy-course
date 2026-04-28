@@ -14,6 +14,7 @@ Install this plugin first — it owns every skill that touches Udemy or generate
 | `slidev-runner` | dev tooling | Slidev v51 deck dev/build/scope-fix |
 | `udemy-landing-populator` | **deployment (Playwright MCP)** | Pushes landing-page / intended-learners / messages into the Udemy instructor dashboard |
 | `udemy-curriculum-populator` | **deployment (Playwright/Chrome MCP)** | Pushes sections + lecture stubs into `/manage/curriculum/` from planner output |
+| `udemy-resource-uploader` | **deployment (Chrome MCP)** | Attaches downloadable resources (PDF, .docx, etc.) to lectures via the lecture-add-content-btn → Resources flow |
 | `udemy-coding-exercise-deployer` | **deployment (Chrome MCP)** | Pushes a single coding exercise into an existing section |
 
 ### MANDATORY pre-work for any "is X possible?" question
