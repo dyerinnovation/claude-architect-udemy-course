@@ -16,6 +16,7 @@ Install this plugin first — it owns every skill that touches Udemy or generate
 | `udemy-curriculum-populator` | **deployment (Playwright/Chrome MCP)** | Pushes sections + lecture stubs into `/manage/curriculum/` from planner output |
 | `udemy-resource-uploader` | **deployment (Chrome MCP)** | Attaches downloadable resources (PDF, .docx, etc.) to lectures via the lecture-add-content-btn → Resources flow |
 | `udemy-coding-exercise-deployer` | **deployment (Chrome MCP)** | Pushes a single coding exercise into an existing section |
+| `udemy-lecture-video-renderer` | rendering (ElevenLabs + ffmpeg) | Renders narrated lecture .mp4 from a lecture script + Slidev section deck via cloned-voice TTS. Course-agnostic; reusable across every course. One-time voice clone setup at `.../udemy-lecture-video-renderer/voice-clone-setup.md`. Per-course pronunciation at `course-metadata/pronunciation.pls`. |
 
 ### MANDATORY pre-work for any "is X possible?" question
 
