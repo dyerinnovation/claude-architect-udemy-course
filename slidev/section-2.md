@@ -2352,25 +2352,29 @@ The answer is not to reword your prompt. The answer is to use document tags.
 <script setup>
 const GT = String.fromCharCode(62)
 const LT = String.fromCharCode(60)
-const nestedXml = [
-  LT + 'examples' + GT,
-  '  ' + LT + 'example' + GT,
-  '    ' + LT + 'input' + GT + 'User question' + LT + '/input' + GT,
-  '    ' + LT + 'output' + GT + 'Ideal answer' + LT + '/output' + GT,
-  '  ' + LT + '/example' + GT,
-  LT + '/examples' + GT,
-  '',
-  LT + 'instructions' + GT,
-  'Think step by step inside thinking tags, then answer after the closing tag.',
-  LT + '/instructions' + GT,
-].join('\n')
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 6.
+const nestedXmlChunks = [
+  [
+    LT + 'examples' + GT,
+    '  ' + LT + 'example' + GT,
+    '    ' + LT + 'input' + GT + 'User question' + LT + '/input' + GT,
+    '    ' + LT + 'output' + GT + 'Ideal answer' + LT + '/output' + GT,
+    '  ' + LT + '/example' + GT,
+    LT + '/examples' + GT,
+  ].join('\n'),
+  [
+    LT + 'instructions' + GT,
+    'Think step by step inside thinking tags, then answer after the closing tag.',
+    LT + '/instructions' + GT,
+  ].join('\n'),
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Advanced"
   title="Nesting and thinking Tags"
   lang="xml"
-  :code="nestedXml"
+  :code-chunks="nestedXmlChunks"
   annotation="Nesting creates hierarchy — Claude understands parent/child. Thinking tags act as a scratchpad for chain-of-thought, improving complex reasoning."
 />
 
