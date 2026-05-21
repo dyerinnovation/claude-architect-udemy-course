@@ -3312,7 +3312,9 @@ The assistant messages always contain the reasoning and tool calls. The user mes
 <!-- SLIDE 5a — Tools & dispatcher -->
 
 <script setup>
-const toolsCode = `import anthropic
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 5.
+const toolsChunks = [
+  `import anthropic
 
 client = anthropic.Anthropic()
 
@@ -3336,22 +3338,22 @@ tools = [
             "required": ["city"]
         }
     }
-]
-
-def execute_tool(name: str, inputs: dict) -> str:
+]`,
+  `def execute_tool(name: str, inputs: dict) -> str:
     """Route tool calls to real implementations."""
     if name == "get_current_weather":
         return f"Currently 22°C and sunny in {inputs['city']}."
     elif name == "get_5day_forecast":
         return f"5-day forecast for {inputs['city']}: sunny all week, highs ~23°C."
-    return "Unknown tool."`
+    return "Unknown tool."`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Implementation — part 1"
   title="Tools & Dispatcher"
   lang="python"
-  :code="toolsCode"
+  :code-chunks="toolsChunks"
   annotation="Two weather tools and a dispatcher. In production, this is where you call external APIs, query DBs, run calculations."
 />
 
@@ -3368,7 +3370,9 @@ The execute_tool function is your dispatcher — it routes Claude's tool calls t
 <!-- SLIDE 5b — The loop implementation -->
 
 <script setup>
-const loopCode = `def run_agent(user_message: str) -> str:
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 6.
+const loopChunks = [
+  `def run_agent(user_message: str) -> str:
     messages = [{"role": "user", "content": user_message}]
 
     while True:
@@ -3381,10 +3385,8 @@ const loopCode = `def run_agent(user_message: str) -> str:
 
         # Exit condition: Claude is done
         if response.stop_reason == "end_turn":
-            return response.content[0].text
-
-        # Claude wants to use tools
-        if response.stop_reason == "tool_use":
+            return response.content[0].text`,
+  `        if response.stop_reason == "tool_use":
             tool_use_blocks = [
                 b for b in response.content if b.type == "tool_use"
             ]
@@ -3395,20 +3397,20 @@ const loopCode = `def run_agent(user_message: str) -> str:
                     "content": execute_tool(tu.name, tu.input),
                 }
                 for tu in tool_use_blocks
-            ]
-            # Append assistant + user turn BEFORE the next API call
-            messages.append({"role": "assistant", "content": response.content})
+            ]`,
+  `            messages.append({"role": "assistant", "content": response.content})
             messages.append({"role": "user", "content": tool_results})
 
 answer = run_agent("What's the weather in Paris right now, and the forecast?")
-print(answer)`
+print(answer)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Implementation — part 2"
   title="The Loop"
   lang="python"
-  :code="loopCode"
+  :code-chunks="loopChunks"
   annotation="while True is the engine. Only exit: stop_reason=='end_turn'. Execute every tool_use block, append BOTH assistant message AND user tool_results before looping."
 />
 
