@@ -1657,7 +1657,9 @@ Memorize this sequence. The exam tests it.
 <!-- SLIDE 5 — SDK way -->
 
 <script setup>
-const sdkCode = `import anthropic
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 5.
+const sdkChunks = [
+  `import anthropic
 
 client = anthropic.Anthropic()
 
@@ -1666,22 +1668,22 @@ with client.messages.stream(
     model="claude-opus-4-7",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Explain REST APIs in plain English."}]
-) as stream:
-    # text_stream yields each text chunk as a plain string
+) as stream:`,
+  `    # text_stream yields each text chunk as a plain string
     for text in stream.text_stream:
-        print(text, end="", flush=True)  # flush=True = immediate output
-
-# After the context exits, the final message is available
+        print(text, end="", flush=True)  # flush=True = immediate output`,
+  `# After the context exits, the final message is available
 final_message = stream.get_final_message()
 print(f"\\nStop reason: {final_message.stop_reason}")
-print(f"Input tokens: {final_message.usage.input_tokens}")`
+print(f"Input tokens: {final_message.usage.input_tokens}")`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="SDK helper"
   title="Streaming in Python — The SDK Way"
   lang="python"
-  :code="sdkCode"
+  :code-chunks="sdkChunks"
   annotation="text_stream yields text deltas only — no event parsing · get_final_message() returns stop_reason + usage."
 />
 
@@ -1698,7 +1700,9 @@ After the with block exits, get_final_message() gives you the complete assembled
 <!-- SLIDE 6 — Raw event streaming -->
 
 <script setup>
-const rawCode = `import anthropic
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 6.
+const rawChunks = [
+  `import anthropic
 
 client = anthropic.Anthropic()
 
@@ -1707,24 +1711,25 @@ with client.messages.stream(
     model="claude-opus-4-7",
     max_tokens=1024,
     messages=[{"role": "user", "content": "List three benefits of microservices."}]
-) as stream:
-    for event in stream:
+) as stream:`,
+  `    for event in stream:
         if event.type == "content_block_delta":
             if event.delta.type == "text_delta":
                 print(event.delta.text, end="", flush=True)
             elif event.delta.type == "input_json_delta":
                 # Partial JSON from a tool call -- accumulate this
-                print(event.delta.partial_json, end="")
-        elif event.type == "message_delta":
+                print(event.delta.partial_json, end="")`,
+  `        elif event.type == "message_delta":
             # stop_reason is HERE, not in message_stop
-            print(f"\\nStop reason: {event.delta.stop_reason}")`
+            print(f"\\nStop reason: {event.delta.stop_reason}")`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Full control"
   title="Raw Event Streaming"
   lang="python"
-  :code="rawCode"
+  :code-chunks="rawChunks"
   annotation="⚠ stop_reason lives in message_delta, not message_stop · tool args arrive as input_json_delta — partial JSON you accumulate."
 />
 
