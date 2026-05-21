@@ -1947,7 +1947,9 @@ First place: using tool use with a JSON schema. This is the most reliable approa
 <!-- SLIDE 4 — Tool use for structured output -->
 
 <script setup>
-const goldCode = `import anthropic
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 4.
+const goldChunks = [
+  `import anthropic
 
 client = anthropic.Anthropic()
 
@@ -1965,24 +1967,23 @@ extraction_tool = {
         },
         "required": ["order_id", "customer_name", "total_amount", "status"]
     }
-}
-
-response = client.messages.create(
+}`,
+  `response = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=1024,
     tools=[extraction_tool],
     tool_choice={"type": "any"},   # Force Claude to call a tool
     messages=[{"role": "user", "content": "Order #A123, Jane Smith, $49.99, shipped."}]
-)
-
-order_data = response.content[0].input   # Already a validated dict`
+)`,
+  `order_data = response.content[0].input   # Already a validated dict`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Gold standard"
   title="Tool Use for Structured Output"
   lang="python"
-  :code="goldCode"
+  :code-chunks="goldChunks"
   annotation="tool_choice='any' forces a tool call — no plain text · SDK validates against schema before returning."
 />
 
@@ -2001,7 +2002,9 @@ The SDK validates the output against your schema before returning. This is why y
 <!-- SLIDE 5 — Reading the response -->
 
 <script setup>
-const readCode = `# After the create() call from the previous slide...
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 5.
+const readChunks = [
+  `# After the create() call from the previous slide...
 
 # stop_reason tells you Claude called a tool, not finished naturally
 print(response.stop_reason)           # "tool_use"
@@ -2010,20 +2013,20 @@ print(response.stop_reason)           # "tool_use"
 print(response.content[0].type)       # "tool_use"
 
 # Which tool was called
-print(response.content[0].name)       # "extract_order"
-
-# The validated, schema-conformant data
+print(response.content[0].name)       # "extract_order"`,
+  `# The validated, schema-conformant data
 structured_data = response.content[0].input
 print(type(structured_data))          # <class 'dict'> -- already parsed
 print(structured_data["order_id"])    # "A123"
-print(structured_data["status"])      # "shipped"`
+print(structured_data["status"])      # "shipped"`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Reading response"
   title="How to Read the Tool-Use Response"
   lang="python"
-  :code="readCode"
+  :code-chunks="readChunks"
   annotation="stop_reason is ALWAYS 'tool_use' when a tool was called · content[0].input is already a dict — no json.loads()."
 />
 
@@ -2038,7 +2041,9 @@ Notice that content[0].input is already a Python dict — the SDK parsed it for 
 <!-- SLIDE 6 — Silver: response_format & system-prompt JSON -->
 
 <script setup>
-const silverCode = `# APPROACH 2: response_format parameter -- valid JSON, but no schema check
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 6.
+const silverChunks = [
+  `# APPROACH 2: response_format parameter -- valid JSON, but no schema check
 response = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=1024,
@@ -2047,9 +2052,8 @@ response = client.messages.create(
         "content": "Extract as JSON: Order #B456, Tom Lee, $29.00, pending."
     }]
 )
-raw_json = response.content[0].text   # Still a string -- you must parse it
-
-# APPROACH 3: System prompt instruction -- most flexible, least enforced
+raw_json = response.content[0].text   # Still a string -- you must parse it`,
+  `# APPROACH 3: System prompt instruction -- most flexible, least enforced
 system = """You are a data extractor. Always respond with valid JSON matching:
 {"order_id": string, "customer_name": string, "total_amount": number, "status": string}
 Never include any text outside the JSON object."""
@@ -2058,14 +2062,15 @@ response = client.messages.create(
     model="claude-opus-4-7", max_tokens=1024, system=system,
     messages=[{"role": "user", "content": "Order #C789, Sara Kim, $99.50, delivered."}]
 )
-# Usually works. But Claude could add a markdown fence or a preamble sentence.`
+# Usually works. But Claude could add a markdown fence or a preamble sentence.`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Runners-up"
   title="response_format & System-Prompt JSON"
   lang="python"
-  :code="silverCode"
+  :code-chunks="silverChunks"
   annotation="⚠ Neither enforces your schema. Shape is Claude's best effort. You need application-level validation after parsing."
 />
 
