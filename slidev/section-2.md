@@ -1328,7 +1328,9 @@ The common thread is that you control the prompt, so you know what strings to ex
 <!-- SLIDE 5 — Stop sequences in practice -->
 
 <script setup>
-const practiceCode = `import anthropic
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 5.
+const practiceChunks = [
+  `import anthropic
 
 client = anthropic.Anthropic()
 
@@ -1340,22 +1342,22 @@ response = client.messages.create(
         "role": "user",
         "content": "What is the capital of Japan? Wrap your answer in <answer> tags."
     }]
-)
-
-if response.stop_reason == "stop_sequence":
+)`,
+  `if response.stop_reason == "stop_sequence":
     matched = response.stop_sequence        # "</answer>"
     answer = response.content[0].text.strip()
-    print(f"Extracted: {answer}")
-else:
+    print(f"Extracted: {answer}")`,
+  `else:
     # "end_turn" -- Claude finished before hitting the sequence
-    print(f"Unexpected stop reason: {response.stop_reason}")`
+    print(f"Unexpected stop reason: {response.stop_reason}")`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Example"
   title="Stop Sequences in Practice"
   lang="python"
-  :code="practiceCode"
+  :code-chunks="practiceChunks"
   annotation="stop_reason tells you WHY it stopped · stop_sequence tells you WHAT matched · always handle the end_turn fallthrough."
 />
 
@@ -1402,23 +1404,26 @@ The fix is simple: use stop sequences where you control the casing in the prompt
 <!-- SLIDE 7 — Combining stop sequences with prefills -->
 
 <script setup>
-const combinedCode = `response = client.messages.create(
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 7.
+const combinedChunks = [
+  `response = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=256,
-    stop_sequences=["</answer>"],   # stop at closing tag
-    messages=[
+    stop_sequences=["</answer>"],   # stop at closing tag`,
+  `    messages=[
         {"role": "user", "content": "What is 144 divided by 12?"},
         {"role": "assistant", "content": "<answer>"}   # prefill opening tag
     ]
-)
-# response.content[0].text is the raw answer -- no tags, no commentary`
+)`,
+  `# response.content[0].text is the raw answer -- no tags, no commentary`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Combined"
   title="Combining Stop Sequences with Prefills"
   lang="python"
-  :code="combinedCode"
+  :code-chunks="combinedChunks"
   annotation="Response = exactly the content between the tags. No opening tag (prefill). No closing tag (stop). Just the answer."
 />
 
@@ -2258,36 +2263,42 @@ Plain text boundaries — dashes, ALL CAPS labels — work too, but they're frag
 <script setup>
 const GT = String.fromCharCode(62)
 const LT = String.fromCharCode(60)
-const coreXml = [
-  LT + 'instructions' + GT,
-  'Analyze the support ticket and classify urgency: low, medium, or high.',
-  'Respond with only the classification word.',
-  LT + '/instructions' + GT,
-  '',
-  LT + 'context' + GT,
-  'High urgency: data loss, security breach, or complete service outage.',
-  'Medium urgency: degraded performance or partial feature failure.',
-  'Low urgency: cosmetic issues, feature requests, or general questions.',
-  LT + '/context' + GT,
-  '',
-  LT + 'examples' + GT,
-  '  ' + LT + 'example' + GT,
-  '    ' + LT + 'input' + GT + 'Dashboard will not load.' + LT + '/input' + GT,
-  '    ' + LT + 'output' + GT + 'medium' + LT + '/output' + GT,
-  '  ' + LT + '/example' + GT,
-  LT + '/examples' + GT,
-  '',
-  LT + 'document' + GT,
-  '[TICKET_CONTENT]',
-  LT + '/document' + GT,
-].join('\n')
+// 4 chunks, 3 clicks. Aligned with [click] markers in script SLIDE 4.
+const coreXmlChunks = [
+  [
+    LT + 'instructions' + GT,
+    'Analyze the support ticket and classify urgency: low, medium, or high.',
+    'Respond with only the classification word.',
+    LT + '/instructions' + GT,
+  ].join('\n'),
+  [
+    LT + 'context' + GT,
+    'High urgency: data loss, security breach, or complete service outage.',
+    'Medium urgency: degraded performance or partial feature failure.',
+    'Low urgency: cosmetic issues, feature requests, or general questions.',
+    LT + '/context' + GT,
+  ].join('\n'),
+  [
+    LT + 'examples' + GT,
+    '  ' + LT + 'example' + GT,
+    '    ' + LT + 'input' + GT + 'Dashboard will not load.' + LT + '/input' + GT,
+    '    ' + LT + 'output' + GT + 'medium' + LT + '/output' + GT,
+    '  ' + LT + '/example' + GT,
+    LT + '/examples' + GT,
+  ].join('\n'),
+  [
+    LT + 'document' + GT,
+    '[TICKET_CONTENT]',
+    LT + '/document' + GT,
+  ].join('\n'),
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Core patterns"
   title="The Core XML Patterns"
   lang="xml"
-  :code="coreXml"
+  :code-chunks="coreXmlChunks"
   annotation="instructions = what to do · context = background · examples = few-shot · document = content to analyze (data, not instructions)."
 />
 
