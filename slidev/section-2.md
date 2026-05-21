@@ -720,7 +720,9 @@ The default is typically around 1.0 for most Claude models. For production use, 
 <!-- SLIDE 3 — Temperature in practice -->
 
 <script setup>
-const tempCode = `# LOW temperature -- accuracy and consistency
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 3.
+const tempChunks = [
+  `# LOW temperature -- accuracy and consistency
 code_review = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
@@ -729,9 +731,8 @@ code_review = client.messages.create(
         "role": "user",
         "content": "Review this Python function for bugs: def add(a, b): return a - b"
     }]
-)
-
-# HIGH temperature -- creativity and variation
+)`,
+  `# HIGH temperature -- creativity and variation
 creative = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
@@ -740,14 +741,15 @@ creative = client.messages.create(
         "role": "user",
         "content": "Write three different taglines for an artisan coffee shop."
     }]
-)`
+)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Memorize this"
   title="Temperature in Practice"
   lang="python"
-  :code="tempCode"
+  :code-chunks="tempChunks"
   annotation="temp=0 → code review, extraction, classification, factual Q&A · temp=0.7–1.0 → brainstorming, creative writing, marketing"
 />
 
