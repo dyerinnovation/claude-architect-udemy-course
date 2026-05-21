@@ -1006,12 +1006,13 @@ All four of these share the same underlying mechanic. You're not adding a specia
 <!-- SLIDE 4 — JSON Extraction Prefill -->
 
 <script setup>
-const jsonCode = `import anthropic, json
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 4.
+const jsonChunks = [
+  `import anthropic, json
 client = anthropic.Anthropic()
 
-user_data = "Name: Alice Chen, Role: Staff Engineer, Team: Platform"
-
-response = client.messages.create(
+user_data = "Name: Alice Chen, Role: Staff Engineer, Team: Platform"`,
+  `response = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=256,
     messages=[
@@ -1025,18 +1026,18 @@ response = client.messages.create(
             "content": "{"
         }
     ]
-)
-
-# Re-attach the opening brace Claude was given, then parse
+)`,
+  `# Re-attach the opening brace Claude was given, then parse
 raw = "{" + response.content[0].text
-result = json.loads(raw)`
+result = json.loads(raw)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Example"
   title="JSON Extraction Prefill"
   lang="python"
-  :code="jsonCode"
+  :code-chunks="jsonChunks"
   annotation="⚠ Prefill text is NOT in the response body. Claude returns only what it generated AFTER the prefill — prepend it yourself."
 />
 
@@ -1053,24 +1054,26 @@ So when you reconstruct the full value, you prepend the prefill yourself — tha
 <!-- SLIDE 5 — Code fence and fixed phrase prefills -->
 
 <script setup>
-const codeFencePrefill = `# Force a Python code block to open:
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 5.
+const codeFenceChunks = [
+  `# Force a Python code block to open:
 {
     "role": "assistant",
     "content": "\\\`\\\`\\\`python\\n"
-}
-
-# Force specific phrasing at the start:
+}`,
+  `# Force specific phrasing at the start:
 {
     "role": "assistant",
     "content": "The answer is:"
-}`
+}`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="More prefill patterns"
   title="Code Generation & Format Prefills"
   lang="python"
-  :code="codeFencePrefill"
+  :code-chunks="codeFenceChunks"
   annotation="Code fence: eliminates intros before code. Fixed phrase: eliminates response-opening variation."
 />
 
@@ -1087,23 +1090,26 @@ For format control, prefill with the exact phrase you want to start the response
 <!-- SLIDE 6 — Prefills + Stop Sequences -->
 
 <script setup>
-const combinedCode = `response = client.messages.create(
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 6.
+const combinedChunks = [
+  `response = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=512,
-    stop_sequences=["</answer>"],
-    messages=[
+    stop_sequences=["</answer>"],`,
+  `    messages=[
         {"role": "user", "content": "What is 12 * 8? Respond inside <answer> tags."},
         {"role": "assistant", "content": "<answer>"}   # prefill
     ]
 )
-# response.content[0].text contains only what's between the tags`
+# response.content[0].text contains only what's between the tags`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Power pair"
   title="Prefills + Stop Sequences"
   lang="python"
-  :code="combinedCode"
+  :code-chunks="combinedChunks"
   annotation="Prefill controls START · Stop sequence controls END · Response = exactly what's between the tags, zero regex."
 />
 
@@ -2593,16 +2599,16 @@ Use base64 when the image is private or stored locally. Use URL when the image i
 <!-- SLIDE 4 — Sending an image in Python -->
 
 <script setup>
-const imageCode = `import anthropic
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 4.
+const imageChunks = [
+  `import anthropic
 import base64
 
-client = anthropic.Anthropic()
-
-# Read the image file and encode it as base64
+client = anthropic.Anthropic()`,
+  `# Read the image file and encode it as base64
 with open("diagram.png", "rb") as image_file:
-    image_data = base64.standard_b64encode(image_file.read()).decode("utf-8")
-
-response = client.messages.create(
+    image_data = base64.standard_b64encode(image_file.read()).decode("utf-8")`,
+  `response = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=1024,
     messages=[
@@ -2613,25 +2619,23 @@ response = client.messages.create(
                     "type": "image",
                     "source": {
                         "type": "base64",
-                        "media_type": "image/png",  # Must match actual file type
-                        "data": image_data,          # Base64-encoded bytes
+                        "media_type": "image/png",
+                        "data": image_data,
                     },
                 },
-                {
-                    "type": "text",
-                    "text": "What does this diagram show?",
-                },
+                {"type": "text", "text": "What does this diagram show?"},
             ],
         }
     ],
-)`
+)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Example"
   title="Sending an Image — Python"
   lang="python"
-  :code="imageCode"
+  :code-chunks="imageChunks"
   annotation="Image first, text after — Claude reads blocks in order · All three required on base64: type, media_type, data."
 />
 
