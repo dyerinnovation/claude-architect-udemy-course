@@ -413,15 +413,15 @@ These are fundamentally different things and they belong in different places.
 <!-- SLIDE 3 — Correct usage -->
 
 <script setup>
-const correctCode = `import anthropic
-client = anthropic.Anthropic()
-
-# System prompt defined once -- applies to every turn
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 3.
+const correctChunks = [
+  `import anthropic
+client = anthropic.Anthropic()`,
+  `# System prompt defined once -- applies to every turn
 SYSTEM_PROMPT = """You are Aria, a friendly customer support agent for SkyLine Airlines.
 You only answer questions about flights, baggage, and reservations.
-If asked about anything else, politely redirect the customer."""
-
-response = client.messages.create(
+If asked about anything else, politely redirect the customer."""`,
+  `response = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
     system=SYSTEM_PROMPT,       # Top-level parameter -- NOT in messages array
@@ -430,14 +430,15 @@ response = client.messages.create(
     ]
 )
 
-print(response.content[0].text)`
+print(response.content[0].text)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="✓ Correct"
   title="system as a Top-Level Parameter"
   lang="python"
-  :code="correctCode"
+  :code-chunks="correctChunks"
   annotation="system sits alongside model and max_tokens. Aria's persona is established before the first user message. Never repeat the system prompt inside messages."
 />
 
@@ -456,12 +457,14 @@ You never repeat the system prompt in the messages array.
 <!-- SLIDE 4 — Wrong way -->
 
 <script setup>
-const wrongCode = `# WRONG: Embedding instructions inside the first user message
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 4.
+const wrongChunks = [
+  `# WRONG: Embedding instructions inside the first user message
 response = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
-    # No system parameter
-    messages=[
+    # No system parameter`,
+  `    messages=[
         {
             "role": "user",
             # Instructions mixed into a user turn -- this is the mistake
@@ -471,14 +474,15 @@ Only answer questions about flights, baggage, and reservations.
 Hi, I need to change my seat on flight SK442."""
         }
     ]
-)`
+)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="✗ Wrong"
   title="Instructions Buried in a User Message"
   lang="python"
-  :code="wrongCode"
+  :code-chunks="wrongChunks"
   annotation="Works for one turn. After that, instructions are conversation history — truncate history, instructions disappear. System prompts are never truncated."
 />
 
@@ -499,10 +503,11 @@ A system prompt, by contrast, always comes through — it's never truncated from
 <!-- SLIDE 5 — Multi-turn -->
 
 <script setup>
-const chatCode = `# YOU maintain conversation history across turns
-conversation_history = []
-
-def chat(user_message):
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 5.
+const chatChunks = [
+  `# YOU maintain conversation history across turns
+conversation_history = []`,
+  `def chat(user_message):
     conversation_history.append({"role": "user", "content": user_message})
 
     response = client.messages.create(
@@ -514,18 +519,18 @@ def chat(user_message):
 
     reply = response.content[0].text
     conversation_history.append({"role": "assistant", "content": reply})
-    return reply
-
-chat("Can I change my seat?")           # Turn 1 -- persona active
+    return reply`,
+  `chat("Can I change my seat?")           # Turn 1 -- persona active
 chat("What about baggage fees?")        # Turn 2 -- persona STILL active
-chat("Can you help me book a hotel?")   # Turn 3 -- Aria redirects, correctly`
+chat("Can you help me book a hotel?")   # Turn 3 -- Aria redirects, correctly`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Persistence"
   title="Multi-Turn: Why system Persists"
   lang="python"
-  :code="chatCode"
+  :code-chunks="chatChunks"
   annotation="system is re-sent every call as a separate parameter — even if you trim messages history, system stays intact."
 />
 
