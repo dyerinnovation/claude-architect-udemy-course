@@ -85,6 +85,7 @@ const coreParams = [
   eyebrow="The primitives"
   title="The Five Core Request Parameters"
   :bullets="coreParams"
+  :hide-footer="true"
 />
 
 <!--
@@ -110,27 +111,29 @@ These five parameters are the foundation of everything else in this section.
 <!-- SLIDE 3 — A Complete Request, Annotated -->
 
 <script setup>
-const requestCode = `import anthropic
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 3.
+const requestChunks = [
+  `import anthropic
 
-client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment
-
-response = client.messages.create(
+client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment`,
+  `response = client.messages.create(
     model="claude-sonnet-4-6",              # Which Claude model to use
     max_tokens=1024,                        # Max tokens in the response
-    system="You are a helpful assistant.",  # Top-level system prompt
-    messages=[
+    system="You are a helpful assistant.",  # Top-level system prompt`,
+  `    messages=[
         {"role": "user",      "content": "What is the capital of France?"},
         {"role": "assistant", "content": "The capital of France is Paris."},
         {"role": "user",      "content": "What is its population?"}
     ]
-)`
+)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Anatomy"
   title="A Complete Request, Annotated"
   lang="python"
-  :code="requestCode"
+  :code-chunks="requestChunks"
   annotation="system is top-level — never inside messages. Roles alternate: only 'user' and 'assistant'. Claude has no memory — you pass history every call."
 />
 
@@ -151,25 +154,29 @@ Claude has no memory between calls — everything it knows about the conversatio
 <!-- SLIDE 4 — The Response Object, Dissected -->
 
 <script setup>
-const responseCode = `{
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 4.
+const responseChunks = [
+  `{
   "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
   "type": "message",
   "role": "assistant",
   "content": [
     { "type": "text", "text": "The population of Paris..." }
   ],
-  "model": "claude-sonnet-4-6",
+`,
+  `  "model": "claude-sonnet-4-6",
   "stop_reason": "end_turn",
   "stop_sequence": null,
   "usage": { "input_tokens": 42, "output_tokens": 31 }
-}`
+}`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Response"
   title="The Response Object, Dissected"
   lang="json"
-  :code="responseCode"
+  :code-chunks="responseChunks"
   annotation="content is a list of typed blocks, not a string. stop_reason tells you why Claude stopped. usage = exactly what you're billed for."
 />
 
@@ -217,28 +224,29 @@ The production rule: always check stop_reason. If it's "max_tokens", you may nee
 <!-- SLIDE 6 — Reading the Response in Code -->
 
 <script setup>
-const readCode = `# Most common case: access the first text block directly
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 6.
+const readChunks = [
+  `# Most common case: access the first text block directly
 answer = response.content[0].text
-print(answer)
-
-# Safer: iterate over all content blocks
+print(answer)`,
+  `# Safer: iterate over all content blocks
 for block in response.content:
     if block.type == "text":
-        print(block.text)
-
-# Check why Claude stopped
+        print(block.text)`,
+  `# Check why Claude stopped
 print(response.stop_reason)  # "end_turn", "max_tokens", "stop_sequence", "tool_use"
 
 # Check token usage
 print(f"Input: {response.usage.input_tokens}")
-print(f"Output: {response.usage.output_tokens}")`
+print(f"Output: {response.usage.output_tokens}")`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Reading the response"
   title="Access Text, Stop Reason, and Usage"
   lang="python"
-  :code="readCode"
+  :code-chunks="readChunks"
   annotation="Quick: content[0].text works for simple text. Production: iterate content blocks — especially with tools."
 />
 

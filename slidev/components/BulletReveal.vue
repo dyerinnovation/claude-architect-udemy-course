@@ -16,6 +16,7 @@ const props = defineProps({
   footerLabel: { type: String, default: '' },
   footerNum: { type: [Number, String], default: 1 },
   footerTotal: { type: [Number, String], default: 1 },
+  hideFooter: { type: Boolean, default: false },
 })
 
 const rows = computed(() => props.bullets.slice(0, 6))
@@ -44,7 +45,7 @@ const rows = computed(() => props.bullets.slice(0, 6))
       </v-clicks>
     </ul>
 
-    <SlideFooter :label="footerLabel" :num="footerNum" :total="footerTotal" />
+    <SlideFooter v-if="!hideFooter" :label="footerLabel" :num="footerNum" :total="footerTotal" />
   </Frame>
 </template>
 

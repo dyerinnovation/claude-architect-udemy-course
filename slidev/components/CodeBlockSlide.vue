@@ -4,7 +4,7 @@ import Eyebrow from './Eyebrow.vue'
 import SlideTitle from './SlideTitle.vue'
 import SlideFooter from './SlideFooter.vue'
 
-defineProps({
+const props = defineProps({
   eyebrow: { type: String, default: '' },
   title: { type: String, required: true },
   lang: { type: String, default: 'ts' },
@@ -14,10 +14,17 @@ defineProps({
   // can resolve to undefined. Accept undefined/empty here to avoid the Vue
   // type-warning, and let the default slot act as a fallback code body.
   code: { type: String, default: '' },
+  // When provided, code reveals incrementally via slidev clicks:
+  // chunk 0 is always visible; chunks 1..N reveal on click 1..N.
+  // Use this for narration-aligned code reveals (see lecture-writer's
+  // [click] marker convention). Annotation becomes always-visible when
+  // codeChunks is used (no longer hidden behind its own click).
+  codeChunks: { type: Array, default: () => [] },
   annotation: { type: String, default: '' },
   footerLabel: { type: String, default: '' },
   footerNum: { type: [Number, String], default: 1 },
   footerTotal: { type: [Number, String], default: 1 },
+  hideFooter: { type: Boolean, default: false },
 })
 </script>
 
@@ -33,9 +40,16 @@ defineProps({
         <div class="cbs__lang">
           {{ lang }}
         </div>
-        <pre class="cbs__pre"><code v-if="code" v-text="code" /><code v-else><slot /></code></pre>
+        <pre class="cbs__pre"><code v-if="codeChunks.length > 0"><span class="cbs__chunk" v-text="codeChunks[0]" /><v-clicks><span v-for="(chunk, i) in codeChunks.slice(1)" :key="i" class="cbs__chunk" v-text="chunk" /></v-clicks></code><code v-else-if="code" v-text="code" /><code v-else><slot /></code></pre>
       </div>
-      <v-click>
+      <!-- Annotation: always visible when codeChunks is used (so it can guide the reveal sequence). Single-code slides keep the original click-reveal behavior. -->
+      <template v-if="codeChunks.length > 0">
+        <aside v-if="annotation" class="cbs__rail">
+          <div class="cbs__rail-label">Annotation</div>
+          <div class="cbs__rail-body">{{ annotation }}</div>
+        </aside>
+      </template>
+      <v-click v-else>
         <aside v-if="annotation" class="cbs__rail">
           <div class="cbs__rail-label">Annotation</div>
           <div class="cbs__rail-body">{{ annotation }}</div>
@@ -43,7 +57,7 @@ defineProps({
       </v-click>
     </div>
 
-    <SlideFooter :label="footerLabel" :num="footerNum" :total="footerTotal" />
+    <SlideFooter v-if="!hideFooter" :label="footerLabel" :num="footerNum" :total="footerTotal" />
   </Frame>
 </template>
 
@@ -102,6 +116,21 @@ defineProps({
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
+}
+
+/* Click-reveal chunks: stack as blocks so collapsed reveals don't reserve layout space */
+.cbs__pre .cbs__chunk {
+  display: block;
+}
+/* Visible spacer between successive code chunks. Browsers collapse trailing
+   whitespace inside display:block spans inside <pre>, so we add a margin
+   instead of relying on \n at the chunk boundaries. */
+.cbs__pre .cbs__chunk:not(:first-child) {
+  margin-top: 0.8em;
+}
+/* Collapsed (un-revealed) chunks should not reserve layout space. */
+.cbs__pre :deep(.slidev-vclick-hidden) {
+  display: none;
 }
 
 .cbs__rail {
