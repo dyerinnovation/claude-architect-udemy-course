@@ -2854,13 +2854,17 @@ Think of input_schema as the function signature — it tells Claude what argumen
 <!-- SLIDE 3 — Concrete tool definition -->
 
 <script setup>
-const weatherToolCode = `get_weather_tool = {
+// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 3.
+const weatherToolChunks = [
+  `get_weather_tool = {
     "name": "get_current_weather",
     "description": (
         "Retrieves the current weather for a given city. "
         "Use this when the user asks about current weather conditions."
     ),
-    "input_schema": {
+    ...
+}`,
+  `    "input_schema": {
         "type": "object",
         "properties": {
             "city": {
@@ -2873,16 +2877,16 @@ const weatherToolCode = `get_weather_tool = {
                 "description": "Temperature unit to return"
             }
         },
-        "required": ["city"]  # unit is optional
-    }
-}`
+        "required": ["city"]
+    }`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Concrete example"
   title="A Full Tool Definition"
   lang="python"
-  :code="weatherToolCode"
+  :code-chunks="weatherToolChunks"
   annotation="Per-property description — Claude reads these too · required[] — which args Claude must always supply; optional args may be omitted."
 />
 
@@ -2990,41 +2994,42 @@ input is a Python dict containing the parsed arguments Claude generated. You don
 <!-- SLIDE 6 — Execute and return -->
 
 <script setup>
-const executeCode = `# Step 1: find the tool_use block in the response content
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 6.
+const executeChunks = [
+  `# Step 1: find the tool_use block in the response content
 tool_use_block = next(
     block for block in response.content if block.type == "tool_use"
-)
-
-# Step 2: execute your actual function with Claude's arguments
-result = get_current_weather(**tool_use_block.input)
-
-# Step 3: send the result back as a user message with a tool_result block
+)`,
+  `# Step 2: execute your actual function with Claude's arguments
+result = get_current_weather(**tool_use_block.input)`,
+  `# Step 3: send the result back as a user message with a tool_result block
 followup = client.messages.create(
     model="claude-opus-4-7",
     max_tokens=1024,
     tools=[get_weather_tool],
     messages=[
         {"role": "user", "content": "What's the weather like in Tokyo right now?"},
-        {"role": "assistant", "content": response.content},   # Include Claude's tool call
+        {"role": "assistant", "content": response.content},
         {
             "role": "user",
             "content": [
                 {
                     "type": "tool_result",
-                    "tool_use_id": tool_use_block.id,  # Must match the tool_use id
-                    "content": str(result),            # Your function's return value
+                    "tool_use_id": tool_use_block.id,
+                    "content": str(result),
                 }
             ],
         },
     ],
-)`
+)`,
+]
 </script>
 
 <CodeBlockSlide
   eyebrow="Returning the result"
   title="Execute the Tool — and Return the Result"
   lang="python"
-  :code="executeCode"
+  :code-chunks="executeChunks"
   annotation="tool_result goes in a user message — never assistant · tool_use_id links result back to the specific call."
 />
 
