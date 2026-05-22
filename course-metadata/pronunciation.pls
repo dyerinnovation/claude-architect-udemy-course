@@ -2,6 +2,11 @@
 <!--
   Pronunciation overrides for the Claude Certified Architect (CCA) course.
 
+  Uses <alias> rules (literal text substitution). eleven_multilingual_v2
+  silently IGNORES <phoneme> rules — do NOT switch this file to phoneme. See
+  the renderer playbook section "ElevenLabs pronunciation rule types —
+  alias vs phoneme model support".
+
   These entries are MERGED with the universal tech-term template at
   udemy-course-builder/.claude/skills/udemy-lecture-video-renderer/pronunciation.template.pls
   by tts_render.py at render time. Course entries win on grapheme conflict.
@@ -11,72 +16,23 @@
   when either PLS file changes.
 
   To add a new pronunciation override:
-    1. Add a <lexeme> entry below with IPA phonemes
+    1. Add a <lexeme> entry below with the spoken-English alias text
     2. Re-run any lecture render — the skill auto-detects the PLS change
        and re-uploads the merged dictionary
-
-  IPA reference: standard American English conventions.
 -->
 
-<lexicon version="1.0"
-         xmlns="http://www.w3.org/2005/01/pronunciation-lexicon"
-         alphabet="ipa"
-         xml:lang="en-US">
+<lexicon version="1.0" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon" xml:lang="en-US">
 
-  <!-- =====================================================================
-       Anthropic + Claude model family — required for every CCA lecture
-       ===================================================================== -->
+  <!-- Anthropic + Claude model family — required for every CCA lecture -->
+  <lexeme><grapheme>Anthropic</grapheme><alias>an-THROP-ick</alias></lexeme>
+  <lexeme><grapheme>Claude</grapheme><alias>clawed</alias></lexeme>
+  <lexeme><grapheme>Sonnet</grapheme><alias>SON-it</alias></lexeme>
+  <lexeme><grapheme>Opus</grapheme><alias>OH-pus</alias></lexeme>
+  <lexeme><grapheme>Haiku</grapheme><alias>HIGH-koo</alias></lexeme>
 
-  <!-- Anthropic: stress on second syllable — an-THROP-ic -->
-  <lexeme>
-    <grapheme>Anthropic</grapheme>
-    <phoneme>ænˈθrɒpɪk</phoneme>
-  </lexeme>
-
-  <!-- Claude: single syllable, rhymes with "clawed" -->
-  <lexeme>
-    <grapheme>Claude</grapheme>
-    <phoneme>klɔːd</phoneme>
-  </lexeme>
-
-  <!-- Sonnet: two syllables, SON-it -->
-  <lexeme>
-    <grapheme>Sonnet</grapheme>
-    <phoneme>ˈsɒnɪt</phoneme>
-  </lexeme>
-
-  <!-- Opus: two syllables, OH-pus -->
-  <lexeme>
-    <grapheme>Opus</grapheme>
-    <phoneme>ˈoʊpəs</phoneme>
-  </lexeme>
-
-  <!-- Haiku: two syllables, HY-koo -->
-  <lexeme>
-    <grapheme>Haiku</grapheme>
-    <phoneme>ˈhaɪkuː</phoneme>
-  </lexeme>
-
-  <!-- =====================================================================
-       Certification + course-specific acronyms
-       ===================================================================== -->
-
-  <!-- MCP: EM-SEE-PEE (Model Context Protocol) -->
-  <lexeme>
-    <grapheme>MCP</grapheme>
-    <phoneme>ˌɛm siː ˈpiː</phoneme>
-  </lexeme>
-
-  <!-- CCA: SEE-SEE-AY (Claude Certified Architect) -->
-  <lexeme>
-    <grapheme>CCA</grapheme>
-    <phoneme>ˌsiː siː ˈeɪ</phoneme>
-  </lexeme>
-
-  <!-- CCA-F: SEE-SEE-AY-EFF (CCA Foundations exam track) -->
-  <lexeme>
-    <grapheme>CCA-F</grapheme>
-    <phoneme>ˌsiː siː eɪ ˈɛf</phoneme>
-  </lexeme>
+  <!-- Certification + course-specific acronyms (phonetic English spelling) -->
+  <lexeme><grapheme>MCP</grapheme><alias>em see pee</alias></lexeme>
+  <lexeme><grapheme>CCA</grapheme><alias>see see ay</alias></lexeme>
+  <lexeme><grapheme>CCA-F</grapheme><alias>see see ay eff</alias></lexeme>
 
 </lexicon>
