@@ -69,6 +69,43 @@ Today we're going to dissect every part of a request and response. By the end of
 
 ---
 
+<!-- SLIDE 1a: How This Lecture Fits Into the Course -->
+
+<LectureContext
+  phase="Phase 02 · Claude API Bootcamp"
+  lecture-label="Lecture 1 of 11"
+  prev-context="Coming from: Course intro + study plan (Section 1)"
+  next-context="Leads to: System prompts, tool use, structured output, batch, files (rest of Section 2)"
+  essence="The Messages API is the foundation every other section plugs into."
+  footer-label="API Bootcamp"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 1b: What You'll Learn -->
+
+<script setup>
+const learnBullets = [
+  { label: 'Every field', detail: 'what each request + response field does and why it exists' },
+  { label: '5 core parameters', detail: 'model, max_tokens, messages, system, temperature' },
+  { label: 'stop_reason values', detail: 'the 4 values and how to branch agent logic on them' },
+  { label: 'Production patterns', detail: 'how to safely read responses and handle truncation' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets"
+  footer-label="API Bootcamp"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
 <!-- SLIDE 2 — The Five Core Request Parameters -->
 
 <script setup>
@@ -85,7 +122,9 @@ const coreParams = [
   eyebrow="The primitives"
   title="The Five Core Request Parameters"
   :bullets="coreParams"
-  :hide-footer="true"
+  footer-label="API Bootcamp"
+  :footer-num="4"
+  :footer-total="10"
 />
 
 <!--
@@ -134,6 +173,9 @@ client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment`,
   title="A Complete Request, Annotated"
   lang="python"
   :code-chunks="requestChunks"
+  footer-label="API Bootcamp"
+  :footer-num="5"
+  :footer-total="10"
 />
 
 <!--
@@ -153,20 +195,29 @@ Claude has no memory between calls — everything it knows about the conversatio
 <!-- SLIDE 4 — The Response Object, Dissected -->
 
 <script setup>
-// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 4.
-const responseChunks = [
-  `{
-  "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
-  "type": "message",
-  "role": "assistant",
-  "content": [
-    { "type": "text", "text": "The population of Paris..." }
-  ],
-`,
-  `  "model": "claude-sonnet-4-6",
-  "stop_reason": "end_turn",
-  "stop_sequence": null,
-  "usage": { "input_tokens": 42, "output_tokens": 31 }
+// 5 chunks, 4 clicks. Aligned with 4 [click] markers in script SLIDE 4.
+const responseCode = [
+`{`,
+
+`    "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+    "type": "message",
+    "role": "assistant",`,
+
+`    "content": [
+        {
+            "type": "text",
+            "text": "The population of Paris..."
+        }
+    ],`,
+
+`    "model": "claude-sonnet-4-6",
+    "stop_reason": "end_turn",
+    "stop_sequence": null,`,
+
+`    "usage": {
+        "input_tokens": 42,
+        "output_tokens": 31
+    }
 }`,
 ]
 </script>
@@ -175,7 +226,10 @@ const responseChunks = [
   eyebrow="Response"
   title="The Response Object, Dissected"
   lang="json"
-  :code-chunks="responseChunks"
+  :code-chunks="responseCode"
+  footer-label="API Bootcamp"
+  :footer-num="6"
+  :footer-total="10"
 />
 
 <!--
@@ -207,6 +261,9 @@ const stopReasons = [
   eyebrow="stop_reason"
   title="The Four Values You'll See"
   :bullets="stopReasons"
+  footer-label="API Bootcamp"
+  :footer-num="7"
+  :footer-total="10"
 />
 
 <!--
@@ -222,17 +279,19 @@ The production rule: always check stop_reason. If it's "max_tokens", you may nee
 <!-- SLIDE 6 — Reading the Response in Code -->
 
 <script setup>
-// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 6.
-const readChunks = [
-  `# Most common case: access the first text block directly
+// 3 chunks, 2 clicks. Aligned with 2 [click] markers in script SLIDE 6.
+const readCode = [
+`# Most common case: access the first text block directly
 answer = response.content[0].text
 print(answer)`,
-  `# Safer: iterate over all content blocks
+
+`# Safer: iterate over all content blocks
 for block in response.content:
     if block.type == "text":
         print(block.text)`,
-  `# Check why Claude stopped
-print(response.stop_reason)  # "end_turn", "max_tokens", "stop_sequence", "tool_use"
+
+`# Check why Claude stopped
+print(response.stop_reason)   # "end_turn", "max_tokens", "stop_sequence", "tool_use"
 
 # Check token usage
 print(f"Input: {response.usage.input_tokens}")
@@ -244,7 +303,10 @@ print(f"Output: {response.usage.output_tokens}")`,
   eyebrow="Reading the response"
   title="Access Text, Stop Reason, and Usage"
   lang="python"
-  :code-chunks="readChunks"
+  :code-chunks="readCode"
+  footer-label="API Bootcamp"
+  :footer-num="8"
+  :footer-total="10"
 />
 
 <!--
@@ -265,13 +327,17 @@ Checking stop_reason is important for robustness. If stop_reason is "max_tokens"
   <div class="exam-stack">
     <v-clicks>
     <CalloutBox variant="dont" title="Distractor pattern">
-      <p><code>{"role": "system", "content": "..."}</code> inside the <code>messages</code> array. That's OpenAI's API — not Claude's.</p>
+      <p><code>{"role": "system", "content": "..."}</code> inside the <code>messages</code> array.</p>
+      <p>That's OpenAI's API — not Claude's.</p>
     </CalloutBox>
     <CalloutBox variant="do" title="Correct pattern">
-      <p><code>system="..."</code> at the top level of <code>client.messages.create()</code>, alongside <code>model</code> and <code>max_tokens</code>. The only valid roles inside <code>messages</code> are <code>"user"</code> and <code>"assistant"</code>.</p>
+      <p><code>system="..."</code> at the top level of <code>client.messages.create()</code>.</p>
+      <p>Sits alongside <code>model</code> and <code>max_tokens</code>.</p>
+      <p>The only valid roles inside <code>messages</code> are <code>"user"</code> and <code>"assistant"</code>.</p>
     </CalloutBox>
     </v-clicks>
   </div>
+  <SlideFooter label="API Bootcamp" :num="9" :total="10" />
 </Frame>
 
 <style>
@@ -303,6 +369,9 @@ const takeaways = [
   eyebrow="Takeaway"
   title="What to Remember"
   :bullets="takeaways"
+  footer-label="API Bootcamp"
+  :footer-num="10"
+  :footer-total="10"
 />
 
 <!--
