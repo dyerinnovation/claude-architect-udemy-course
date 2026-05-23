@@ -115,7 +115,6 @@ The three strongest signals across 20 sources:
   title="Structured aggregated input"
   lang="markdown"
   :code="structuredCode"
-  annotation="Every named chunk is an anchor the model can hold onto."
 />
 
 <!--
@@ -486,7 +485,6 @@ const trimmedCode = `// RAW: lookup_order returns 40+ fields
   title="lookup_order -- trimmed response"
   lang="json"
   :code="trimmedCode"
-  annotation="Same function, same data source, ~90% less context footprint."
 />
 
 <!--
@@ -628,7 +626,6 @@ const caseFactsCode = `{
   title="Case facts block"
   lang="json"
   :code="caseFactsCode"
-  annotation="A schema, not a paragraph. Every field has a type."
 />
 
 <!--
@@ -908,7 +905,6 @@ Correct: Escalate. Policy ambiguity.`
   title="Escalation criteria in the system prompt"
   lang="text"
   :code="promptCode"
-  annotation="Explicit criteria + 2-3 few-shot examples = calibrated router. No confidence score needed."
 />
 
 <!--
@@ -1401,7 +1397,6 @@ const errorCode = `// BAD -- generic status, lost information
   title="Web search timeout -> coordinator"
   lang="json"
   :code="errorCode"
-  annotation="Bad: 'search unavailable.' Good: structured context with partials and alternatives."
 />
 
 <!--
@@ -1629,7 +1624,6 @@ const statusCode = `// CLEAN MISS -- the search ran, answer is none
   title="Distinct statuses in the schema"
   lang="json"
   :code="statusCode"
-  annotation="Two statuses, two recovery branches. Never the same [] for both."
 />
 
 <!--
@@ -1790,7 +1784,6 @@ const coverageCode = `{
   title="Synthesis output with coverage"
   lang="json"
   :code="coverageCode"
-  annotation="Three buckets -- covered, partial, gaps. Every requested topic lands in exactly one."
 />
 
 <!--
@@ -2145,7 +2138,6 @@ const scratchpadCode = `# scratchpad.md
   title="scratchpad.md -- example structure"
   lang="markdown"
   :code="scratchpadCode"
-  annotation="Free-form Markdown, structured enough to skim in one pass."
 />
 
 <!--
@@ -2382,7 +2374,6 @@ const manifestCode = `{
   title="Agent state manifest"
   lang="json"
   :code="manifestCode"
-  annotation="Four fields per agent: id, status, location, timestamp. Written atomically after output persists."
 />
 
 <!--
@@ -3009,7 +3000,6 @@ const mappingCode = `{
   title="Claim-source mapping"
   lang="json"
   :code="mappingCode"
-  annotation="Five fields per claim. Unbackable claims get flagged, not included."
 />
 
 <!--
@@ -3229,7 +3219,6 @@ const conflictCode = `{
   title="Conflict-preserved output"
   lang="json"
   :code="conflictCode"
-  annotation="conflict_detected + both values with full mapping + methodological notes."
 />
 
 <!--

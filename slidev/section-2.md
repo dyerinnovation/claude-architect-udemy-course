@@ -134,7 +134,6 @@ client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment`,
   title="A Complete Request, Annotated"
   lang="python"
   :code-chunks="requestChunks"
-  annotation="system is top-level — never inside messages. Roles alternate: only 'user' and 'assistant'. Claude has no memory — you pass history every call."
 />
 
 <!--
@@ -177,7 +176,6 @@ const responseChunks = [
   title="The Response Object, Dissected"
   lang="json"
   :code-chunks="responseChunks"
-  annotation="content is a list of typed blocks, not a string. stop_reason tells you why Claude stopped. usage = exactly what you're billed for."
 />
 
 <!--
@@ -247,7 +245,6 @@ print(f"Output: {response.usage.output_tokens}")`,
   title="Access Text, Stop Reason, and Usage"
   lang="python"
   :code-chunks="readChunks"
-  annotation="Quick: content[0].text works for simple text. Production: iterate content blocks — especially with tools."
 />
 
 <!--
@@ -439,7 +436,6 @@ print(response.content[0].text)`,
   title="system as a Top-Level Parameter"
   lang="python"
   :code-chunks="correctChunks"
-  annotation="system sits alongside model and max_tokens. Aria's persona is established before the first user message. Never repeat the system prompt inside messages."
 />
 
 <!--
@@ -483,7 +479,6 @@ Hi, I need to change my seat on flight SK442."""
   title="Instructions Buried in a User Message"
   lang="python"
   :code-chunks="wrongChunks"
-  annotation="Works for one turn. After that, instructions are conversation history — truncate history, instructions disappear. System prompts are never truncated."
 />
 
 <!--
@@ -531,7 +526,6 @@ chat("Can you help me book a hotel?")   # Turn 3 -- Aria redirects, correctly`,
   title="Multi-Turn: Why system Persists"
   lang="python"
   :code-chunks="chatChunks"
-  annotation="system is re-sent every call as a separate parameter — even if you trim messages history, system stays intact."
 />
 
 <!--
@@ -750,7 +744,6 @@ creative = client.messages.create(
   title="Temperature in Practice"
   lang="python"
   :code-chunks="tempChunks"
-  annotation="temp=0 → code review, extraction, classification, factual Q&A · temp=0.7–1.0 → brainstorming, creative writing, marketing"
 />
 
 <!--
@@ -1038,7 +1031,6 @@ result = json.loads(raw)`,
   title="JSON Extraction Prefill"
   lang="python"
   :code-chunks="jsonChunks"
-  annotation="⚠ Prefill text is NOT in the response body. Claude returns only what it generated AFTER the prefill — prepend it yourself."
 />
 
 <!--
@@ -1074,7 +1066,6 @@ const codeFenceChunks = [
   title="Code Generation & Format Prefills"
   lang="python"
   :code-chunks="codeFenceChunks"
-  annotation="Code fence: eliminates intros before code. Fixed phrase: eliminates response-opening variation."
 />
 
 <!--
@@ -1110,7 +1101,6 @@ const combinedChunks = [
   title="Prefills + Stop Sequences"
   lang="python"
   :code-chunks="combinedChunks"
-  annotation="Prefill controls START · Stop sequence controls END · Response = exactly what's between the tags, zero regex."
 />
 
 <!--
@@ -1364,7 +1354,6 @@ response = client.messages.create(
   title="Stop Sequences in Practice"
   lang="python"
   :code-chunks="practiceChunks"
-  annotation="stop_reason tells you WHY it stopped · stop_sequence tells you WHAT matched · always handle the end_turn fallthrough."
 />
 
 <!--
@@ -1430,7 +1419,6 @@ const combinedChunks = [
   title="Combining Stop Sequences with Prefills"
   lang="python"
   :code-chunks="combinedChunks"
-  annotation="Response = exactly the content between the tags. No opening tag (prefill). No closing tag (stop). Just the answer."
 />
 
 <!--
@@ -1684,7 +1672,6 @@ print(f"Input tokens: {final_message.usage.input_tokens}")`,
   title="Streaming in Python — The SDK Way"
   lang="python"
   :code-chunks="sdkChunks"
-  annotation="text_stream yields text deltas only — no event parsing · get_final_message() returns stop_reason + usage."
 />
 
 <!--
@@ -1730,7 +1717,6 @@ with client.messages.stream(
   title="Raw Event Streaming"
   lang="python"
   :code-chunks="rawChunks"
-  annotation="⚠ stop_reason lives in message_delta, not message_stop · tool args arrive as input_json_delta — partial JSON you accumulate."
 />
 
 <!--
@@ -1905,7 +1891,6 @@ const badJsonCode = `{
   title="When JSON From Claude Breaks Your Pipeline"
   lang="json"
   :code="badJsonCode"
-  annotation="JSONDecodeError: Expecting property name enclosed in double quotes: line 5 column 1. One malformed response. One crashed pipeline. You need a guarantee — not a retry loop."
 />
 
 <!--
@@ -1984,7 +1969,6 @@ extraction_tool = {
   title="Tool Use for Structured Output"
   lang="python"
   :code-chunks="goldChunks"
-  annotation="tool_choice='any' forces a tool call — no plain text · SDK validates against schema before returning."
 />
 
 <!--
@@ -2027,7 +2011,6 @@ print(structured_data["status"])      # "shipped"`,
   title="How to Read the Tool-Use Response"
   lang="python"
   :code-chunks="readChunks"
-  annotation="stop_reason is ALWAYS 'tool_use' when a tool was called · content[0].input is already a dict — no json.loads()."
 />
 
 <!--
@@ -2071,7 +2054,6 @@ response = client.messages.create(
   title="response_format & System-Prompt JSON"
   lang="python"
   :code-chunks="silverChunks"
-  annotation="⚠ Neither enforces your schema. Shape is Claude's best effort. You need application-level validation after parsing."
 />
 
 <!--
@@ -2315,7 +2297,6 @@ const coreXmlChunks = [
   title="The Core XML Patterns"
   lang="xml"
   :code-chunks="coreXmlChunks"
-  annotation="instructions = what to do · context = background · examples = few-shot · document = content to analyze (data, not instructions)."
 />
 
 <!--
@@ -2391,7 +2372,6 @@ const nestedXmlChunks = [
   title="Nesting and thinking Tags"
   lang="xml"
   :code-chunks="nestedXmlChunks"
-  annotation="Nesting creates hierarchy — Claude understands parent/child. Thinking tags act as a scratchpad for chain-of-thought, improving complex reasoning."
 />
 
 <!--
@@ -2646,7 +2626,6 @@ with open("diagram.png", "rb") as image_file:
   title="Sending an Image — Python"
   lang="python"
   :code-chunks="imageChunks"
-  annotation="Image first, text after — Claude reads blocks in order · All three required on base64: type, media_type, data."
 />
 
 <!--
@@ -2892,7 +2871,6 @@ const weatherToolChunks = [
   title="A Full Tool Definition"
   lang="python"
   :code-chunks="weatherToolChunks"
-  annotation="Per-property description — Claude reads these too · required[] — which args Claude must always supply; optional args may be omitted."
 />
 
 <!--
@@ -2935,7 +2913,6 @@ response = client.messages.create(
   title="Sending the Request With Tools"
   lang="python"
   :code="requestCode"
-  annotation="If Claude decides to call a tool, response.stop_reason == 'tool_use' — Claude is handing control back to you, it's not done."
 />
 
 <!--
@@ -3035,7 +3012,6 @@ followup = client.messages.create(
   title="Execute the Tool — and Return the Result"
   lang="python"
   :code-chunks="executeChunks"
-  annotation="tool_result goes in a user message — never assistant · tool_use_id links result back to the specific call."
 />
 
 <!--
@@ -3354,7 +3330,6 @@ tools = [
   title="Tools & Dispatcher"
   lang="python"
   :code-chunks="toolsChunks"
-  annotation="Two weather tools and a dispatcher. In production, this is where you call external APIs, query DBs, run calculations."
 />
 
 <!--
@@ -3411,7 +3386,6 @@ print(answer)`,
   title="The Loop"
   lang="python"
   :code-chunks="loopChunks"
-  annotation="while True is the engine. Only exit: stop_reason=='end_turn'. Execute every tool_use block, append BOTH assistant message AND user tool_results before looping."
 />
 
 <!--

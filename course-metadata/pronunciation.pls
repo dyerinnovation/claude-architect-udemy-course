@@ -35,4 +35,6 @@
   <lexeme><grapheme>CCA</grapheme><alias>see see ay</alias></lexeme>
   <lexeme><grapheme>CCA-F</grapheme><alias>see see ay eff</alias></lexeme>
 
+  <lexeme><grapheme>stop_reason</grapheme><alias>stop reason</alias></lexeme>
+
 </lexicon>

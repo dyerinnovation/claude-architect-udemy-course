@@ -842,7 +842,6 @@ const good_error = `{
   title="process_refund: business-rule violation"
   lang="json"
   :code="good_error"
-  annotation="isError: true at the top — MCP's flag for 'this is a failure.' All three required fields present. description is customer-friendly."
 />
 
 <!--
@@ -1195,7 +1194,6 @@ return propagate_to_coordinator(
   title="Retry with backoff inside the subagent"
   lang="python"
   :code="local_recovery_code"
-  annotation="Transient blips absorbed locally. Sustained failures propagate with structured context."
 />
 
 <!--
@@ -1225,7 +1223,6 @@ const propagation_code = `{
   title="Structured error → coordinator"
   lang="json"
   :code="propagation_code"
-  annotation="Four fields: failure_type, attempted_query, partial_results, alternatives. Sample Q8's correct answer, word-for-word."
 />
 
 <!--
@@ -1544,7 +1541,6 @@ const auto_code = `{
   title="auto — the default"
   lang="json"
   :code="auto_code"
-  annotation="Conversational agents. Half the turns are text, half are tool calls — Claude decides."
 />
 
 <!--
@@ -1566,7 +1562,6 @@ const any_code = `{
   title="any — guaranteed tool use"
   lang="json"
   :code="any_code"
-  annotation="Scenario 6 pattern — extract from varied documents. Claude picks the right schema per doc."
 />
 
 <!--
@@ -1587,7 +1582,6 @@ const forced_code = `{
   title="Forced — exact tool"
   lang="json"
   :code="forced_code"
-  annotation="Force-first, free after. Metadata runs every time, then auto/any for subsequent enrichment."
 />
 
 <!--
@@ -1755,7 +1749,6 @@ const project_code = `// .mcp.json at project root -- committed to repo
   title=".mcp.json — checked into the repo"
   lang="json"
   :code="project_code"
-  annotation="Version-controlled. Reviewable in PRs. Reproducible. Config travels with the codebase."
 />
 
 <!--
@@ -1780,7 +1773,6 @@ const user_code = `// ~/.claude.json -- personal, never committed
   title="~/.claude.json — personal"
   lang="json"
   :code="user_code"
-  annotation="Same format. Different scope. Discovered at the same time as project servers — both are available."
 />
 
 <!--
@@ -1911,7 +1903,6 @@ const expansion_code = `// .mcp.json -- committed, with env placeholders
   title=".mcp.json with env expansion"
   lang="json"
   :code="expansion_code"
-  annotation="At runtime, Claude Code substitutes the value of each env var from the shell launching the process."
 />
 
 <!--
@@ -2312,7 +2303,6 @@ grep "process_refund" **/*.py
   title="Grep — content search"
   lang="bash"
   :code="grep_code"
-  annotation="How you start understanding a function's footprint across the codebase."
 />
 
 <!--
@@ -2334,7 +2324,6 @@ infra/**/*.tf
   title="Glob — path match"
   lang="bash"
   :code="glob_code"
-  annotation="Finds files by name pattern. Doesn't open them. Uses Grep for this? You pay to read every file."
 />
 
 <!--

@@ -3,6 +3,8 @@ import Frame from './Frame.vue'
 import Eyebrow from './Eyebrow.vue'
 import SlideTitle from './SlideTitle.vue'
 import SlideFooter from './SlideFooter.vue'
+import { ref, onMounted } from 'vue'
+import { useResizeObserver } from '@vueuse/core'
 
 const props = defineProps({
   eyebrow: { type: String, default: '' },
@@ -17,14 +19,46 @@ const props = defineProps({
   // When provided, code reveals incrementally via slidev clicks:
   // chunk 0 is always visible; chunks 1..N reveal on click 1..N.
   // Use this for narration-aligned code reveals (see lecture-writer's
-  // [click] marker convention). Annotation becomes always-visible when
-  // codeChunks is used (no longer hidden behind its own click).
+  // [click] marker convention).
   codeChunks: { type: Array, default: () => [] },
-  annotation: { type: String, default: '' },
   footerLabel: { type: String, default: '' },
   footerNum: { type: [Number, String], default: 1 },
   footerTotal: { type: [Number, String], default: 1 },
   hideFooter: { type: Boolean, default: false },
+})
+
+// Auto-shrink for vertical overflow: step font-size down from 24px → 18px
+// (max 4pt drop). If we hit the floor and still overflow, log a warning so
+// the slide-QA pass can split the code across multiple chunks/slides.
+const preRef = ref(null)
+const fontSize = ref(24)
+
+const FONT_STEPS = [24, 22, 20, 18]
+let currentStepIdx = 0
+
+function checkOverflow() {
+  if (!preRef.value) return
+  const el = preRef.value
+  if (el.scrollHeight > el.clientHeight + 2) {
+    if (currentStepIdx < FONT_STEPS.length - 1) {
+      currentStepIdx += 1
+      fontSize.value = FONT_STEPS[currentStepIdx]
+    } else {
+      // At 18px floor and still overflowing — log for slide-QA pass
+      console.warn(
+        `[CodeBlockSlide] Code overflow at floor font (18px) on slide titled "${props.title}". ` +
+        `Consider splitting the code into more chunks or across two slides.`
+      )
+    }
+  }
+}
+
+onMounted(() => {
+  if (preRef.value) {
+    useResizeObserver(preRef.value, checkOverflow)
+    // Run an initial check after first paint
+    requestAnimationFrame(checkOverflow)
+  }
 })
 </script>
 
@@ -35,26 +69,13 @@ const props = defineProps({
     </Eyebrow>
     <SlideTitle>{{ title }}</SlideTitle>
 
-    <div class="cbs" :class="{ 'cbs--with-rail': !!annotation }">
+    <div class="cbs">
       <div class="cbs__panel">
         <div class="cbs__lang">
           {{ lang }}
         </div>
-        <pre class="cbs__pre"><code v-if="codeChunks.length > 0"><span class="cbs__chunk" v-text="codeChunks[0]" /><v-clicks><span v-for="(chunk, i) in codeChunks.slice(1)" :key="i" class="cbs__chunk" v-text="chunk" /></v-clicks></code><code v-else-if="code" v-text="code" /><code v-else><slot /></code></pre>
+        <pre ref="preRef" class="cbs__pre" :style="{ fontSize: fontSize + 'px' }"><code v-if="codeChunks.length > 0"><span class="cbs__chunk" v-text="codeChunks[0]" /><v-clicks><span v-for="(chunk, i) in codeChunks.slice(1)" :key="i" class="cbs__chunk" v-text="chunk" /></v-clicks></code><code v-else-if="code" v-text="code" /><code v-else><slot /></code></pre>
       </div>
-      <!-- Annotation: always visible when codeChunks is used (so it can guide the reveal sequence). Single-code slides keep the original click-reveal behavior. -->
-      <template v-if="codeChunks.length > 0">
-        <aside v-if="annotation" class="cbs__rail">
-          <div class="cbs__rail-label">Annotation</div>
-          <div class="cbs__rail-body">{{ annotation }}</div>
-        </aside>
-      </template>
-      <v-click v-else>
-        <aside v-if="annotation" class="cbs__rail">
-          <div class="cbs__rail-label">Annotation</div>
-          <div class="cbs__rail-body">{{ annotation }}</div>
-        </aside>
-      </v-click>
     </div>
 
     <SlideFooter v-if="!hideFooter" :label="footerLabel" :num="footerNum" :total="footerTotal" />
@@ -70,21 +91,19 @@ const props = defineProps({
   flex: 1;
   min-height: 0;
 }
-.cbs--with-rail {
-  grid-template-columns: minmax(0, 1.6fr) minmax(360px, 1fr);
-}
 .cbs__panel {
-  position: relative;
   background: var(--mint-100);
   border: 1px solid var(--mint-300);
   border-radius: 16px;
   padding: 36px 40px 40px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
 }
 .cbs__lang {
-  position: absolute;
-  top: 16px;
-  right: 24px;
+  align-self: flex-end;
   font-family: var(--font-mono);
   font-size: 20px;
   font-weight: 600;
@@ -102,10 +121,11 @@ const props = defineProps({
   background: transparent;
   color: var(--forest-800);
   font-family: var(--font-mono);
-  font-size: 24px;
   line-height: 1.55;
   white-space: pre;
   overflow: auto;
+  flex: 1;
+  min-height: 0;
   max-height: 100%;
 }
 .cbs__pre :deep(code) {
@@ -131,31 +151,5 @@ const props = defineProps({
 /* Collapsed (un-revealed) chunks should not reserve layout space. */
 .cbs__pre :deep(.slidev-vclick-hidden) {
   display: none;
-}
-
-.cbs__rail {
-  background: var(--paper-0);
-  border: 1px solid var(--paper-200);
-  border-left: 6px solid var(--sprout-500);
-  border-radius: 16px;
-  padding: 28px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.cbs__rail-label {
-  font-family: var(--font-body);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--sprout-700);
-}
-.cbs__rail-body {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 28px;
-  line-height: 1.4;
-  color: var(--forest-500);
 }
 </style>

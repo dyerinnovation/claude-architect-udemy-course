@@ -120,7 +120,6 @@ while True:
   title="The Code Pattern"
   lang="python"
   :code="loopCode"
-  annotation="while True — Claude drives termination, not a counter. Append BOTH the assistant message AND the tool result before the next call."
   footerLabel="Lecture 3.1"
   :footerNum="3"
   :footerTotal="8"
@@ -458,7 +457,6 @@ messages.append({
   title="Handling Multiple Tool Calls in One Response"
   lang="python"
   :code="batchCode"
-  annotation="Don't process tools one-at-a-time with individual API calls. Do batch all tool results into one combined user message."
   footerLabel="Lecture 3.2"
   :footerNum="5"
   :footerTotal="8"
@@ -1027,7 +1025,6 @@ response = client.messages.create(
   title="The Task Tool — Spawning Subagents"
   lang="python"
   :code="taskCode"
-  annotation="allowedTools MUST include 'Task' — it's how an agent formally accepts an assignment. No Task in allowedTools → no assignment accepted."
   footerLabel="Lecture 3.4"
   :footerNum="5"
   :footerTotal="8"
@@ -1538,7 +1535,6 @@ task_call = {
   title="Context Isolation in Code — What the Subagent Receives"
   lang="python"
   :code="codePattern"
-  annotation="Every fact the subagent needs must be serialized into the task prompt by the coordinator."
   footerLabel="Lecture 3.6"
   :footerNum="3"
   :footerTotal="8"
@@ -1794,7 +1790,6 @@ const taskStructCode = `task_call = {
   title="The Task Tool — Key Parameters"
   lang="python"
   :code="taskStructCode"
-  annotation="allowedTools — which tools the subagent can use; MUST include 'Task'. prompt — complete self-contained context; it's all the subagent knows."
   footerLabel="Lecture 3.7"
   :footerNum="3"
   :footerTotal="8"
@@ -1898,7 +1893,6 @@ coordinator_response_content = [
   title="Coordinator Spawning Multiple Subagents in One Turn"
   lang="python"
   :code="parallelCode"
-  annotation="Both Task calls in the SAME coordinator response = parallel. Coordinator waits for ALL Task results before continuing. Covered in depth in 3.8."
   footerLabel="Lecture 3.7"
   :footerNum="6"
   :footerTotal="8"
@@ -2110,7 +2104,6 @@ coordinator_response_content = [
   title="Parallel Spawning — Coordinator Response"
   lang="python"
   :code="parallelCode"
-  annotation="All three Task calls in one response → parallel. Coordinator waits for all three tool_results as a single batch before its next turn."
   :footerNum="4"
   :footerTotal="8"
 />
@@ -2356,7 +2349,6 @@ def synthesize_with_context(claim_payload):
   title="Structured Context Payload"
   lang="python"
   :code="payloadCode"
-  annotation="Do: pass the full structured payload — Agent B never asks 'where did this come from?' Don't: narrative summaries — they discard provenance and embed the first agent's bias."
   :footerNum="4"
   :footerTotal="8"
 />
@@ -2630,7 +2622,6 @@ and professionally. Explain next steps clearly.
   title="Programmatic Enforcement in Code"
   lang="python"
   :code="enforceCode"
-  annotation="The $500 limit is in the code, not the prompt. Claude never gets the chance to bypass it. Structured error response tells Claude exactly how to recover."
   :footerNum="5"
   :footerTotal="8"
 />
@@ -2827,7 +2818,6 @@ agent = AgentLoop(
   title="Normalizing Tool Results"
   lang="python"
   :code="postCode"
-  annotation="Claude reasons about dates in natural language; Unix 1711929600 is ambiguous, ISO 8601 is unambiguous. Register once — normalization applies to every tool, no per-tool changes."
   :footerNum="3"
   :footerTotal="8"
 />
@@ -2875,7 +2865,6 @@ const preCode = `class RefundGuardHook(PreToolUseHook):
   title="Blocking Unauthorized Tool Calls"
   lang="python"
   :code="preCode"
-  annotation="BlockToolCall stops execution before the tool runs. The structured error becomes the tool_result Claude sees — it can explain the situation to the user."
   :footerNum="4"
   :footerTotal="8"
 />
@@ -3074,7 +3063,6 @@ const chainCode = `def run_code_review_pipeline(repo_path: str, changed_files: l
   title="Prompt Chaining — Code Review Pipeline"
   lang="python"
   :code="chainCode"
-  annotation="The engineer determines the sequence, not Claude. Step 2 always follows Step 1. Testable, repeatable, auditable."
   :footerNum="4"
   :footerTotal="8"
 />
@@ -3118,7 +3106,6 @@ const adaptiveCode = `def run_investigation(initial_prompt: str, max_steps: int 
   title="Dynamic Adaptive — Open-Ended Investigation"
   lang="python"
   :code="adaptiveCode"
-  annotation="max_steps is REQUIRED for dynamic adaptive. Without it, unexpected data could trigger infinite loops in production."
   :footerNum="5"
   :footerTotal="8"
 />
@@ -3375,7 +3362,6 @@ def start_fresh_with_summary(prior_summary: str, next_task_prompt: str):
   title="The Fresh Start + Injected Summary Pattern"
   lang="python"
   :code="freshCode"
-  annotation="The new session has accurate, current context — no stale tool results. The summary carries conclusions, not raw history."
   :footerNum="6"
   :footerTotal="8"
 />
@@ -3581,7 +3567,6 @@ def generate_handoff_summary(session_state) -> HandoffSummary:
   title="Generating a Structured Handoff Summary"
   lang="python"
   :code="handoffCode"
-  annotation="Structured data model FIRST — never ask Claude to 'summarize the conversation.' Extract verified fields, then generate the handoff from those fields."
   :footerNum="4"
   :footerTotal="7"
 />

@@ -1,3 +1,11 @@
+<!--
+  AntiPatternSlide — side-by-side DO/DON'T comparison.
+
+  IMPORTANT: body strings should include `\n` between logical clauses
+  so they render as separate visual blocks (e.g. "rule statement\n\nexample").
+  Run-on text without newlines collapses into one paragraph and feels
+  visually heavy.
+-->
 <script setup>
 import Frame from './Frame.vue'
 import Eyebrow from './Eyebrow.vue'
@@ -60,7 +68,7 @@ defineProps({
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 36px;
   min-height: 0;
 }
 .aps__col {
@@ -69,7 +77,7 @@ defineProps({
   gap: 16px;
   min-width: 0;
   border-radius: 18px;
-  padding: 24px 24px 26px;
+  padding: 28px 28px 32px;
   border: 1px solid transparent;
 }
 .aps__col--bad {
@@ -106,7 +114,7 @@ defineProps({
 }
 .aps__label {
   font-family: var(--font-body);
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -121,9 +129,9 @@ defineProps({
   color: var(--mint-100);
   border-radius: 12px;
   font-family: var(--font-mono);
-  font-size: 24px;
+  font-size: 28px;
   line-height: 1.55;
-  white-space: pre;
+  white-space: pre-wrap;
   overflow: auto;
   flex: 1;
   min-height: 0;
@@ -159,7 +167,7 @@ defineProps({
 .aps__why-text {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 24px;
+  font-size: 28px;
   line-height: 1.4;
   color: var(--forest-500);
 }

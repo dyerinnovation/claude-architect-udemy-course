@@ -117,7 +117,6 @@ Skip:
   title="Explicit review criteria in practice"
   lang="text"
   :code="reviewPromptCode"
-  annotation="Three explicit categorical rules. A vague version would have said 'review this code carefully.' The difference is not tone -- it's whether the model has decision criteria."
 />
 
 <!--
@@ -237,7 +236,6 @@ LOW
   title="Explicit severity with concrete examples per tier"
   lang="text"
   :code="severityCode"
-  annotation="Each tier gets at least one concrete code example in your prompt. Not 'security issues are CRITICAL,' but 'SQL-injection is the CRITICAL reference.'"
 />
 
 <!--
@@ -294,7 +292,6 @@ Output each finding with: severity, file path, line, one-sentence explanation.`
   title="Severity criteria + skip rules + output contract"
   lang="text"
   :code="promptSkeleton"
-  annotation="That prompt has shape, examples, and guardrails. You can read its behavior from the prompt alone."
 />
 
 <!--
@@ -430,7 +427,6 @@ Output: "January 3, 2025 at 1:30 AM PST"`
   title="Each example shows the &ldquo;why&rdquo; -- not just input -> output"
   lang="text"
   :code="reasoningExample"
-  annotation="Q/A pairs aren't few-shot -- they're labeled pairs. The reasoning trace is what teaches. Consistent output requires consistent reasoning."
 />
 
 <!--
@@ -570,7 +566,6 @@ Action: escalate with summary.`
   title="Input -> reasoning -> output (not Q/A)"
   lang="text"
   :code="reasoningTrace"
-  annotation="Not just input-output. Input, reasoning, output. The reasoning is what teaches."
 />
 
 <!--
@@ -680,7 +675,6 @@ Output:
   title="Empty-field pattern -- include a null example"
   lang="text"
   :code="nullExample"
-  annotation="Without a null example, the model feels pressure to fill the field and invents a value. Exam guide, Task 4.2."
 />
 
 <!--
@@ -794,7 +788,6 @@ const extractionTool = `tools = [{
   title="An extraction tool with a strict schema"
   lang="python"
   :code="extractionTool"
-  annotation="When Claude processes an invoice, it responds with a tool_use block whose input is a dict matching this schema exactly. No intermediate string parsing."
 />
 
 <!--
@@ -974,7 +967,6 @@ response = client.messages.create(
   title='tool_choice: &ldquo;any&rdquo; with three schemas'
   lang="python"
   :code="multiSchemaCode"
-  annotation="Without any, the model could return prose like 'this looks like a contract' and skip the tool call. With any, structured output is guaranteed on every request."
 />
 
 <!--
@@ -998,7 +990,6 @@ tool_choice = {"type": "tool", "name": "extract_enrichment"}
   title="Pipeline sequencing via tool_choice"
   lang="python"
   :code="forcedCode"
-  annotation="Step one guaranteed first, step two guaranteed second. tool_choice as a workflow-ordering primitive."
 />
 
 <!--
@@ -1125,7 +1116,6 @@ const nullableCode = `{
   title='type: ["string", "null"] -- the honest way out'
   lang="json"
   :code="nullableCode"
-  annotation="If you forget the 'null' alternative, the model has to produce something string-shaped -- and something string-shaped is a lie."
 />
 
 <!--
@@ -1154,7 +1144,6 @@ const enumOtherCode = `{
   title="Extensible enum -- handle the unanticipated"
   lang="json"
   :code="enumOtherCode"
-  annotation="You extended the taxonomy without a schema change. No inventing new enum values, no jamming SOWs into 'invoice.'"
 />
 
 <!--
@@ -1201,7 +1190,6 @@ const fullSchemaCode = `{
   title="A full extraction schema using every pattern"
   lang="json"
   :code="fullSchemaCode"
-  annotation="Every Scenario 6 correct answer looks something like this. Study the shape."
 />
 
 <!--
@@ -1373,7 +1361,6 @@ const canonicalExample = `{
   title="Schema-valid. Semantically wrong."
   lang="json"
   :code="canonicalExample"
-  annotation="This is the difference between syntax-valid and correct. The API returns success. Your downstream code pays $1,000. You've been short-changed by $50 and the schema never knew."
 />
 
 <!--
@@ -1578,7 +1565,6 @@ Please re-extract, correcting the above errors.`
   title="Original doc + failed extraction + specific errors"
   lang="text"
   :code="retryPrompt"
-  annotation="Vague retries don't work. Specific validation errors guide the model to the exact field that needs correction. Exam guide Task 4.4."
 />
 
 <!--
@@ -1720,7 +1706,6 @@ const findingSchema = `{
   title="The review finding schema -- with detected_pattern"
   lang="json"
   :code="findingSchema"
-  annotation="Without detected_pattern, you're analyzing strings. With it, you're analyzing categories."
 />
 
 <!--
@@ -1934,7 +1919,6 @@ const customIdCode = `{
   title="Each batch request carries a custom_id"
   lang="json"
   :code="customIdCode"
-  annotation="Without custom_id, you'd match by order -- which breaks if anything is dropped. With it, you have a stable primary key. Deep dive in 6.13."
 />
 
 <!--
@@ -2218,7 +2202,6 @@ const customIdSchema = `{
   title="A batch request carries custom_id + params"
   lang="json"
   :code="customIdSchema"
-  annotation="For a 1,000-document extraction job, your custom_ids might be the document's row ID -- so downstream processing writes back to the same row without ambiguity."
 />
 
 <!--
@@ -2290,7 +2273,6 @@ resubmit_batch([
   title="Chunk oversize docs and resubmit"
   lang="python"
   :code="chunkingCode"
-  annotation="Exam guide Task 4.5 -- 'chunking documents that exceeded context limits.' Memorize 'chunking' as the move for oversize failures."
 />
 
 <!--
