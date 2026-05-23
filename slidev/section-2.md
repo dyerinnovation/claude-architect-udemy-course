@@ -281,6 +281,8 @@ The production rule: always check stop_reason. If it's "max_tokens", you may nee
 <script setup>
 // 3 chunks, 2 clicks. Aligned with 2 [click] markers in script SLIDE 6.
 const readCode = [
+`# Reading a Claude API response`,
+
 `# Most common case: access the first text block directly
 answer = response.content[0].text
 print(answer)`,
