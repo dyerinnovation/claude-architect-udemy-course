@@ -35,6 +35,15 @@
   <lexeme><grapheme>CCA</grapheme><alias>see see ay</alias></lexeme>
   <lexeme><grapheme>CCA-F</grapheme><alias>see see ay eff</alias></lexeme>
 
+  <!-- Claude API field names — strip underscores so TTS reads naturally -->
   <lexeme><grapheme>stop_reason</grapheme><alias>stop reason</alias></lexeme>
+  <lexeme><grapheme>stop_sequence</grapheme><alias>stop sequence</alias></lexeme>
+  <lexeme><grapheme>max_tokens</grapheme><alias>max tokens</alias></lexeme>
+  <lexeme><grapheme>tool_use</grapheme><alias>tool use</alias></lexeme>
+  <lexeme><grapheme>tool_result</grapheme><alias>tool result</alias></lexeme>
+  <lexeme><grapheme>end_turn</grapheme><alias>end turn</alias></lexeme>
+
+  <!-- 2-letter common-word identifiers — force letter-reading mode -->
+  <lexeme><grapheme>id</grapheme><alias>I. D.</alias></lexeme>
 
 </lexicon>

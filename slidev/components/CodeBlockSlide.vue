@@ -3,7 +3,7 @@ import Frame from './Frame.vue'
 import Eyebrow from './Eyebrow.vue'
 import SlideTitle from './SlideTitle.vue'
 import SlideFooter from './SlideFooter.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 import { useNav } from '@slidev/client'
 
@@ -72,6 +72,17 @@ const activeChunkIdx = computed(() => {
   const cc = nav.clicks?.value ?? 0
   return Math.min(cc, Math.max(0, props.codeChunks.length - 1))
 })
+
+// Click-aware auto-shrink: ResizeObserver only fires on parent size changes,
+// but click reveals grow scrollHeight without changing clientHeight — so the
+// observer NEVER fires on click navigation. Without this watch, content
+// revealed past the panel goes undetected and gets clipped. Re-running
+// checkOverflow on every click change catches the overflow as it happens.
+// (Round-3 fix: SLIDE 6 usage block was clipping at click 4 before this.)
+watch(() => nav.clicks?.value, () => {
+  // wait for the DOM to update with the newly-revealed chunk, then re-check
+  requestAnimationFrame(checkOverflow)
+})
 </script>
 
 <template>
@@ -117,7 +128,7 @@ const activeChunkIdx = computed(() => {
 .cbs__lang {
   align-self: flex-end;
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
