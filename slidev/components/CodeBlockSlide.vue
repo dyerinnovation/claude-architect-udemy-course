@@ -112,7 +112,11 @@ watch(() => nav.clicks?.value, () => {
 
 <style scoped>
 .cbs {
-  margin-top: 24px;
+  /* Round-6: margin-top tightened 24->8px so the SlideTitle sits closer to
+     the code panel. Combined with the panel padding reduction below, this
+     reclaims ~36px of vertical room for code — enough to fit SLIDE 6's
+     usage block at full font size without auto-shrink. */
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -123,7 +127,7 @@ watch(() => nav.clicks?.value, () => {
   background: var(--mint-100);
   border: 1px solid var(--mint-300);
   border-radius: 16px;
-  padding: 24px 32px 28px;
+  padding: 14px 32px 18px;
   overflow: hidden;
   flex: 1;
   min-height: 0;
