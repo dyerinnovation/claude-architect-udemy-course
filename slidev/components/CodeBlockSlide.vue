@@ -44,6 +44,11 @@ function checkOverflow() {
     if (currentStepIdx < FONT_STEPS.length - 1) {
       currentStepIdx += 1
       fontSize.value = FONT_STEPS[currentStepIdx]
+      // Round-5 fix: recurse via RAF so the loop continues until content fits
+      // OR floor is hit. The single-shot version only shrank one step per
+      // call — when chunk 4 of SLIDE 6 (Response Object) overflowed by 2+
+      // steps' worth, only one step fired and content kept clipping.
+      requestAnimationFrame(checkOverflow)
     } else {
       // At 18px floor and still overflowing — log for slide-QA pass
       console.warn(
@@ -93,10 +98,10 @@ watch(() => nav.clicks?.value, () => {
     <SlideTitle>{{ title }}</SlideTitle>
 
     <div class="cbs">
+      <div class="cbs__lang">
+        {{ lang }}
+      </div>
       <div class="cbs__panel">
-        <div class="cbs__lang">
-          {{ lang }}
-        </div>
         <pre ref="preRef" class="cbs__pre" :style="{ fontSize: fontSize + 'px' }"><code v-if="codeChunks.length > 0"><span class="cbs__chunk" :class="{ 'cbs__chunk--active': activeChunkIdx === 0 }" v-text="codeChunks[0]" /><v-clicks><span v-for="(chunk, i) in codeChunks.slice(1)" :key="i" class="cbs__chunk" :class="{ 'cbs__chunk--active': activeChunkIdx === i + 1 }" v-text="chunk" /></v-clicks></code><code v-else-if="code" v-text="code" /><code v-else><slot /></code></pre>
       </div>
     </div>
@@ -108,9 +113,9 @@ watch(() => nav.clicks?.value, () => {
 <style scoped>
 .cbs {
   margin-top: 24px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   flex: 1;
   min-height: 0;
 }
@@ -118,14 +123,17 @@ watch(() => nav.clicks?.value, () => {
   background: var(--mint-100);
   border: 1px solid var(--mint-300);
   border-radius: 16px;
-  padding: 36px 40px 40px;
+  padding: 24px 32px 28px;
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-height: 0;
 }
 .cbs__lang {
+  /* Round-5: badge moved OUT of .cbs__panel into .cbs so the panel can
+     be 100% code real estate. Reclaims ~26px of vertical room inside the
+     panel + ~24px from the padding reduction = ~50px more code area. */
   align-self: flex-end;
   font-family: var(--font-mono);
   font-size: 14px;
