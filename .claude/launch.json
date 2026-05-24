@@ -1,0 +1,43 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "guides-preview",
+      "runtimeExecutable": "/opt/homebrew/bin/python3",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "Claude-Created-Exam-Section-guides"],
+      "port": 8765
+    },
+    {
+      "name": "slidev-section-2",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:2", "--prefix", "slidev"],
+      "port": 3040
+    },
+    {
+      "name": "voice-clone-setup",
+      "runtimeExecutable": "/opt/homebrew/bin/python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8766",
+        "--directory",
+        "/Users/jonathandyer/Documents/dev/udemy-courses/udemy-course-builder/.claude/skills/udemy-lecture-video-renderer"
+      ],
+      "port": 8766
+    },
+    {
+      "name": "feedback-preview",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": [
+        "/Users/jonathandyer/Documents/dev/udemy-courses/udemy-course-builder/.claude/skills/udemy-lecture-video-renderer/feedback_server.py",
+        "--port",
+        "8767",
+        "--directory",
+        ".",
+        "--lecture-output-root",
+        "/Volumes/Dev_SSD/Dyer_Innovation_Lecture_Videos/Udemy/Claude-Architect-Course/lectures"
+      ],
+      "port": 8767
+    }
+  ]
+}

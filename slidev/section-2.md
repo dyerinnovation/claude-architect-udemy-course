@@ -89,8 +89,8 @@ const lectureFitsTiles = [
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -111,8 +111,8 @@ const learnBullets = [
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -466,7 +466,7 @@ const lectureFitsTiles = [
   },
   {
     label: "What this lecture is about",
-    detail: 'One parameter on that skeleton — the system field — and why misplacing it is one of the most common API mistakes.',
+    detail: 'One parameter on that skeleton — the system prompt — and why misplacing it is one of the most common API mistakes.',
   },
   {
     label: 'Where we go next',
@@ -479,9 +479,10 @@ const lectureFitsTiles = [
   eyebrow="How this lecture fits in"
   title="Here's how this lecture fits into the course"
   :tiles="lectureFitsTiles"
+  :initial-blank="true"
   footer-label="API Bootcamp"
   :footer-num="2"
-  :footer-total="10"
+  :footer-total="11"
 />
 
 <!--
@@ -498,20 +499,20 @@ After this, lecture 2.3 turns to the dials that control creativity — temperatu
 
 <script setup>
 const learnBullets = [
-  { label: 'Where it lives', detail: 'Exactly where the system parameter sits in messages.create() and why it is not a role' },
-  { label: 'System vs user', detail: 'The contrast with instructions buried in a user message — and why those break across turns' },
-  { label: 'Multi-turn proof', detail: 'The pattern that holds a persona across 3 calls with nothing repeated in history' },
-  { label: 'Decision rule', detail: 'Which instructions belong in system vs per-turn user content' },
+  { label: 'Where the System Parameter Lives', detail: 'Exactly where the system parameter sits in messages.create() and why it is not a role' },
+  { label: 'System vs User', detail: 'The contrast with instructions buried in a user message — and why those break across turns' },
+  { label: 'Multi-Turn Proof', detail: 'The pattern that holds a persona across 3 calls with nothing repeated in history' },
+  { label: 'Decision Rule', detail: 'Which instructions belong in the system parameter vs per-turn user content' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets"
   footer-label="API Bootcamp"
   :footer-num="3"
-  :footer-total="10"
+  :footer-total="11"
 />
 
 <!--
@@ -533,12 +534,12 @@ Fourth, the decision rule for which instructions belong in system and which belo
 <TwoColSlide
   variant="compare"
   eyebrow="What it is"
-  title="What the system Parameter Actually Is"
+  title="What the System Parameter Actually Is"
   leftLabel="Visualized"
-  rightLabel="Three properties"
+  rightLabel="Three Properties"
   footer-label="API Bootcamp"
   :footer-num="4"
-  :footer-total="10"
+  :footer-total="11"
 >
   <template #left>
     <p><strong>system =</strong> "You are Aria, airline support..."</p>
@@ -595,12 +596,12 @@ print(response.content[0].text)`,
 
 <CodeBlockSlide
   eyebrow="✓ Correct"
-  title="system as a Top-Level Parameter"
+  title="System as a Top-Level Parameter"
   lang="python"
   :code-chunks="correctChunks"
   footer-label="API Bootcamp"
   :footer-num="5"
-  :footer-total="10"
+  :footer-total="11"
 />
 
 <!--
@@ -646,7 +647,7 @@ Hi, I need to change my seat on flight SK442."""
   :code-chunks="wrongChunks"
   footer-label="API Bootcamp"
   :footer-num="6"
-  :footer-total="10"
+  :footer-total="11"
 />
 
 <!--
@@ -663,64 +664,110 @@ A system prompt, by contrast, always comes through — it's never truncated from
 
 ---
 
-<!-- SLIDE 7 — Multi-turn -->
+<!-- SLIDE 7 — Building the Multi-Turn Chat Function -->
 
 <script setup>
-// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 5.
-const chatChunks = [
-  `# YOU maintain conversation history across turns
-conversation_history = []`,
+// 5 chunks, 4 clicks. Aligned with [click] markers in script SLIDE 7.
+// Chunk 0 is a single-line context comment so the slide enters with only
+// the comment visible; chunks 1-4 reveal one logical block each as the
+// narrator walks through the function. (Rule 7: one logical block per chunk.)
+const chatChunks22 = [
+  `# Conversation history is just a list of dicts — that's the entire memory`,
+  `conversation_history = []`,
   `def chat(user_message):
-    conversation_history.append({"role": "user", "content": user_message})
-
-    response = client.messages.create(
+    conversation_history.append({
+        "role": "user",
+        "content": user_message
+    })`,
+  `    response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=1024,
         system="You are Aria, SkyLine Airlines support. Only discuss flights.",
         messages=conversation_history   # Full history sent every call
-    )
-
-    reply = response.content[0].text
-    conversation_history.append({"role": "assistant", "content": reply})
-    return reply`,
-  `chat("Can I change my seat?")           # Turn 1 -- persona active
-chat("What about baggage fees?")        # Turn 2 -- persona STILL active
-chat("Can you help me book a hotel?")   # Turn 3 -- Aria redirects, correctly`,
+    )`,
+  `    assistant_reply = response.content[0].text
+    conversation_history.append({
+        "role": "assistant",
+        "content": assistant_reply
+    })
+    return assistant_reply`,
 ]
 </script>
 
 <CodeBlockSlide
   eyebrow="Persistence"
-  title="Multi-Turn: Why system Persists"
+  title="Building the Multi-Turn Chat Function"
   lang="python"
-  :code-chunks="chatChunks"
+  :code-chunks="chatChunks22"
   footer-label="API Bootcamp"
   :footer-num="7"
-  :footer-total="10"
+  :footer-total="11"
 />
 
 <!--
-Let's see this play out across multiple turns.
+Let's see this play out across multiple turns. The chat function we're about to build takes one user message, calls Claude with the persistent system prompt, and tracks the full history. Here it is in five logical pieces.
 
-The system prompt is re-sent on every API call — you pass it every time. But because it's a separate parameter, it's never confused with the conversation itself.
+First, we keep conversation history client-side, in a plain Python list.
 
-Even if you trim your messages history to save tokens, the system prompt stays intact.
+Second, the function signature appends each incoming user message to history before any API call.
 
-This is exactly why the system parameter exists as a distinct field.
+Third, the API call passes the same system value every time, alongside the FULL history. System sits in its own parameter, never inside messages.
+
+Fourth, capture the reply, append it to history, return.
 -->
 
 ---
 
-<!-- SLIDE 8 — When to use system vs messages -->
+<!-- SLIDE 8 — Three Turns, One Persona — The Payoff -->
+
+<script setup>
+// 4 chunks, 3 clicks. Chunk 0 is a brief context comment so the slide
+// enters visually clean; chunks 1-3 reveal one chat() call + its assistant
+// response per click.
+const chatCallsChunks22 = [
+  `# Three turns through chat() — Aria's persona persists across all of them`,
+  `chat("Can I change my seat?")
+# → "Sure! What's your flight number? I can pull up available seats..."`,
+  `chat("What about baggage fees?")
+# → "For SkyLine carry-on is free; checked bags are $35 per piece..."`,
+  `chat("Can you help me book a hotel?")
+# → "I can only help with flights, baggage, and reservations. For hotels,
+#    try a booking site like Expedia or Booking.com..."`,
+]
+</script>
+
+<CodeBlockSlide
+  eyebrow="The Payoff"
+  title="Three Turns, One Persona"
+  lang="python"
+  :code-chunks="chatCallsChunks22"
+  footer-label="API Bootcamp"
+  :footer-num="8"
+  :footer-total="11"
+/>
+
+<!--
+The payoff — three turns through that chat function with the assistant's reply shown next to each call.
+
+Turn one — Aria handles a seat change in character.
+
+Turn two — baggage fees, persona held. We never repeated the instructions in the user message.
+
+Turn three — the user asks for a hotel, Aria redirects. The system prompt's scope rule is still active on turn three the same way it was on turn one. Contrast this with the wrong-way pattern from earlier — instructions buried in the first user message couldn't survive a truncated history. The system parameter is the difference.
+-->
+
+---
+
+<!-- SLIDE 9 — When to Use the System Parameter vs. User Messages -->
 
 <TwoColSlide
   variant="compare"
-  title="When to Use system vs. User-Level"
-  leftLabel="Use system parameter"
-  rightLabel="Use messages content"
+  title="When to Use the System Parameter vs. User Messages"
+  leftLabel="Use the System Parameter"
+  rightLabel="Use messages Content"
   footer-label="API Bootcamp"
-  :footer-num="8"
-  :footer-total="10"
+  :footer-num="9"
+  :footer-total="11"
 >
   <template #left>
     <p><em>Anything that must be true for every turn.</em></p>
@@ -738,7 +785,7 @@ This is exactly why the system parameter exists as a distinct field.
       <li>One-off instructions for the current question</li>
       <li>Turn-specific context</li>
     </ul>
-    <p style="margin-top: 18px;"><strong>Rule of thumb:</strong> if it must be true for every exchange → <code>system</code>.</p>
+    <p style="margin-top: 18px;"><strong>Rule of thumb:</strong> if it must be true for every exchange, put it in the system parameter.</p>
   </template>
 </TwoColSlide>
 
@@ -749,27 +796,27 @@ Use system for things that apply to the entire conversation from the start. Pers
 
 Use the messages array for things that are specific to a single turn. If you need to inject dynamic data — like a customer's account details — that can go in the user message for that turn. One-off instructions that only apply to the current question belong in messages, not system.
 
-The rule of thumb: if it needs to be true for every single exchange, it belongs in system.
+The rule of thumb: if it needs to be true for every single exchange, it belongs in the system parameter.
 -->
 
 ---
 
-<!-- SLIDE 9 — Exam Tip -->
+<!-- SLIDE 10 — Exam Tip -->
 
 <Frame>
   <Eyebrow>⚡ Exam Tip</Eyebrow>
-  <SlideTitle>System Prompts Persist. First User Messages Don't.</SlideTitle>
+  <SlideTitle>System Prompts Persist —<br>First User Messages Don't.</SlideTitle>
   <div class="exam-stack">
     <v-clicks>
-    <CalloutBox variant="dont" title="Distractor pattern">
+    <CalloutBox variant="dont" title="Distractor Pattern">
       <p>Putting persona or role instructions in the first user message and assuming they'll persist through the conversation.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Exam signal">
-      <p>A scenario where a bot "forgets" its persona or breaks its rules after several turns → the root cause is almost always instructions placed in a user message rather than the <code>system</code> parameter.</p>
+    <CalloutBox variant="do" title="Exam Signal">
+      <p>A scenario where a bot "forgets" its persona or breaks its rules after several turns. The root cause is almost always instructions placed in a user message rather than the system parameter.</p>
     </CalloutBox>
     </v-clicks>
   </div>
-  <SlideFooter label="API Bootcamp" :num="9" :total="10" />
+  <SlideFooter label="API Bootcamp" :num="10" :total="11" />
 </Frame>
 
 <!--
@@ -782,24 +829,24 @@ Watch for exam scenarios where a bot "forgets" its persona or breaks its rules a
 
 ---
 
-<!-- SLIDE 10 — Takeaways -->
+<!-- SLIDE 11 — Takeaways -->
 
 <script setup>
-const takeaways = [
-  { label: 'Top-level field', detail: 'system is a top-level parameter alongside model and max_tokens -- never inside the messages array' },
-  { label: 'Auto-persists', detail: 'System prompts apply to every turn automatically -- never confused with conversation history' },
-  { label: 'User messages can be lost', detail: 'Instructions placed in the first user message are part of history -- they can be truncated' },
-  { label: 'Rule of thumb', detail: 'Use system for persona/format/safety; use messages for turn-specific data' },
+const takeaways22 = [
+  { label: 'The System Parameter Is a Top Level Field Outside the Messages Array', detail: 'It sits alongside model and max_tokens — never inside the messages list' },
+  { label: 'System Prompts Persist Across Turns', detail: 'You pass the same system value on every API call; it is never confused with conversation history' },
+  { label: 'User Messages are Not Guaranteed to be Persistent Across Turns', detail: 'Instructions in the first user message are part of history — they can be truncated when you trim to save tokens' },
+  { label: 'Rule of Thumb', detail: 'Use system for persona, format, safety; use messages for turn-specific data and dynamic context' },
 ]
 </script>
 
 <BulletReveal
   eyebrow="Takeaway"
   title="What to Remember"
-  :bullets="takeaways"
+  :bullets="takeaways22"
   footer-label="API Bootcamp"
-  :footer-num="10"
-  :footer-total="10"
+  :footer-num="11"
+  :footer-total="11"
 />
 
 <!--
@@ -869,23 +916,23 @@ Coming up: how this lecture fits into the bootcamp.
 <script setup>
 const lectureFitsTiles = [
   {
-    label: 'Where we came from',
+    label: 'Where We Came From',
     detail: 'Lecture 2.2 covered the system parameter — WHAT Claude is told to do.',
   },
   {
-    label: 'What this lecture is about',
+    label: 'What This Lecture Is About',
     detail: 'HOW Claude generates its response — the three sampling parameters that govern randomness.',
   },
   {
-    label: 'Where we go next',
+    label: 'Where We Go Next',
     detail: 'Lecture 2.4 turns to prefilled assistant messages — controlling Claude from the first token.',
   },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -909,13 +956,13 @@ const learnBullets = [
   { label: 'temperature', detail: 'What it does to the probability distribution and how to pick a value for the task' },
   { label: 'top_p (nucleus)', detail: 'Trims the candidate pool by cumulative probability — when to reach for it' },
   { label: 'top_k', detail: 'A hard count limit; top_k=1 is greedy decoding' },
-  { label: 'The exam trap', detail: 'Why temperature=0 is not the safe default for every scenario' },
+  { label: 'The Exam Trap', detail: 'Why temperature=0 is not the safe default for every scenario' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -939,7 +986,7 @@ Fourth, the exam trap — assuming temperature equals zero is always the safe de
 <!-- SLIDE 4 — Temperature: The main dial -->
 
 <ConceptHero
-  eyebrow="The main dial"
+  eyebrow="The Main Dial"
   leadLine="Temperature reshapes the probability distribution before sampling."
   concept="0 → spike · 1.0 → flat"
   supportLine="Default ~1.0 for most Claude models — always set it explicitly in production."
@@ -989,7 +1036,7 @@ creative = client.messages.create(
 </script>
 
 <CodeBlockSlide
-  eyebrow="Memorize this"
+  eyebrow="Memorize This"
   title="Temperature in Practice"
   lang="python"
   :code-chunks="tempChunks"
@@ -1019,7 +1066,7 @@ const topP = [
 </script>
 
 <BulletReveal
-  eyebrow="Nucleus sampling"
+  eyebrow="Nucleus Sampling"
   title="top_p — Trim the Candidate Pool"
   :bullets="topP"
   footer-label="API Bootcamp"
@@ -1047,12 +1094,12 @@ The practical difference from temperature: top_p controls the size of the candid
 const topK = [
   { label: 'top_k = N', detail: 'Only the N highest-probability tokens eligible' },
   { label: 'top_k = 1', detail: 'Greedy decoding -- always the single most likely token' },
-  { label: 'How they differ', detail: 'temperature reshapes · top_p trims by cumulative probability · top_k trims by count' },
+  { label: 'How They Differ', detail: 'temperature reshapes · top_p trims by cumulative probability · top_k trims by count' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="Hard count"
+  eyebrow="Hard Count"
   title="top_k — Limit Candidates by Count"
   :bullets="topK"
   footer-label="API Bootcamp"
@@ -1079,10 +1126,10 @@ In practice, Anthropic recommends adjusting only one of these at a time. Stackin
   <SlideTitle>Low Temperature Is Not Always "Better"</SlideTitle>
   <div class="exam-stack">
     <v-clicks>
-    <CalloutBox variant="dont" title="Distractor pattern">
+    <CalloutBox variant="dont" title="Distractor Pattern">
       <p>Assuming <code>temperature=0</code> produces the highest-quality output for <em>all</em> tasks — selecting it as the default in every scenario.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Exam signal">
+    <CalloutBox variant="do" title="Exam Signal">
       <p>A scenario that says "generate ten different product name ideas" is asking for creative output — <code>temperature=0</code> would produce ten nearly identical suggestions, which defeats the purpose.</p>
     </CalloutBox>
     </v-clicks>
@@ -1107,7 +1154,7 @@ const takeaways = [
   { label: 'temperature', detail: 'Reshapes the distribution -- 0 near-deterministic, 1.0 highly varied; match to task' },
   { label: 'top_p (nucleus)', detail: 'Excludes long-tail tokens by cumulative probability' },
   { label: 'top_k', detail: 'A hard count -- top_k=1 is greedy decoding' },
-  { label: 'Adjust one at a time', detail: 'Anthropic recommends temperature alone for most cases' },
+  { label: 'Adjust One at a Time', detail: 'Anthropic recommends temperature alone for most cases' },
 ]
 </script>
 
@@ -1187,23 +1234,23 @@ Coming up: how this lecture fits into the bootcamp.
 <script setup>
 const lectureFitsTiles = [
   {
-    label: 'Where we came from',
+    label: 'Where We Came From',
     detail: 'Lecture 2.3 covered the three randomness dials — they shape texture, not where the response starts.',
   },
   {
-    label: 'What this lecture is about',
+    label: 'What This Lecture Is About',
     detail: 'Prefilling — using the structure of the messages array to force the first token of the response.',
   },
   {
-    label: 'Where we go next',
+    label: 'Where We Go Next',
     detail: 'Lecture 2.5 covers stop sequences — the matching bookend that controls where Claude stops.',
   },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -1224,16 +1271,16 @@ After this, lecture 2.5 covers stop sequences — the matching bookend that cont
 
 <script setup>
 const learnBullets = [
-  { label: 'The mechanic', detail: 'Exactly what a prefill is — and the one-rule mechanic, with zero special parameters' },
-  { label: '4 high-value uses', detail: 'JSON extraction, killing preamble, code-fence forcing, persona locking' },
-  { label: 'Reading the response', detail: 'The catch that trips up most first-time users — prefill is not in the response body' },
-  { label: 'Pair with stop_sequences', detail: 'Why prefill + stop sequence is the cleanest extraction pattern in the API' },
+  { label: 'The Mechanic', detail: 'Exactly what a prefill is — and the one-rule mechanic, with zero special parameters' },
+  { label: '4 High-Value Uses', detail: 'JSON extraction, killing preamble, code-fence forcing, persona locking' },
+  { label: 'Reading the Response', detail: 'The catch that trips up most first-time users — prefill is not in the response body' },
+  { label: 'Pair With stop_sequences', detail: 'Why prefill + stop sequence is the cleanest extraction pattern in the API' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -1302,15 +1349,15 @@ That's the power — you control the very first token of the response.
 
 <script setup>
 const prefillUses = [
-  { label: 'Force JSON to open with {', detail: 'Structured output that begins correctly' },
-  { label: 'Eliminate preamble', detail: "No 'Certainly!' or 'Great question!'" },
-  { label: 'Open a code block', detail: '```python -- forces language tag immediately' },
-  { label: 'Lock in persona', detail: "Character voice mid-conversation without breaking immersion" },
+  { label: 'Force JSON to Open With {', detail: 'Structured output that begins correctly' },
+  { label: 'Eliminate Preamble', detail: "No 'Certainly!' or 'Great question!'" },
+  { label: 'Open a Code Block', detail: '```python -- forces language tag immediately' },
+  { label: 'Lock in Persona', detail: "Character voice mid-conversation without breaking immersion" },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="When to prefill"
+  eyebrow="When to Prefill"
   title="Four Common Prefill Use Cases"
   :bullets="prefillUses"
   footer-label="API Bootcamp"
@@ -1403,7 +1450,7 @@ const codeFenceChunks = [
 </script>
 
 <CodeBlockSlide
-  eyebrow="More prefill patterns"
+  eyebrow="More Prefill Patterns"
   title="Code Generation & Format Prefills"
   lang="python"
   :code-chunks="codeFenceChunks"
@@ -1441,7 +1488,7 @@ const combinedChunks = [
 </script>
 
 <CodeBlockSlide
-  eyebrow="Power pair"
+  eyebrow="Power Pair"
   title="Prefills + Stop Sequences"
   lang="python"
   :code-chunks="combinedChunks"
@@ -1467,10 +1514,10 @@ The response will be the content between the tags — nothing before, nothing af
   <SlideTitle>There Is No prefill Parameter</SlideTitle>
   <div class="exam-stack">
     <v-clicks>
-    <CalloutBox variant="dont" title="Distractor pattern">
+    <CalloutBox variant="dont" title="Distractor Pattern">
       <p>Candidates look for a dedicated <code>prefill</code> parameter in the API or believe you need a special flag to enable this behavior.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="The entire mechanic">
+    <CalloutBox variant="do" title="The Entire Mechanic">
       <p>Last message role: <code>"user"</code> → Claude starts a fresh response.<br/>Last message role: <code>"assistant"</code> → Claude continues from its content.</p>
     </CalloutBox>
     </v-clicks>
@@ -1492,10 +1539,10 @@ If the last message has role: "user", Claude starts a fresh response. If it has 
 
 <script setup>
 const takeaways = [
-  { label: 'Assistant-role last', detail: "A prefill is an assistant-role message placed LAST in the messages array -- Claude continues from its content" },
-  { label: 'Not in response body', detail: 'Prefill text is NOT in the response body -- prepend it yourself when reconstructing' },
-  { label: 'Common uses', detail: 'Force JSON {, eliminate preamble, open code fences, lock in persona' },
-  { label: 'Pair with stop_sequences', detail: 'Prefill opens, stop sequence closes -- exactly what you need' },
+  { label: 'Assistant-Role Last', detail: "A prefill is an assistant-role message placed LAST in the messages array -- Claude continues from its content" },
+  { label: 'Not in Response Body', detail: 'Prefill text is NOT in the response body -- prepend it yourself when reconstructing' },
+  { label: 'Common Uses', detail: 'Force JSON {, eliminate preamble, open code fences, lock in persona' },
+  { label: 'Pair With stop_sequences', detail: 'Prefill opens, stop sequence closes -- exactly what you need' },
 ]
 </script>
 
@@ -1575,23 +1622,23 @@ Coming up: how this lecture fits into the course.
 <script setup>
 const lectureFitsTiles25 = [
   {
-    label: 'After prefills',
+    label: 'After Prefills',
     detail: "Lecture 2.4 covered prefilled assistant messages -- the tool that controls the START of Claude's output.",
   },
   {
-    label: 'The companion tool',
+    label: 'The Companion Tool',
     detail: 'Stop sequences control the END of generation -- a hard line drawn the moment Claude emits a specific string.',
   },
   {
-    label: 'Scenario 6 fundamental',
+    label: 'Scenario 6 Fundamental',
     detail: 'Structured extraction pipelines lean on stop sequences to bound output cleanly.',
   },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles25"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -1604,16 +1651,16 @@ const lectureFitsTiles25 = [
 
 <script setup>
 const learnBullets25 = [
-  { label: 'How they behave', detail: 'Exactly how stop_sequences halts, returns, and omits at runtime' },
-  { label: 'When to reach for them', detail: 'The four scenarios where stop sequences are the right tool' },
-  { label: 'The traps', detail: 'Case-sensitivity and whitespace pitfalls that catch candidates' },
-  { label: 'Pair with prefills', detail: 'The cleanest bounded extraction pattern in the Claude API' },
+  { label: 'How They Behave', detail: 'Exactly how stop_sequences halts, returns, and omits at runtime' },
+  { label: 'When to Reach for Them', detail: 'The four scenarios where stop sequences are the right tool' },
+  { label: 'The Traps', detail: 'Case-sensitivity and whitespace pitfalls that catch candidates' },
+  { label: 'Pair With Prefills', detail: 'The cleanest bounded extraction pattern in the Claude API' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets25"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -1627,8 +1674,8 @@ const learnBullets25 = [
 <TwoColSlide
   variant="antipattern-fix"
   title="The Overgeneration Problem"
-  leftLabel="✓ What you asked for"
-  rightLabel="✗ What Claude gave you"
+  leftLabel="✓ What You Asked For"
+  rightLabel="✗ What Claude Gave You"
   footer-label="API Bootcamp"
   :footer-num="4"
   :footer-total="11"
@@ -1701,15 +1748,15 @@ When a stop sequence fires, response.stop_reason is "stop_sequence" — not "end
 
 <script setup>
 const useCases25 = [
-  { label: '1 · Structured extraction', detail: 'Stop at </answer> -- clean content inside a tag' },
-  { label: '2 · Delimited output', detail: 'Stop at ###END### with no trailing content' },
-  { label: '3 · Multi-turn dialogue', detail: 'Stop at turn boundaries like \\nHuman:' },
-  { label: '4 · Code generation', detail: 'Stop after closing fence -- one clean block' },
+  { label: '1 · Structured Extraction', detail: 'Stop at </answer> -- clean content inside a tag' },
+  { label: '2 · Delimited Output', detail: 'Stop at ###END### with no trailing content' },
+  { label: '3 · Multi-Turn Dialogue', detail: 'Stop at turn boundaries like \\nHuman:' },
+  { label: '4 · Code Generation', detail: 'Stop after closing fence -- one clean block' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="Use cases"
+  eyebrow="Use Cases"
   title="When Stop Sequences Are the Right Tool"
   :bullets="useCases25"
   footer-label="API Bootcamp"
@@ -1791,7 +1838,7 @@ const tableRows25 = [
 </script>
 
 <ComparisonTable
-  eyebrow="Exact literals"
+  eyebrow="Exact Literals"
   title="Case Sensitivity & Whitespace Traps"
   :columns='["What Claude Generated", "Did It Stop?"]'
   :rows="tableRows25"
@@ -1834,7 +1881,7 @@ const combinedChunks = [
 
 <CodeBlockSlide
   eyebrow="Combined"
-  title="Combining Stop Sequences with Prefills"
+  title="Combining Stop Sequences With Prefills"
   lang="python"
   :code-chunks="combinedChunks"
   footer-label="API Bootcamp"
@@ -1862,7 +1909,7 @@ This is the cleanest extraction pattern in the Claude API. Memorize it.
     <CalloutBox variant="dont" title="Trap">
       <p>Assuming stop sequences behave like regex or case-insensitive matching — wondering why uppercase fires inconsistently against lowercase output.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Correct pattern">
+    <CalloutBox variant="do" title="Correct Pattern">
       <p>Stop sequences are exact, case-sensitive literals applied to the raw output stream.</p>
       <p>Use XML closing tags you control in the prompt.</p>
       <p>Always verify <code>stop_reason == 'stop_sequence'</code>.</p>
@@ -1886,10 +1933,10 @@ The fix is structural: use sequences you control in the prompt — XML closing t
 
 <script setup>
 const takeaways25 = [
-  { label: 'Up to 8,191 literals', detail: 'stop_sequences -- any match halts generation; the string itself is not in the body' },
+  { label: 'Up to 8,191 Literals', detail: 'stop_sequences -- any match halts generation; the string itself is not in the body' },
   { label: 'Check stop_reason', detail: "'stop_sequence' worked, 'end_turn' finished first -- handle both cases" },
-  { label: 'Exact match', detail: 'Case-sensitive, whitespace counts, no regex' },
-  { label: 'Pair with prefills', detail: 'Prefill opens, stop sequence closes -- exactly what you need' },
+  { label: 'Exact Match', detail: 'Case-sensitive, whitespace counts, no regex' },
+  { label: 'Pair With Prefills', detail: 'Prefill opens, stop sequence closes -- exactly what you need' },
 ]
 </script>
 
@@ -1969,23 +2016,23 @@ Coming up: how this lecture fits into the course.
 <script setup>
 const lectureFitsTiles26 = [
   {
-    label: 'After stop sequences',
+    label: 'After Stop Sequences',
     detail: 'Lecture 2.5 controlled the END of generation with stop sequences -- bounding what Claude outputs.',
   },
   {
-    label: 'Controlling delivery',
+    label: 'Controlling Delivery',
     detail: 'This lecture is about when bytes arrive at your app, not what Claude outputs -- the model does the same work either way.',
   },
   {
-    label: 'Scenarios 1 + 4 matter most',
+    label: 'Scenarios 1 + 4 Matter Most',
     detail: 'The user-facing scenarios where perceived latency is the whole game.',
   },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles26"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -1998,16 +2045,16 @@ const lectureFitsTiles26 = [
 
 <script setup>
 const learnBullets26 = [
-  { label: 'What streaming actually IS', detail: 'The SSE protocol under the hood, and the TTFT concept it optimizes' },
-  { label: 'The 6-event sequence', detail: 'Memorize the order -- the exam tests it' },
-  { label: 'Two ways to consume', detail: "SDK's text-only iterator vs the raw-event loop for tool calls" },
-  { label: 'When to stream vs not', detail: 'The decision framework: user-facing UX vs batch pipelines' },
+  { label: 'What Streaming Actually Is', detail: 'The SSE protocol under the hood, and the TTFT concept it optimizes' },
+  { label: 'The 6-Event Sequence', detail: 'Memorize the order -- the exam tests it' },
+  { label: 'Two Ways to Consume', detail: "SDK's text-only iterator vs the raw-event loop for tool calls" },
+  { label: 'When to Stream vs Not', detail: 'The decision framework: user-facing UX vs batch pipelines' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets26"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -2098,7 +2145,7 @@ const eventSteps = [
 </script>
 
 <StepSequence
-  eyebrow="Memorize this"
+  eyebrow="Memorize This"
   title="The Streaming Event Sequence"
   :steps="eventSteps"
   footer-label="API Bootcamp"
@@ -2152,7 +2199,7 @@ print(f"Input tokens: {final_message.usage.input_tokens}")`,
 </script>
 
 <CodeBlockSlide
-  eyebrow="SDK helper"
+  eyebrow="SDK Helper"
   title="Streaming in Python — The SDK Way"
   lang="python"
   :code-chunks="sdkChunks"
@@ -2200,7 +2247,7 @@ with client.messages.stream(
 </script>
 
 <CodeBlockSlide
-  eyebrow="Full control"
+  eyebrow="Full Control"
   title="Raw Event Streaming"
   lang="python"
   :code-chunks="rawChunks"
@@ -2272,7 +2319,7 @@ The rule of thumb: if a human sees the output in real time, stream it. If a prog
       <p>Thinking streaming makes Claude generate faster, or changes what Claude outputs.</p>
       <p>It does neither.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Correct pattern">
+    <CalloutBox variant="do" title="Correct Pattern">
       <p>Streaming reduces time-to-first-token (perceived latency) — total generation time is unchanged.</p>
       <p>Choose streaming for user-facing UX, not batch.</p>
       <p><code>stop_reason</code> arrives in <code>message_delta</code>, not <code>message_stop</code>.</p>
@@ -2296,10 +2343,10 @@ And the detail that trips candidates up: stop_reason lives in message_delta, not
 
 <script setup>
 const takeaways26 = [
-  { label: 'SSE + event order', detail: 'message_start -> content_block_start -> content_block_delta* -> content_block_stop -> message_delta -> message_stop' },
-  { label: 'stop_reason lives in message_delta', detail: 'NOT in message_stop -- tool args arrive as input_json_delta' },
-  { label: 'Reduces TTFT, not total time', detail: 'Streaming changes perceived latency; total generation time unchanged' },
-  { label: 'Stream for users, not batch', detail: 'Humans watching -> stream; code parsing full response -> don\'t' },
+  { label: 'SSE + Event Order', detail: 'message_start -> content_block_start -> content_block_delta* -> content_block_stop -> message_delta -> message_stop' },
+  { label: 'stop_reason Lives in message_delta', detail: 'NOT in message_stop -- tool args arrive as input_json_delta' },
+  { label: 'Reduces TTFT, Not Total Time', detail: 'Streaming changes perceived latency; total generation time unchanged' },
+  { label: 'Stream for Users, Not Batch', detail: 'Humans watching -> stream; code parsing full response -> don\'t' },
 ]
 </script>
 
@@ -2379,11 +2426,11 @@ Coming up: how this lecture fits into the course.
 <script setup>
 const lectureFitsTiles27 = [
   {
-    label: 'After streaming',
+    label: 'After Streaming',
     detail: 'Lecture 2.6 controlled DELIVERY with streaming. This lecture is about controlling SHAPE.',
   },
   {
-    label: 'Scenario 6 territory',
+    label: 'Scenario 6 Territory',
     detail: 'Structured data extraction -- the single most common production use case Anthropic ships against.',
   },
   {
@@ -2394,8 +2441,8 @@ const lectureFitsTiles27 = [
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles27"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -2408,16 +2455,16 @@ const lectureFitsTiles27 = [
 
 <script setup>
 const learnBullets27 = [
-  { label: 'How naive JSON fails', detail: 'Exactly how "respond in JSON" prompting breaks in production' },
-  { label: 'Three approaches ranked', detail: "Why one is the exam's clear preferred answer" },
-  { label: 'Tool-use-for-extraction in code', detail: "Including tool_choice 'any' to force a tool call" },
-  { label: 'The most-tested distinction', detail: 'What tool use does -- and does NOT -- guarantee' },
+  { label: 'How Naive JSON Fails', detail: 'Exactly how "respond in JSON" prompting breaks in production' },
+  { label: 'Three Approaches Ranked', detail: "Why one is the exam's clear preferred answer" },
+  { label: 'Tool-Use-For-Extraction in Code', detail: "Including tool_choice 'any' to force a tool call" },
+  { label: 'The Most-Tested Distinction', detail: 'What tool use does -- and does NOT -- guarantee' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets27"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -2445,7 +2492,7 @@ const brokenJsonChunks = [
 </script>
 
 <CodeBlockSlide
-  eyebrow="Broken pipeline"
+  eyebrow="Broken Pipeline"
   title="When JSON From Claude Breaks Your Pipeline"
   lang="json"
   :code-chunks="brokenJsonChunks"
@@ -2468,12 +2515,12 @@ The fix isn't more retry logic. The fix is reaching for an API feature that give
 const ranking27 = [
   { label: '🏆 1st -- Tool Use + JSON Schema', detail: "Most reliable · schema enforced · exam's preferred answer" },
   { label: '2nd -- response_format', detail: 'Valid JSON syntax · no schema check' },
-  { label: '3rd -- System Prompt + JSON mode', detail: 'Usually works · not a guarantee' },
+  { label: '3rd -- System Prompt + JSON Mode', detail: 'Usually works · not a guarantee' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="Three approaches"
+  eyebrow="Three Approaches"
   title="Ranked by Reliability"
   :bullets="ranking27"
   footer-label="API Bootcamp"
@@ -2529,7 +2576,7 @@ extraction_tool = {
 </script>
 
 <CodeBlockSlide
-  eyebrow="Gold standard"
+  eyebrow="Gold Standard"
   title="Tool Use for Structured Output"
   lang="python"
   :code-chunks="goldChunks"
@@ -2574,7 +2621,7 @@ print(structured_data["status"])      # "shipped"`,
 </script>
 
 <CodeBlockSlide
-  eyebrow="Reading response"
+  eyebrow="Reading Response"
   title="How to Read the Tool-Use Response"
   lang="python"
   :code-chunks="readChunks"
@@ -2620,7 +2667,7 @@ response = client.messages.create(
 </script>
 
 <CodeBlockSlide
-  eyebrow="Runners-up"
+  eyebrow="Runners-Up"
   title="response_format & System-Prompt JSON"
   lang="python"
   :code-chunks="silverChunks"
@@ -2643,9 +2690,9 @@ The response_format approach is cleaner but still doesn't validate against your 
 
 <TwoColSlide
   variant="compare"
-  title="What Tool Use Guarantees — and What It Doesn't"
+  title="What Tool Use Guarantees — And What It Doesn't"
   leftLabel="✓ Guarantees"
-  rightLabel="✗ Does NOT guarantee"
+  rightLabel="✗ Does NOT Guarantee"
   footer-label="API Bootcamp"
   :footer-num="9"
   :footer-total="11"
@@ -2691,7 +2738,7 @@ The mental model: tool use is a syntax and structure guarantee, not a truth guar
     <CalloutBox variant="dont" title="Trap">
       <p>Choosing tool use because it eliminates <em>all</em> errors in the output — including wrong values or hallucinated data.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Correct pattern">
+    <CalloutBox variant="do" title="Correct Pattern">
       <p>Tool use + <code>tool_choice:'any'</code> guarantees syntactically valid, schema-conformant JSON.</p>
       <p>It does NOT guarantee values are correct or hallucination-free.</p>
       <p><code>stop_reason</code> is <code>'tool_use'</code> (not <code>'end_turn'</code>) whenever a tool is called.</p>
@@ -2717,10 +2764,10 @@ And know this cold: when a tool is called, stop_reason is 'tool_use' — never '
 
 <script setup>
 const takeaways27 = [
-  { label: 'Reliability order', detail: 'Tool use + JSON schema > response_format > system prompt instruction' },
-  { label: "Force with tool_choice", detail: "tool_choice={'type':'any'} prevents plain text -- Claude MUST call a tool" },
+  { label: 'Reliability Order', detail: 'Tool use + JSON schema > response_format > system prompt instruction' },
+  { label: "Force With tool_choice", detail: "tool_choice={'type':'any'} prevents plain text -- Claude MUST call a tool" },
   { label: 'stop_reason = tool_use', detail: "When a tool is called; data arrives as parsed dict at response.content[0].input" },
-  { label: 'Syntax, not truth', detail: 'Tool use guarantees syntactic/structural validity -- NOT factually correct values' },
+  { label: 'Syntax, Not Truth', detail: 'Tool use guarantees syntactic/structural validity -- NOT factually correct values' },
 ]
 </script>
 
@@ -2801,23 +2848,23 @@ XML tags are how you eliminate that ambiguity — and they're the single best de
 <script setup>
 const lectureFitsTiles_2_8 = [
   {
-    label: 'Where we are',
+    label: 'Where We Are',
     detail: "Section 2 is the API Bootcamp; this lecture starts the prompt-engineering arc inside it.",
   },
   {
-    label: 'Why it matters',
+    label: 'Why It Matters',
     detail: 'XML tags are the foundation for the prompt-injection scenario — the highest-value Domain 4 exam question.',
   },
   {
-    label: "What's next",
+    label: "What's Next",
     detail: 'Multimodal, then tool use — both use the same content-block thinking we set up here.',
   },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles_2_8"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -2841,15 +2888,15 @@ The next two lectures — multimodal and tool use — both lean on the same cont
 <script setup>
 const learnBullets_2_8 = [
   { label: 'Why XML', detail: 'The reason XML works -- Claude was trained on enormous amounts of XML and HTML' },
-  { label: '5 core tags', detail: 'instructions, context, examples, document, thinking -- what each signals' },
-  { label: 'Prompt injection mitigation', detail: 'The structural fix for the exam-tested adversarial-document scenario' },
-  { label: 'When to skip XML', detail: 'Tags are not a default -- knowing when they are overhead is part of the exam' },
+  { label: '5 Core Tags', detail: 'instructions, context, examples, document, thinking -- what each signals' },
+  { label: 'Prompt Injection Mitigation', detail: 'The structural fix for the exam-tested adversarial-document scenario' },
+  { label: 'When to Skip XML', detail: 'Tags are not a default -- knowing when they are overhead is part of the exam' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets_2_8"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -2873,7 +2920,7 @@ Fourth — when to skip XML. Tags aren't a default. Knowing when they're overhea
 <!-- SLIDE 4 — How Does Claude Know? -->
 
 <ConceptHero
-  eyebrow="The problem"
+  eyebrow="The Problem"
   leadLine="Instructions, context, example, user data — all in one plain-text prompt."
   concept="How does Claude know?"
   supportLine="XML tags turn an ambiguous wall of text into a structured prompt."
@@ -2892,8 +2939,8 @@ XML tags give you a way to tell Claude exactly what each piece is for. They turn
 <TwoColSlide
   variant="compare"
   title="Why XML? Claude Was Trained on It"
-  leftLabel="Training data"
-  rightLabel="Why it works"
+  leftLabel="Training Data"
+  rightLabel="Why It Works"
 >
   <template #left>
     <p>Structured web and doc content (HTML, XML, documentation) plus books, articles, code.</p>
@@ -2953,7 +3000,7 @@ const coreXmlChunks = [
 </script>
 
 <CodeBlockSlide
-  eyebrow="Core patterns"
+  eyebrow="Core Patterns"
   title="The Core XML Patterns"
   lang="xml"
   :code-chunks="coreXmlChunks"
@@ -3048,12 +3095,12 @@ This measurably improves accuracy on complex problems. The thinking content is s
 const whenHelps = [
   { label: 'Use XML', detail: 'Multiple distinct sections; user data isolation; few-shot examples; complex prompts 200+ words' },
   { label: 'Skip XML', detail: 'Single-sentence prompts; no external data; one-shot classification; simple Q and A with no injection risk' },
-  { label: 'Rule of thumb', detail: 'More than one type of content calls for XML. A single instruction with no data does not.' },
+  { label: 'Rule of Thumb', detail: 'More than one type of content calls for XML. A single instruction with no data does not.' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="Judgment call"
+  eyebrow="Judgment Call"
   title="When XML Helps vs. When It Is Overhead"
   :bullets="whenHelps"
 />
@@ -3091,10 +3138,10 @@ The answer: wrap user-provided content in document tags. Structural isolation so
 
 <script setup>
 const takeaways = [
-  { label: 'Semantic signal', detail: 'XML tags give Claude a role cue -- instructions, context, examples, document, thinking are recognized as distinct roles' },
-  { label: 'Core patterns', detail: 'instructions, context, examples (with nested example), document, thinking' },
-  { label: 'Injection mitigation', detail: 'Wrap user content in document tags -- structural isolation, not prompt rewording' },
-  { label: 'Precision tool', detail: 'Use for multi-section prompts; skip for simple single-sentence prompts' },
+  { label: 'Semantic Signal', detail: 'XML tags give Claude a role cue -- instructions, context, examples, document, thinking are recognized as distinct roles' },
+  { label: 'Core Patterns', detail: 'instructions, context, examples (with nested example), document, thinking' },
+  { label: 'Injection Mitigation', detail: 'Wrap user content in document tags -- structural isolation, not prompt rewording' },
+  { label: 'Precision Tool', detail: 'Use for multi-section prompts; skip for simple single-sentence prompts' },
 ]
 </script>
 
@@ -3170,15 +3217,15 @@ Claude can handle all of this — but not through a separate vision API. Images 
 
 <script setup>
 const lectureFitsTiles_2_9 = [
-  { label: 'Where we are', detail: "Section 2's API Bootcamp; this is the multimodal piece." },
-  { label: 'Why it matters', detail: 'Vision unlocks document processing, UI testing, and visual QA without a separate model.' },
-  { label: "What's next", detail: 'Tool use, where Claude moves from observing to acting.' },
+  { label: 'Where We Are', detail: "Section 2's API Bootcamp; this is the multimodal piece." },
+  { label: 'Why It Matters', detail: 'Vision unlocks document processing, UI testing, and visual QA without a separate model.' },
+  { label: "What's Next", detail: 'Tool use, where Claude moves from observing to acting.' },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles_2_9"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -3201,16 +3248,16 @@ After this, the next two lectures cover tool use — the leap from Claude readin
 
 <script setup>
 const learnBullets_2_9 = [
-  { label: 'Content blocks', detail: 'Messages content can be a string OR an array of typed blocks -- arrays unlock images' },
-  { label: 'Two source types', detail: 'base64 for private/local; url for public. Each has a specific shape' },
-  { label: 'The exam trap', detail: 'Distractors invent an image= parameter -- only the content-block pattern works' },
-  { label: 'What Claude can do', detail: 'Six concrete capabilities -- OCR, chart analysis, visual diffing, identification' },
+  { label: 'Content Blocks', detail: 'Messages content can be a string OR an array of typed blocks -- arrays unlock images' },
+  { label: 'Two Source Types', detail: 'base64 for private/local; url for public. Each has a specific shape' },
+  { label: 'The Exam Trap', detail: 'Distractors invent an image= parameter -- only the content-block pattern works' },
+  { label: 'What Claude Can Do', detail: 'Six concrete capabilities -- OCR, chart analysis, visual diffing, identification' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets_2_9"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -3236,8 +3283,8 @@ Fourth — what Claude can actually do. Six concrete capabilities -- OCR, chart 
 <TwoColSlide
   variant="compare"
   title="The Content Block Model"
-  leftLabel="String form"
-  rightLabel="Content-block form"
+  leftLabel="String Form"
+  rightLabel="Content-Block Form"
 >
   <template #left>
     <pre><code>{"role": "user",
@@ -3410,10 +3457,10 @@ For architects, this unlocks document processing, UI testing, data extraction, a
   <SlideTitle>Images Are Content Blocks — Not a Separate Parameter</SlideTitle>
   <div class="exam-stack">
     <v-clicks>
-    <CalloutBox variant="dont" title="Distractor patterns">
+    <CalloutBox variant="dont" title="Distractor Patterns">
       <p>Passing images via a top-level <code>image=</code> parameter · putting the image URL in the system prompt · omitting <code>media_type</code> on a base64 source.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Only correct pattern">
+    <CalloutBox variant="do" title="Only Correct Pattern">
       <p>Images live inside the <code>content</code> array as a block with <code>'type':'image'</code> and a source object containing <code>type</code>, <code>media_type</code>, and either <code>data</code> or <code>url</code>.</p>
     </CalloutBox>
     </v-clicks>
@@ -3436,10 +3483,10 @@ The only correct pattern: images live inside the content array as a block with "
 
 <script setup>
 const takeaways = [
-  { label: 'content is an array of blocks', detail: "'type':'text' for text, 'type':'image' for images" },
-  { label: 'Two source types', detail: "'base64' (with media_type + data) or 'url' (with url)" },
+  { label: 'Content Is an Array of Blocks', detail: "'type':'text' for text, 'type':'image' for images" },
+  { label: 'Two Source Types', detail: "'base64' (with media_type + data) or 'url' (with url)" },
   { label: 'Valid media_type', detail: 'image/jpeg, image/png, image/gif, image/webp' },
-  { label: 'Order matters', detail: 'Images + text coexist in one message -- order blocks the way Claude should read them' },
+  { label: 'Order Matters', detail: 'Images + text coexist in one message -- order blocks the way Claude should read them' },
 ]
 </script>
 
@@ -3515,15 +3562,15 @@ This single mechanism — tool use — anchors Domain 1 (twenty-seven percent) p
 
 <script setup>
 const lectureFitsTiles_2_10 = [
-  { label: 'Where we are', detail: "Section 2's API Bootcamp; this is the tool-use foundation." },
-  { label: 'Why it matters', detail: 'Tool use anchors Domain 1 (27%) AND Domain 2 (18%) — almost half the exam.' },
-  { label: "What's next", detail: 'Lecture 2.11 builds the complete agent loop; Section 3 takes it to agentic scale.' },
+  { label: 'Where We Are', detail: "Section 2's API Bootcamp; this is the tool-use foundation." },
+  { label: 'Why It Matters', detail: 'Tool use anchors Domain 1 (27%) AND Domain 2 (18%) — almost half the exam.' },
+  { label: "What's Next", detail: 'Lecture 2.11 builds the complete agent loop; Section 3 takes it to agentic scale.' },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles_2_10"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -3546,16 +3593,16 @@ The exam impact is hard to overstate — tool use questions show up in Domain 1 
 
 <script setup>
 const learnBullets_2_10 = [
-  { label: '3 required fields', detail: 'name, description, input_schema -- the entire surface area' },
-  { label: 'Send tools, read response', detail: 'tools=[...] parameter; the tool_use content block and its four fields' },
-  { label: 'Request-response cycle', detail: '5 steps total -- 3 yours, 2 Claude\'s. Foundation of Section 3' },
-  { label: 'Exam-tested rule', detail: 'Where tool_result goes -- and the wrong patterns that show up as distractors' },
+  { label: '3 Required Fields', detail: 'name, description, input_schema -- the entire surface area' },
+  { label: 'Send Tools, Read Response', detail: 'tools=[...] parameter; the tool_use content block and its four fields' },
+  { label: 'Request-Response Cycle', detail: '5 steps total -- 3 yours, 2 Claude\'s. Foundation of Section 3' },
+  { label: 'Exam-Tested Rule', detail: 'Where tool_result goes -- and the wrong patterns that show up as distractors' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets_2_10"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -3582,7 +3629,7 @@ Fourth — the exam-tested structural rule. Where the tool_result goes — and t
   variant="compare"
   title="Anatomy of a Tool Definition"
   leftLabel="JSON"
-  rightLabel="Three required fields"
+  rightLabel="Three Required Fields"
 >
   <template #left>
     <pre><code>{"name": "get_weather",
@@ -3650,7 +3697,7 @@ const weatherToolChunks = [
 </script>
 
 <CodeBlockSlide
-  eyebrow="Concrete example"
+  eyebrow="Concrete Example"
   title="A Full Tool Definition"
   lang="python"
   :code-chunks="weatherToolChunks"
@@ -3692,7 +3739,7 @@ response = client.messages.create(
 </script>
 
 <CodeBlockSlide
-  eyebrow="The request"
+  eyebrow="The Request"
   title="Sending the Request With Tools"
   lang="python"
   :code="requestCode"
@@ -3716,7 +3763,7 @@ It's not done. It's waiting for you to execute the tool and return the result.
   variant="compare"
   title="Reading the Tool-Use Response"
   leftLabel="JSON"
-  rightLabel="Four fields"
+  rightLabel="Four Fields"
 >
   <template #left>
     <pre><code>{"stop_reason": "tool_use",
@@ -3791,7 +3838,7 @@ followup = client.messages.create(
 </script>
 
 <CodeBlockSlide
-  eyebrow="Returning the result"
+  eyebrow="Returning the Result"
   title="Execute the Tool — and Return the Result"
   lang="python"
   :code-chunks="executeChunks"
@@ -3822,7 +3869,7 @@ const cycleSteps = [
 </script>
 
 <FlowDiagram
-  eyebrow="The full cycle"
+  eyebrow="The Full Cycle"
   title="The Request-Response Cycle"
   :steps="cycleSteps"
 />
@@ -3850,10 +3897,10 @@ Two-step exchange. Everything in agentic architecture builds on this.
   <SlideTitle>Tool Results Go in a user Message</SlideTitle>
   <div class="exam-stack">
     <v-clicks>
-    <CalloutBox variant="dont" title="Wrong structure">
+    <CalloutBox variant="dont" title="Wrong Structure">
       <p>Putting <code>tool_result</code> inside the assistant message alongside <code>tool_use</code> · omitting <code>tool_use_id</code> · skipping the assistant message in replayed history.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Only correct pattern">
+    <CalloutBox variant="do" title="Only Correct Pattern">
       <p>Append assistant message (with <code>tool_use</code> content) to history, THEN append a new user message containing a <code>tool_result</code> block with matching <code>tool_use_id</code>.</p>
     </CalloutBox>
     </v-clicks>
@@ -3874,10 +3921,10 @@ Skip either step and Claude's conversation history is malformed — you'll see e
 
 <script setup>
 const takeaways = [
-  { label: 'Three required fields', detail: 'Every tool needs name, description, and input_schema (JSON Schema)' },
+  { label: 'Three Required Fields', detail: 'Every tool needs name, description, and input_schema (JSON Schema)' },
   { label: 'Pass via tools=[...]', detail: 'In messages.create() -- Claude decides whether to call one' },
-  { label: "tool_use block", detail: "When stop_reason=='tool_use', content has a tool_use block with id, name, input" },
-  { label: "Return in USER message", detail: "tool_result block in a user turn, using tool_use_id to link back" },
+  { label: "tool_use Block", detail: "When stop_reason=='tool_use', content has a tool_use block with id, name, input" },
+  { label: "Return in USER Message", detail: "tool_result block in a user turn, using tool_use_id to link back" },
 ]
 </script>
 
@@ -3951,15 +3998,15 @@ This lecture wires the complete loop, end-to-end. If you understand this pattern
 
 <script setup>
 const lectureFitsTiles_2_11 = [
-  { label: 'Where we are', detail: "The closing lecture of Section 2; the agentic loop everything else depends on." },
-  { label: 'Why it matters', detail: 'Demo 1 in Section 8 is a hands-on extension of exactly this loop.' },
-  { label: "What's next", detail: 'Section 3 takes this pattern to agentic scale — stop_reason, multi-agent, planning.' },
+  { label: 'Where We Are', detail: "The closing lecture of Section 2; the agentic loop everything else depends on." },
+  { label: 'Why It Matters', detail: 'Demo 1 in Section 8 is a hands-on extension of exactly this loop.' },
+  { label: "What's Next", detail: 'Section 3 takes this pattern to agentic scale — stop_reason, multi-agent, planning.' },
 ]
 </script>
 
 <LectureContext
-  eyebrow="How this lecture fits in"
-  title="Here's how this lecture fits into the course"
+  eyebrow="How This Lecture Fits In"
+  title="Here's How This Lecture Fits Into the Course"
   :tiles="lectureFitsTiles_2_11"
   footer-label="API Bootcamp"
   :footer-num="2"
@@ -3982,16 +4029,16 @@ Concretely: Scenarios 1 and 3 from lecture 1.1 — Customer Support Agent and Mu
 
 <script setup>
 const learnBullets_2_11 = [
-  { label: 'Loop structure', detail: '6 steps total -- where to check stop_reason, when to execute, what to append' },
-  { label: 'Multi-tool rule', detail: 'N tool_use blocks -> N tool_result blocks in ONE user message -- exam-tested' },
-  { label: 'Complete implementation', detail: '~30 lines of Python -- tools, dispatcher, while-loop engine, exit condition' },
-  { label: 'Connection to agents', detail: 'This loop IS the spine of every Claude agent -- Section 3 builds on it' },
+  { label: 'Loop Structure', detail: '6 steps total -- where to check stop_reason, when to execute, what to append' },
+  { label: 'Multi-Tool Rule', detail: 'N tool_use blocks -> N tool_result blocks in ONE user message -- exam-tested' },
+  { label: 'Complete Implementation', detail: '~30 lines of Python -- tools, dispatcher, while-loop engine, exit condition' },
+  { label: 'Connection to Agents', detail: 'This loop IS the spine of every Claude agent -- Section 3 builds on it' },
 ]
 </script>
 
 <BulletReveal
-  eyebrow="What you'll learn"
-  title="By the end of this lecture you'll know..."
+  eyebrow="What You'll Learn"
+  title="By the End of This Lecture You'll Know..."
   :bullets="learnBullets_2_11"
   footer-label="API Bootcamp"
   :footer-num="3"
@@ -4026,7 +4073,7 @@ const loopSteps = [
 </script>
 
 <FlowDiagram
-  eyebrow="The loop"
+  eyebrow="The Loop"
   title="The Loop Structure — Step by Step"
   :steps="loopSteps"
 />
@@ -4054,8 +4101,8 @@ Notice the loop exits only when stop_reason is "end_turn". Everything else is it
 <TwoColSlide
   variant="compare"
   title="Multiple Tool Calls — In One Response"
-  leftLabel="Claude's response"
-  rightLabel="Your reply — ONE user message"
+  leftLabel="Claude's Response"
+  rightLabel="Your Reply — ONE user Message"
 >
   <template #left>
     <pre><code>{"role": "assistant",
@@ -4102,15 +4149,15 @@ If you send them as separate messages, the conversation structure breaks. Claude
 
 <script setup>
 const historySteps = [
-  { number: '1 · user', title: 'Original question', body: "e.g. 'What's the weather in Paris?'" },
-  { number: '2 · assistant', title: 'Tool use blocks', body: 'Content array with one or more tool_use blocks' },
-  { number: '3 · user', title: 'Tool results', body: 'Content array with matching tool_result blocks' },
-  { number: '4 · assistant', title: 'Final answer', body: "Natural-language answer -- stop_reason='end_turn'" },
+  { number: '1 · user', title: 'Original Question', body: "e.g. 'What's the weather in Paris?'" },
+  { number: '2 · assistant', title: 'Tool Use Blocks', body: 'Content array with one or more tool_use blocks' },
+  { number: '3 · user', title: 'Tool Results', body: 'Content array with matching tool_result blocks' },
+  { number: '4 · assistant', title: 'Final Answer', body: "Natural-language answer -- stop_reason='end_turn'" },
 ]
 </script>
 
 <StepSequence
-  eyebrow="History shape"
+  eyebrow="History Shape"
   title="Message History After One Tool Cycle"
   :steps="historySteps"
 />
@@ -4172,7 +4219,7 @@ tools = [
 </script>
 
 <CodeBlockSlide
-  eyebrow="Implementation — part 1"
+  eyebrow="Implementation — Part 1"
   title="Tools & Dispatcher"
   lang="python"
   :code-chunks="toolsChunks"
@@ -4228,7 +4275,7 @@ print(answer)`,
 </script>
 
 <CodeBlockSlide
-  eyebrow="Implementation — part 2"
+  eyebrow="Implementation — Part 2"
   title="The Loop"
   lang="python"
   :code-chunks="loopChunks"
@@ -4330,13 +4377,13 @@ If you understand this loop, you understand the spine of every agentic architect
 
 <Frame>
   <Eyebrow>⚡ Exam Tip</Eyebrow>
-  <SlideTitle>N tool_use blocks → N tool_result blocks in ONE user message</SlideTitle>
+  <SlideTitle>N tool_use Blocks → N tool_result Blocks in ONE user Message</SlideTitle>
   <div class="exam-stack">
     <v-clicks>
     <CalloutBox variant="dont" title="Distractor">
       <p>Two user messages, each with a single <code>tool_result</code> — splitting the turn across multiple user messages.</p>
     </CalloutBox>
-    <CalloutBox variant="do" title="Only correct pattern">
+    <CalloutBox variant="do" title="Only Correct Pattern">
       <p>One assistant turn with N tool calls → one user turn with N tool results. Always. Each <code>tool_result</code> carries the matching <code>tool_use_id</code>.</p>
     </CalloutBox>
     </v-clicks>
@@ -4357,10 +4404,10 @@ The rule: one assistant turn with N tool calls → one user turn with N tool res
 
 <script setup>
 const takeaways = [
-  { label: 'Loop until end_turn', detail: "Claude controls termination -- while True + break on stop_reason=='end_turn'" },
-  { label: 'Append both on every cycle', detail: 'Assistant message (with tool_use) AND user message (with ALL tool_results)' },
+  { label: 'Loop Until end_turn', detail: "Claude controls termination -- while True + break on stop_reason=='end_turn'" },
+  { label: 'Append Both on Every Cycle', detail: 'Assistant message (with tool_use) AND user message (with ALL tool_results)' },
   { label: 'N tool_use -> N tool_result', detail: 'Multiple tool calls -> execute all -> ONE user message with all tool_result blocks' },
-  { label: 'Foundation of agents', detail: 'This pattern is the direct foundation of every agentic Claude architecture' },
+  { label: 'Foundation of Agents', detail: 'This pattern is the direct foundation of every agentic Claude architecture' },
 ]
 </script>
 

@@ -75,6 +75,21 @@ const v = computed(() => VARIANTS[props.variant] || VARIANTS.tip)
   overflow: hidden;
   font-family: var(--font-body);
   box-shadow: var(--shadow-sm);
+  /* Round-1 (Rule 9): ensure stacked CalloutBoxes have visual breathing room
+     from each other AND from any adjacent SlideTitle/Eyebrow above. Authors
+     should also wrap stacked CalloutBoxes in a parent with explicit gap
+     (see udemy-slide-creator SKILL.md Rule 9) for the strongest separation;
+     this margin-top is the always-on baseline guard. */
+  margin-top: 24px;
+}
+/* First sibling of a v-clicks wrapper doesn't need top margin (it's the
+   leader; spacing above it comes from the SlideTitle's natural bottom).
+   Browsers don't expose :first-of-class cleanly via scoped styles, so
+   leverage the slidev pattern: the FIRST .cb inside a `.exam-stack` parent
+   already has flex-gap spacing from the stack — don't compound it. */
+.exam-stack > .cb:first-child,
+.cb:first-child {
+  margin-top: 0;
 }
 .cb__rail {
   width: 8px;

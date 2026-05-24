@@ -3,9 +3,21 @@
 
   Sits as the SECOND slide in every lecture deck (between cover and
   "what you'll learn"). Shows the lecture's positioning via 3 numbered
-  tiles: tile 1 is the foundational framing (visible from slide entry);
-  tiles 2 and 3 reveal on click 1 and click 2, adding nuance and forward
-  context.
+  tiles.
+
+  Two reveal modes:
+
+  - DEFAULT (initial-blank=false): tile 1 is visible from slide entry;
+    tiles 2 and 3 reveal on click 1 and click 2. The script's SLIDE 2
+    narration has 2 [click] markers → 3 narration sub-chunks. Matches
+    every Section 2-7 lecture's existing audit output (Wave 1 / Phase B).
+
+  - OPT-IN (initial-blank=true): the slide enters BLANK (no tiles); each
+    click reveals one tile in turn — click 1 → tile 1, click 2 → tile 2,
+    click 3 → tile 3. The script's SLIDE 2 narration has 3 [click] markers
+    → 4 narration sub-chunks (intro + one per tile). Adopted for
+    lecture 2.2 round-1 per user feedback "we need 1 more frame before c0
+    that starts without any of the steps showing."
 
   Required: `tiles` array of exactly 3 objects with `label` + `detail` fields.
 -->
@@ -24,6 +36,7 @@ defineProps({
     validator: (a) => Array.isArray(a) && a.length === 3,
   },
   // tiles: [{ label: String, detail: String }] x3
+  initialBlank: { type: Boolean, default: false },
   footerLabel: { type: String, default: '' },
   footerNum: { type: [Number, String], default: 1 },
   footerTotal: { type: [Number, String], default: 1 },
@@ -39,29 +52,60 @@ defineProps({
     <SlideTitle>{{ title }}</SlideTitle>
 
     <ul class="lcx__list">
-      <li class="lcx__row">
-        <div class="lcx__num">01</div>
-        <div class="lcx__text">
-          <div class="lcx__label">{{ tiles[0].label }}</div>
-          <div v-if="tiles[0].detail" class="lcx__detail">{{ tiles[0].detail }}</div>
-        </div>
-      </li>
-      <v-clicks>
+      <template v-if="initialBlank">
+        <!-- All three tiles inside v-clicks so the slide enters blank.
+             Click counts: 3 reveals total (one per tile). -->
+        <v-clicks>
+          <li class="lcx__row">
+            <div class="lcx__num">01</div>
+            <div class="lcx__text">
+              <div class="lcx__label">{{ tiles[0].label }}</div>
+              <div v-if="tiles[0].detail" class="lcx__detail">{{ tiles[0].detail }}</div>
+            </div>
+          </li>
+          <li class="lcx__row">
+            <div class="lcx__num">02</div>
+            <div class="lcx__text">
+              <div class="lcx__label">{{ tiles[1].label }}</div>
+              <div v-if="tiles[1].detail" class="lcx__detail">{{ tiles[1].detail }}</div>
+            </div>
+          </li>
+          <li class="lcx__row">
+            <div class="lcx__num">03</div>
+            <div class="lcx__text">
+              <div class="lcx__label">{{ tiles[2].label }}</div>
+              <div v-if="tiles[2].detail" class="lcx__detail">{{ tiles[2].detail }}</div>
+            </div>
+          </li>
+        </v-clicks>
+      </template>
+      <template v-else>
+        <!-- Tile 1 always visible; tiles 2 and 3 inside v-clicks.
+             Click counts: 2 reveals total. Backwards-compat default. -->
         <li class="lcx__row">
-          <div class="lcx__num">02</div>
+          <div class="lcx__num">01</div>
           <div class="lcx__text">
-            <div class="lcx__label">{{ tiles[1].label }}</div>
-            <div v-if="tiles[1].detail" class="lcx__detail">{{ tiles[1].detail }}</div>
+            <div class="lcx__label">{{ tiles[0].label }}</div>
+            <div v-if="tiles[0].detail" class="lcx__detail">{{ tiles[0].detail }}</div>
           </div>
         </li>
-        <li class="lcx__row">
-          <div class="lcx__num">03</div>
-          <div class="lcx__text">
-            <div class="lcx__label">{{ tiles[2].label }}</div>
-            <div v-if="tiles[2].detail" class="lcx__detail">{{ tiles[2].detail }}</div>
-          </div>
-        </li>
-      </v-clicks>
+        <v-clicks>
+          <li class="lcx__row">
+            <div class="lcx__num">02</div>
+            <div class="lcx__text">
+              <div class="lcx__label">{{ tiles[1].label }}</div>
+              <div v-if="tiles[1].detail" class="lcx__detail">{{ tiles[1].detail }}</div>
+            </div>
+          </li>
+          <li class="lcx__row">
+            <div class="lcx__num">03</div>
+            <div class="lcx__text">
+              <div class="lcx__label">{{ tiles[2].label }}</div>
+              <div v-if="tiles[2].detail" class="lcx__detail">{{ tiles[2].detail }}</div>
+            </div>
+          </li>
+        </v-clicks>
+      </template>
     </ul>
 
     <SlideFooter v-if="!hideFooter" :label="footerLabel" :num="footerNum" :total="footerTotal" />
