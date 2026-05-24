@@ -5,6 +5,12 @@ __pycache__/
 .claude/worktrees/
 .claude/scheduled_tasks.lock
 .playwright-mcp/
+
+# All feedback artifacts stay local — never committed.
+# Includes: per-round markdown feedback files, auto-generated per-lecture
+# HTML pages (feedback/lecture-X.Y/index.html — written by render.py), and
+# exported JSON bundles (feedback-bundle-*.json). The source of truth is the
+# script + slidev edits the feedback triggers, not the feedback itself.
 /feedback
 
 # Phase F wave scratch dirs (briefing + intermediate build artifacts)
