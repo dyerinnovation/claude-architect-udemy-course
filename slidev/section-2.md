@@ -69,14 +69,29 @@ Today we're going to dissect every part of a request and response. By the end of
 
 ---
 
-<!-- SLIDE 1a: How This Lecture Fits Into the Course -->
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
+<script setup>
+const lectureFitsTiles = [
+  {
+    label: 'The foundation',
+    detail: "Lecture 1.1 flagged the API Bootcamp as non-negotiable for Path A — this is the first lecture of it.",
+  },
+  {
+    label: 'Different paths, different needs',
+    detail: 'For Paths B and C this is a skim refresher — the vocabulary should already be familiar.',
+  },
+  {
+    label: 'Foundation for the rest',
+    detail: 'Everything in Sections 3 through 7 plugs into what we unpack here.',
+  },
+]
+</script>
 
 <LectureContext
-  phase="Phase 02 · Claude API Bootcamp"
-  lecture-label="Lecture 1 of 11"
-  prev-context="Coming from: Course intro + study plan (Section 1)"
-  next-context="Leads to: System prompts, tool use, structured output, batch, files (rest of Section 2)"
-  essence="The Messages API is the foundation every other section plugs into."
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles"
   footer-label="API Bootcamp"
   :footer-num="2"
   :footer-total="10"
@@ -84,7 +99,7 @@ Today we're going to dissect every part of a request and response. By the end of
 
 ---
 
-<!-- SLIDE 1b: What You'll Learn -->
+<!-- SLIDE 3 — What You'll Learn -->
 
 <script setup>
 const learnBullets = [
@@ -106,7 +121,7 @@ const learnBullets = [
 
 ---
 
-<!-- SLIDE 2 — The Five Core Request Parameters -->
+<!-- SLIDE 4 — The Five Core Request Parameters -->
 
 <script setup>
 const coreParams = [
@@ -125,6 +140,7 @@ const coreParams = [
   footer-label="API Bootcamp"
   :footer-num="4"
   :footer-total="10"
+  :hide-footer="true"
 />
 
 <!--
@@ -147,11 +163,13 @@ These five parameters are the foundation of everything else in this section.
 
 ---
 
-<!-- SLIDE 3 — A Complete Request, Annotated -->
+<!-- SLIDE 5 — A Complete Request, Annotated -->
 
 <script setup>
-// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 3.
+// 4 chunks, 3 clicks. Chunk 0 is blank so the slide starts with no code visible
+// (per udemy-slide-creator SKILL.md Rule 6). Aligned with [click] markers in script SLIDE 5.
 const requestChunks = [
+  ``,
   `import anthropic
 
 client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY from environment`,
@@ -192,7 +210,7 @@ Claude has no memory between calls — everything it knows about the conversatio
 
 ---
 
-<!-- SLIDE 4 — The Response Object, Dissected -->
+<!-- SLIDE 6 — The Response Object, Dissected -->
 
 <script setup>
 // 5 chunks, 4 clicks. Aligned with 4 [click] markers in script SLIDE 4.
@@ -246,7 +264,7 @@ usage tells you exactly what you're being billed for.
 
 ---
 
-<!-- SLIDE 5 — stop_reason Values -->
+<!-- SLIDE 7 — stop_reason Values -->
 
 <script setup>
 const stopReasons = [
@@ -276,7 +294,7 @@ The production rule: always check stop_reason. If it's "max_tokens", you may nee
 
 ---
 
-<!-- SLIDE 6 — Reading the Response in Code -->
+<!-- SLIDE 8 — Reading the Response in Code -->
 
 <script setup>
 // 3 chunks, 2 clicks. Aligned with 2 [click] markers in script SLIDE 6.
@@ -321,7 +339,7 @@ Checking stop_reason is important for robustness. If stop_reason is "max_tokens"
 
 ---
 
-<!-- SLIDE 7 — Exam Tip: System Is NOT a Role -->
+<!-- SLIDE 9 — Exam Tip: System Is NOT a Role -->
 
 <Frame>
   <Eyebrow>⚡ Exam Tip</Eyebrow>
@@ -356,7 +374,7 @@ If you see a question showing {"role": "system", "content": "..."} inside the me
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
 const takeaways = [

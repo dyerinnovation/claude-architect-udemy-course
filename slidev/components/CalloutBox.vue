@@ -126,11 +126,11 @@ const v = computed(() => VARIANTS[props.variant] || VARIANTS.tip)
   color: var(--forest-800);
 }
 .cb__slot :deep(p) {
-  margin: 0 0 10px;
+  margin: 0;
   max-width: none;
 }
-.cb__slot :deep(p:last-child) {
-  margin-bottom: 0;
+.cb__slot :deep(p:not(:first-child)) {
+  margin-top: 16px;
 }
 .cb__slot :deep(code) {
   font-family: var(--font-mono);

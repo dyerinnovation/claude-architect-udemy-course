@@ -3,8 +3,9 @@ import Frame from './Frame.vue'
 import Eyebrow from './Eyebrow.vue'
 import SlideTitle from './SlideTitle.vue'
 import SlideFooter from './SlideFooter.vue'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
+import { useNav } from '@slidev/client'
 
 const props = defineProps({
   eyebrow: { type: String, default: '' },
@@ -60,6 +61,17 @@ onMounted(() => {
     requestAnimationFrame(checkOverflow)
   }
 })
+
+// Determine which chunk is "active" (most recently revealed) for highlighting.
+// In Slidev v51, useNav() exposes `clicks` as a ComputedRef<number> (NOT
+// `currentClicks` — that name doesn't exist on the v51 nav object).
+// Chunk 0 is visible at click 0; chunk i reveals at click i. Cap at the last
+// chunk index so we don't overshoot once all chunks are revealed.
+const nav = useNav()
+const activeChunkIdx = computed(() => {
+  const cc = nav.clicks?.value ?? 0
+  return Math.min(cc, Math.max(0, props.codeChunks.length - 1))
+})
 </script>
 
 <template>
@@ -74,7 +86,7 @@ onMounted(() => {
         <div class="cbs__lang">
           {{ lang }}
         </div>
-        <pre ref="preRef" class="cbs__pre" :style="{ fontSize: fontSize + 'px' }"><code v-if="codeChunks.length > 0"><span class="cbs__chunk" v-text="codeChunks[0]" /><v-clicks><span v-for="(chunk, i) in codeChunks.slice(1)" :key="i" class="cbs__chunk" v-text="chunk" /></v-clicks></code><code v-else-if="code" v-text="code" /><code v-else><slot /></code></pre>
+        <pre ref="preRef" class="cbs__pre" :style="{ fontSize: fontSize + 'px' }"><code v-if="codeChunks.length > 0"><span class="cbs__chunk" :class="{ 'cbs__chunk--active': activeChunkIdx === 0 }" v-text="codeChunks[0]" /><v-clicks><span v-for="(chunk, i) in codeChunks.slice(1)" :key="i" class="cbs__chunk" :class="{ 'cbs__chunk--active': activeChunkIdx === i + 1 }" v-text="chunk" /></v-clicks></code><code v-else-if="code" v-text="code" /><code v-else><slot /></code></pre>
       </div>
     </div>
 
@@ -84,7 +96,7 @@ onMounted(() => {
 
 <style scoped>
 .cbs {
-  margin-top: 56px;
+  margin-top: 24px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 28px;
@@ -151,5 +163,15 @@ onMounted(() => {
 /* Collapsed (un-revealed) chunks should not reserve layout space. */
 .cbs__pre :deep(.slidev-vclick-hidden) {
   display: none;
+}
+/* Active chunk highlight: the chunk being narrated right now pops with a
+   mint background tint + sprout-green left border. Previously revealed
+   chunks stay visible but un-highlighted. */
+.cbs__pre .cbs__chunk--active {
+  background: var(--mint-200);
+  border-left: 4px solid var(--sprout-500);
+  padding-left: 12px;
+  margin-left: -16px;  /* pull back so the highlight extends INTO the gutter */
+  border-radius: 0 6px 6px 0;
 }
 </style>

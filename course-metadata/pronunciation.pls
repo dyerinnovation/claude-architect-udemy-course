@@ -26,7 +26,7 @@
   <!-- Anthropic + Claude model family — required for every CCA lecture -->
   <lexeme><grapheme>Anthropic</grapheme><alias>an-THROP-ick</alias></lexeme>
   <lexeme><grapheme>Claude</grapheme><alias>clawed</alias></lexeme>
-  <lexeme><grapheme>Sonnet</grapheme><alias>SON-it</alias></lexeme>
+  <lexeme><grapheme>Sonnet</grapheme><alias>sahn it</alias></lexeme>
   <lexeme><grapheme>Opus</grapheme><alias>OH-pus</alias></lexeme>
   <lexeme><grapheme>Haiku</grapheme><alias>HIGH-koo</alias></lexeme>
 

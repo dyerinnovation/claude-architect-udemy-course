@@ -2,12 +2,12 @@
   LectureContext — "How this lecture fits in" slide.
 
   Sits as the SECOND slide in every lecture deck (between cover and
-  "what you'll learn"). Shows a breadcrumb (phase › lectureLabel), a
-  large centered essence statement, and optional prev/next context rows
-  that frame the lecture within the section/course flow.
+  "what you'll learn"). Shows the lecture's positioning via 3 numbered
+  tiles: tile 1 is the foundational framing (visible from slide entry);
+  tiles 2 and 3 reveal on click 1 and click 2, adding nuance and forward
+  context.
 
-  prev/next context rows reveal on click (2 clicks total) when both are
-  provided. Single-row decks still work — the row simply doesn't render.
+  Required: `tiles` array of exactly 3 objects with `label` + `detail` fields.
 -->
 <script setup>
 import Frame from './Frame.vue'
@@ -17,11 +17,13 @@ import SlideFooter from './SlideFooter.vue'
 
 defineProps({
   eyebrow: { type: String, default: 'How this lecture fits in' },
-  phase: { type: String, required: true },
-  lectureLabel: { type: String, required: true },
-  prevContext: { type: String, default: '' },
-  nextContext: { type: String, default: '' },
-  essence: { type: String, required: true },
+  title: { type: String, default: "Here's how this lecture fits into the course" },
+  tiles: {
+    type: Array,
+    required: true,
+    validator: (a) => Array.isArray(a) && a.length === 3,
+  },
+  // tiles: [{ label: String, detail: String }] x3
   footerLabel: { type: String, default: '' },
   footerNum: { type: [Number, String], default: 1 },
   footerTotal: { type: [Number, String], default: 1 },
@@ -34,119 +36,81 @@ defineProps({
     <Eyebrow v-if="eyebrow">
       {{ eyebrow }}
     </Eyebrow>
-    <SlideTitle>How this lecture fits in</SlideTitle>
+    <SlideTitle>{{ title }}</SlideTitle>
 
-    <div class="lcx">
-      <div class="lcx__breadcrumb">
-        <span class="lcx__crumb">{{ phase }}</span>
-        <span class="lcx__sep">&rsaquo;</span>
-        <span class="lcx__crumb lcx__crumb--current">{{ lectureLabel }}</span>
-      </div>
-
-      <div class="lcx__essence">
-        <span class="lcx__essence-text">&ldquo;{{ essence }}&rdquo;</span>
-      </div>
-
-      <div class="lcx__context">
-        <v-clicks>
-          <div v-if="prevContext" class="lcx__row lcx__row--prev">
-            <span class="lcx__arrow">&larr;</span>
-            <span class="lcx__row-text">{{ prevContext }}</span>
+    <ul class="lcx__list">
+      <li class="lcx__row">
+        <div class="lcx__num">01</div>
+        <div class="lcx__text">
+          <div class="lcx__label">{{ tiles[0].label }}</div>
+          <div v-if="tiles[0].detail" class="lcx__detail">{{ tiles[0].detail }}</div>
+        </div>
+      </li>
+      <v-clicks>
+        <li class="lcx__row">
+          <div class="lcx__num">02</div>
+          <div class="lcx__text">
+            <div class="lcx__label">{{ tiles[1].label }}</div>
+            <div v-if="tiles[1].detail" class="lcx__detail">{{ tiles[1].detail }}</div>
           </div>
-          <div v-if="nextContext" class="lcx__row lcx__row--next">
-            <span class="lcx__arrow">&rarr;</span>
-            <span class="lcx__row-text">{{ nextContext }}</span>
+        </li>
+        <li class="lcx__row">
+          <div class="lcx__num">03</div>
+          <div class="lcx__text">
+            <div class="lcx__label">{{ tiles[2].label }}</div>
+            <div v-if="tiles[2].detail" class="lcx__detail">{{ tiles[2].detail }}</div>
           </div>
-        </v-clicks>
-      </div>
-    </div>
+        </li>
+      </v-clicks>
+    </ul>
 
     <SlideFooter v-if="!hideFooter" :label="footerLabel" :num="footerNum" :total="footerTotal" />
   </Frame>
 </template>
 
 <style scoped>
-.lcx {
-  margin-top: 48px;
-  flex: 1;
+.lcx__list {
+  list-style: none;
+  margin: 56px 0 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 36px;
-  min-height: 0;
-}
-
-.lcx__breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-family: var(--font-mono);
-  font-size: 22px;
-  color: var(--teal-600);
-  letter-spacing: 0.04em;
-}
-.lcx__crumb {
-  background: var(--mint-100);
-  border: 1px solid var(--teal-200);
-  border-radius: 999px;
-  padding: 6px 16px;
-}
-.lcx__crumb--current {
-  background: var(--paper-0);
-  border-color: var(--sprout-500);
-  color: var(--forest-800);
-  font-weight: 600;
-}
-.lcx__sep {
-  color: var(--teal-200);
-  font-size: 26px;
-  line-height: 1;
-}
-
-.lcx__essence {
+  gap: 14px;
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 48px;
   min-height: 0;
-}
-.lcx__essence-text {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 52px;
-  line-height: 1.2;
-  color: var(--forest-800);
-  text-align: center;
-  text-wrap: balance;
-  letter-spacing: -0.01em;
-}
-
-.lcx__context {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 .lcx__row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: start;
+  gap: 24px;
+  padding: 20px 28px;
   background: var(--paper-0);
   border: 1px solid var(--paper-200);
   border-left: 6px solid var(--sprout-500);
   border-radius: 14px;
-  padding: 18px 24px;
 }
-.lcx__arrow {
-  font-family: var(--font-body);
-  font-size: 26px;
-  font-weight: 700;
+.lcx__num {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 600;
   color: var(--sprout-600);
-  line-height: 1;
+  letter-spacing: 0.05em;
+  padding-top: 4px;
 }
-.lcx__row-text {
+.lcx__label {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 500;
+  color: var(--forest-800);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+}
+.lcx__detail {
   font-family: var(--font-body);
   font-size: 24px;
-  line-height: 1.4;
-  color: var(--forest-800);
+  line-height: 1.45;
+  color: var(--forest-500);
+  margin-top: 8px;
 }
 </style>
