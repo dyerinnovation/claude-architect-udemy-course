@@ -40,20 +40,72 @@ aspectRatio: 16/9
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
       <span>Lecture 3.1</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>~9 min</span>
+      <span>~10 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>8 slides</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-Here's the fundamental question you must answer when building any agentic system with Claude. How does Claude communicate to your code whether it's done — or whether it needs you to do something first? The answer is a single field in every API response: stop_reason. Get this wrong, and your agent either terminates before it finishes, or loops forever. There is no middle ground.
+Here's the fundamental question you must answer when building any agentic system with Claude. How does Claude communicate to your code whether it's done — or whether it needs you to do something first? The answer is a single field in every API response: stop_reason. Get this wrong, and your agent either terminates before it finishes, or loops forever. There is no middle ground — and this is where Domain 1, the biggest chunk of the exam, lives.
 -->
 
 ---
 
-<!-- SLIDE 2 — What the Agentic Loop Looks Like -->
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
+<script setup>
+const lectureFitsTiles31 = [
+  {
+    label: 'Where we came from',
+    detail: 'Section 2 walked through every API response field — including stop_reason. We named it but did not lean on it.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Now stop_reason becomes the anchor — the field that controls the canonical agentic loop pattern.',
+  },
+  {
+    label: 'Where we go next',
+    detail: 'The next twelve lectures all plug into this. 3.2 deepens the two branches; 3.3 names the anti-patterns; 3.4 starts multi-agent.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles31"
+  footer-label="Lecture 3.1"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets31 = [
+  { label: 'The canonical loop', detail: 'while True with explicit break on end_turn -- Claude drives termination, not a counter' },
+  { label: 'tool_use response shape', detail: 'type, id, name, input -- and why the id field matches your result back to Claude' },
+  { label: 'The append rule', detail: 'BOTH the assistant message AND the user-role tool_result before the next call' },
+  { label: 'The two values', detail: 'tool_use to continue, end_turn to stop -- the whole control surface' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets31"
+  footer-label="Lecture 3.1"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — What the Agentic Loop Looks Like -->
 
 <TwoColSlide
   variant="compare"
@@ -61,8 +113,8 @@ Here's the fundamental question you must answer when building any agentic system
   leftLabel="Flow"
   rightLabel="What stop_reason tells you"
   footerLabel="Lecture 3.1"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -91,10 +143,10 @@ Let me show you the complete loop structure. You send a request to Claude. Claud
 
 ---
 
-<!-- SLIDE 3 — The Code Pattern -->
+<!-- SLIDE 5 — The Code Pattern -->
 
 <script setup>
-const loopCode = `messages = [{"role": "user", "content": initial_prompt}]
+const loopCode31 = `messages = [{"role": "user", "content": initial_prompt}]
 
 while True:
     response = client.messages.create(
@@ -119,10 +171,10 @@ while True:
   eyebrow="Canonical loop"
   title="The Code Pattern"
   lang="python"
-  :code="loopCode"
+  :code="loopCode31"
   footerLabel="Lecture 3.1"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 />
 
 <!--
@@ -131,7 +183,7 @@ Here's what this looks like in code. Notice the structure: while True loop with 
 
 ---
 
-<!-- SLIDE 4 — Tool Use Response -->
+<!-- SLIDE 6 — Tool Use Response -->
 
 <TwoColSlide
   variant="compare"
@@ -139,8 +191,8 @@ Here's what this looks like in code. Notice the structure: while True loop with 
   leftLabel="JSON"
   rightLabel="Key fields"
   footerLabel="Lecture 3.1"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -175,10 +227,10 @@ When stop_reason is tool_use, the response content contains a tool use block. It
 
 ---
 
-<!-- SLIDE 5 — Appending Tool Results -->
+<!-- SLIDE 7 — Appending Tool Results -->
 
 <script setup>
-const appendSteps = [
+const appendSteps31 = [
   { number: 'Step 1', title: 'Append the assistant response', body: 'Append the full assistant response (including the tool_use block) to the messages array.' },
   { number: 'Step 2', title: 'Append a user tool_result', body: 'Append a USER message with tool_result blocks -- each needs tool_use_id, content, and is_error.' },
   { number: 'Step 3', title: 'Call the API with full history', body: 'Make the next API call with the FULL updated messages array -- nothing else.' },
@@ -188,10 +240,10 @@ const appendSteps = [
 <StepSequence
   eyebrow="Common mistake"
   title="Appending Tool Results Correctly"
-  :steps="appendSteps"
+  :steps="appendSteps31"
   footerLabel="Lecture 3.1"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -200,7 +252,7 @@ The most common implementation mistake: forgetting to append both the assistant 
 
 ---
 
-<!-- SLIDE 6 — Two stop_reason Values -->
+<!-- SLIDE 8 — Two stop_reason Values -->
 
 <TwoColSlide
   variant="compare"
@@ -208,8 +260,8 @@ The most common implementation mistake: forgetting to append both the assistant 
   leftLabel="tool_use"
   rightLabel="end_turn"
   footerLabel="Lecture 3.1"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -239,10 +291,10 @@ There are other stop_reason values — like max_tokens and stop_sequence — but
 
 ---
 
-<!-- SLIDE 7 — Exam Tip -->
+<!-- SLIDE 9 — Exam Tip -->
 
 <script setup>
-const examTipBad = `# Distractors the exam plants
+const examTipBad31 = `# Distractors the exam plants
 
 if 'done' in response.content[0].text:
     break
@@ -252,7 +304,7 @@ for attempt in range(10):      # cap as PRIMARY exit
 
 if any(b.type == 'tool_use' for b in response.content):
     continue                    # inspecting content instead of stop_reason`
-const examTipGood = `# The only correct pattern
+const examTipGood31 = `# The only correct pattern
 
 if response.stop_reason == 'end_turn':
     break
@@ -265,12 +317,12 @@ elif response.stop_reason == 'tool_use':
   eyebrow="⚡ Exam Tip"
   title="How to Control the Loop"
   lang="text"
-  :badExample="examTipBad"
+  :badExample="examTipBad31"
   whyItFails="Text is non-deterministic. Caps-as-primary hide partial results. Inspecting content blocks duplicates a signal the API already gives you."
-  :fixExample="examTipGood"
+  :fixExample="examTipGood31"
   footerLabel="Lecture 3.1"
-  :footerNum="7"
-  :footerTotal="8"
+  :footerNum="9"
+  :footerTotal="10"
 />
 
 <!--
@@ -279,10 +331,10 @@ The exam will present scenarios where a candidate is doing something other than 
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
-const takeawayBullets = [
+const takeawayBullets31 = [
   { label: "stop_reason='tool_use' -> continue", detail: 'Execute the tool, append the result, and loop back.' },
   { label: "stop_reason='end_turn' -> stop", detail: 'Return the response to the user.' },
   { label: 'Always append BOTH', detail: 'Assistant message AND tool result before the next call.' },
@@ -295,14 +347,15 @@ const takeawayBullets = [
 <BulletReveal
   eyebrow="Takeaway"
   title="The Agentic Loop — What to Know Cold"
-  :bullets="takeawayBullets"
-  footerLabel="Lecture 3.1"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeawayBullets31"
+  footer-label="Lecture 3.1"
+  :footer-num="10"
+  :footer-total="10"
+  :hide-footer="true"
 />
 
 <!--
-Six things to carry forward. stop_reason tool_use means execute the tool, append the result, and loop back. stop_reason end_turn means return the response to the user and stop. Always append both the assistant message AND the tool result before the next call. The loop is while True with an explicit break — Claude drives termination, not a counter. Never use text content inspection to decide whether to continue looping. And this pattern applies to every scenario on the exam — master it first.
+Here are the takeaways to carry forward. stop_reason tool_use means execute the tool, append the result, and loop back. stop_reason end_turn means return the response to the user and stop. Always append both the assistant message AND the tool result before the next call. The loop is while True with an explicit break — Claude drives termination, not a counter. Never use text content inspection to decide whether to keep looping. And this pattern shows up in Scenario 1 — customer support — and Scenario 3 — multi-agent research. Master it first. In the next lecture, we will go deeper into the two stop_reason paths — what specific control flow patterns each one enables, and how to handle multiple tool calls in a single response.
 -->
 
 ---
@@ -330,23 +383,75 @@ Six things to carry forward. stop_reason tool_use means execute the tool, append
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
       <span>Lecture 3.2</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>~9 min</span>
+      <span>~10 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>8 slides</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-In the previous lecture, we looked at the overall agentic loop. Now let's go deeper into the two branches — what happens in each one, and what specific patterns each enables. Because the difference between these two paths isn't just "keep going" versus "stop." It's about what you do with the response content, how you structure the conversation history, and what control flow patterns you can build on top of each.
+In the previous lecture, you saw the agentic loop end-to-end. Now we go deeper on the two branches — what actually happens inside each path, and what control flow patterns each one unlocks. Because the difference between tool_use and end_turn isn't just "keep going" versus "stop" — it's about how you structure conversation history, how you handle multiple tool calls in one turn, and where the routing logic lives.
 -->
 
 ---
 
-<!-- SLIDE 2 — The tool_use path -->
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
 
 <script setup>
-const tuSteps = [
+const lectureFitsTiles32 = [
+  {
+    label: 'Where we came from',
+    detail: 'Lecture 3.1 anchored on stop_reason as the loop control signal -- but only sketched what happens inside each branch.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Going deep on both paths -- the four-step tool_use sequence, the three reasons end_turn fires, and model-driven vs pre-configured routing.',
+  },
+  {
+    label: 'Where we go next',
+    detail: 'Lecture 3.3 names five anti-patterns the exam plants as distractors; then 3.4 starts the multi-agent track.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles32"
+  footer-label="Lecture 3.2"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets32 = [
+  { label: 'The tool_use 4-step sequence', detail: 'Extract blocks -> execute -> package with matching IDs -> append both and call again' },
+  { label: 'What end_turn really means', detail: 'Three reasons: task complete, blocked, or max_tokens -- and why you never loop on any of them' },
+  { label: 'Model-driven vs pre-configured', detail: 'Where the routing logic lives -- and which choice the exam expects for hard constraints' },
+  { label: 'The message-role contract', detail: 'Tool results live in USER messages, never assistant -- get this wrong, the API rejects you' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets32"
+  footer-label="Lecture 3.2"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — The tool_use path -->
+
+<script setup>
+const tuSteps32 = [
   { number: 'Step 1', title: 'Extract tool_use blocks', body: 'From the content array -- a single response can contain MULTIPLE tool_use blocks.' },
   { number: 'Step 2', title: 'Execute each tool', body: 'Run your actual function -- query a DB, call an API, read a file -- whatever the tool does.' },
   { number: 'Step 3', title: 'Package the results', body: 'Each result is a tool_result block with matching tool_use_id, content, and an is_error flag.' },
@@ -357,10 +462,10 @@ const tuSteps = [
 <StepSequence
   eyebrow="The tool_use path"
   title="Step by Step"
-  :steps="tuSteps"
+  :steps="tuSteps32"
   footerLabel="Lecture 3.2"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 />
 
 <!--
@@ -369,10 +474,10 @@ When you receive a response with stop_reason equals tool_use, here's the exact s
 
 ---
 
-<!-- SLIDE 3 — end_turn isn't always success -->
+<!-- SLIDE 5 — end_turn isn't always success -->
 
 <script setup>
-const endTurnBullets = [
+const endTurnBullets32 = [
   { label: '✓ Task complete', detail: 'Most common -- Claude finished successfully. Return the response to the user.' },
   { label: '⚠ Cannot proceed', detail: 'Claude hit a blocker and is returning an explanation. Inspect content, then surface to caller.' },
   { label: '✗ Max tokens', detail: 'Context limit reached mid-response. Check stop_reason value, handle truncation.' },
@@ -382,10 +487,10 @@ const endTurnBullets = [
 <BulletReveal
   eyebrow="end_turn isn't always success"
   title="The end_turn Path — What It Actually Means"
-  :bullets="endTurnBullets"
-  footerLabel="Lecture 3.2"
-  :footerNum="3"
-  :footerTotal="8"
+  :bullets="endTurnBullets32"
+  footer-label="Lecture 3.2"
+  :footer-num="5"
+  :footer-total="10"
 />
 
 <!--
@@ -394,7 +499,7 @@ end_turn doesn't always mean the task is complete and everything is fine. It mea
 
 ---
 
-<!-- SLIDE 4 — Model-driven vs pre-configured -->
+<!-- SLIDE 6 — Model-driven vs pre-configured -->
 
 <TwoColSlide
   variant="compare"
@@ -402,8 +507,8 @@ end_turn doesn't always mean the task is complete and everything is fine. It mea
   leftLabel="Model-driven (Claude decides)"
   rightLabel="Pre-configured (your code decides)"
   footerLabel="Lecture 3.2"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -431,10 +536,10 @@ There are two philosophies for how to route between tools in an agentic workflow
 
 ---
 
-<!-- SLIDE 5 — Batch multiple tool calls -->
+<!-- SLIDE 7 — Batch multiple tool calls -->
 
 <script setup>
-const batchCode = `tool_results = []
+const batchCode32 = `tool_results = []
 
 for block in response.content:
     if block.type == "tool_use":
@@ -456,10 +561,10 @@ messages.append({
   eyebrow="Batch processing"
   title="Handling Multiple Tool Calls in One Response"
   lang="python"
-  :code="batchCode"
+  :code="batchCode32"
   footerLabel="Lecture 3.2"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -468,10 +573,10 @@ Claude can issue multiple tool calls in a single response turn. When this happen
 
 ---
 
-<!-- SLIDE 6 — Conversation turn order -->
+<!-- SLIDE 8 — Conversation turn order -->
 
 <script setup>
-const flowSteps = [
+const flowSteps32 = [
   { label: 'User', sublabel: 'initial request' },
   { label: 'Assistant', sublabel: 'tool_use block' },
   { label: 'User', sublabel: 'tool_result' },
@@ -482,10 +587,10 @@ const flowSteps = [
 <FlowDiagram
   eyebrow="Turn order"
   title="Tool Results in the Conversation History"
-  :steps="flowSteps"
+  :steps="flowSteps32"
   footerLabel="Lecture 3.2"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 />
 
 <!--
@@ -494,10 +599,10 @@ The conversation history is how Claude maintains context across an agentic loop.
 
 ---
 
-<!-- SLIDE 7 — Exam Tip -->
+<!-- SLIDE 9 — Exam Tip -->
 
 <script setup>
-const examBad = `// Trap 1 -- tool result as an assistant message
+const examBad32 = `// Trap 1 -- tool result as an assistant message
 {
   "role": "assistant",
   "content": [
@@ -506,7 +611,7 @@ const examBad = `// Trap 1 -- tool result as an assistant message
       "content": "Seattle: 58\u00B0F" }
   ]
 }`
-const examGood = `// Tool results go in a USER message -- all of them, together
+const examGood32 = `// Tool results go in a USER message -- all of them, together
 {
   "role": "user",
   "content": [
@@ -521,24 +626,24 @@ const examGood = `// Tool results go in a USER message -- all of them, together
   eyebrow="⚡ Exam Tip"
   title="Tool Result Message Role"
   lang="json"
-  :badExample="examBad"
+  :badExample="examBad32"
   whyItFails="Trap 1: tool results as assistant messages — feels intuitive, but wrong. Trap 2: sending only some of the batch and expecting Claude to work with partial info."
-  :fixExample="examGood"
+  :fixExample="examGood32"
   footerLabel="Lecture 3.2"
-  :footerNum="7"
-  :footerTotal="8"
+  :footerNum="9"
+  :footerTotal="10"
 />
 
 <!--
-The exam will test whether you know the correct message role for tool results. Tool results go in user messages — not assistant messages. This trips candidates up because intuitively, I just ran Claude's tool, so I'm sending back to Claude — that feels like the assistant providing output. But the message structure is from Claude's perspective: user messages are what Claude receives from the outside world. A second exam trap: sending incomplete tool results — only some of the batch — and expecting Claude to work with partial information. Always send all tool results in one user message before calling the API again.
+Here's the exam tip that closes this lecture. The exam will test whether you know the correct message role for tool results. Tool results go in user messages — not assistant messages. This trips candidates up because intuitively, I just ran Claude's tool, so I'm sending back to Claude — that feels like the assistant providing output. But the message structure is from Claude's perspective: user messages are what Claude receives from the outside world. A second exam trap: sending incomplete tool results — only some of the batch — and expecting Claude to work with partial information. Always send all tool results in one user message before calling the API again. Almost-right is the whole trap. Last up: the takeaways to lock in.
 -->
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
-const takeawayBullets = [
+const takeawayBullets32 = [
   { label: 'tool_use path', detail: 'Extract blocks -> execute -> append BOTH assistant msg AND tool results -> loop.' },
   { label: 'end_turn path', detail: 'Do not loop. Inspect content to understand completion state, then return.' },
   { label: 'Tool results = USER messages', detail: 'Tool results belong in user messages, not assistant messages.' },
@@ -551,14 +656,15 @@ const takeawayBullets = [
 <BulletReveal
   eyebrow="Takeaway"
   title="tool_use vs end_turn — Control Flow"
-  :bullets="takeawayBullets"
-  footerLabel="Lecture 3.2"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeawayBullets32"
+  footer-label="Lecture 3.2"
+  :footer-num="10"
+  :footer-total="10"
+  :hide-footer="true"
 />
 
 <!--
-Six things to carry into 3.3. tool_use path: extract blocks, execute tools, append both the assistant message and the tool results, and loop. end_turn path: do not loop — inspect content to understand completion state, then return. Tool results belong in user messages, not assistant messages. Multiple tool calls in one response → process all, send one combined user message. Model-driven routing: Claude decides the tool order — use for flexible workflows. Programmatic enforcement: your code enforces the order — use for hard constraints, safety and workflow requirements.
+Here are the takeaways to carry into 3.3. tool_use path: extract blocks, execute tools, append both the assistant message and the tool results, and loop. end_turn path: do not loop — inspect content to understand completion state, then return. Tool results belong in user messages, not assistant messages. Multiple tool calls in one response → process all, send one combined user message. Model-driven routing: Claude decides the tool order — use for flexible workflows. Programmatic enforcement: your code enforces the order — use for hard constraints, safety and workflow requirements. In the next lecture, we look at how this loop breaks — five specific anti-patterns the exam plants as distractors.
 -->
 
 ---
@@ -586,9 +692,9 @@ Six things to carry into 3.3. tool_use path: extract blocks, execute tools, appe
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
       <span>Lecture 3.3</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>~8 min</span>
+      <span>~9 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>8 slides</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
@@ -599,13 +705,65 @@ You've seen the correct agentic loop pattern. Now let's look at the ways it brea
 
 ---
 
-<!-- SLIDE 2 — Anti-Pattern 1: text parsing -->
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
 
 <script setup>
-const ap1Bad = `# Inspecting text to decide when to stop
+const lectureFitsTiles33 = [
+  {
+    label: 'Where we came from',
+    detail: 'Lectures 3.1 and 3.2 built the correct loop -- stop_reason, the tool_use path, the message-role contract for tool results.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'The inverse: five specific ways the loop breaks. Each one feels right -- and that is exactly why the exam uses them as distractors.',
+  },
+  {
+    label: 'Where we go next',
+    detail: 'Lecture 3.4 leaves single-agent territory and introduces hub-and-spoke -- the multi-agent pattern Scenario 3 builds on.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles33"
+  footer-label="Lecture 3.3"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets33 = [
+  { label: 'Why not text-parsing', detail: 'Why words like "done" are wrong -- and why stop_reason exists to replace that pattern' },
+  { label: 'Iteration caps as safety', detail: 'Why caps belong as guards, not primary exits -- and the while True + break pattern that keeps you safe' },
+  { label: 'Two history-shape mistakes', detail: 'Skipping the tool_result append, and putting tool results in assistant messages' },
+  { label: 'Tool errors continue the loop', detail: 'Append errors as is_error: true and let Claude reason, retry, or pivot' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets33"
+  footer-label="Lecture 3.3"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — Anti-Pattern 1: text parsing -->
+
+<script setup>
+const ap1Bad33 = `# Inspecting text to decide when to stop
 if "task complete" in response.content[0].text:
     break`
-const ap1Good = `# Use the structured signal the API already gives you
+const ap1Good33 = `# Use the structured signal the API already gives you
 if response.stop_reason == "end_turn":
     break`
 </script>
@@ -614,12 +772,12 @@ if response.stop_reason == "end_turn":
   eyebrow="Anti-Pattern 1"
   title="Parsing Text to Detect Completion"
   lang="python"
-  :badExample="ap1Bad"
+  :badExample="ap1Bad33"
   whyItFails="Claude's text is non-deterministic — it may phrase completion differently or not at all. stop_reason is a structured API contract — always present, always precise. Text-parsing a structured signal is like checking email subject lines instead of HTTP status codes."
-  :fixExample="ap1Good"
+  :fixExample="ap1Good33"
   footerLabel="Lecture 3.3"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 />
 
 <!--
@@ -628,15 +786,15 @@ The first and most common anti-pattern: inspecting the response text to decide w
 
 ---
 
-<!-- SLIDE 3 — Anti-Pattern 2: iteration caps as primary exit -->
+<!-- SLIDE 5 — Anti-Pattern 2: iteration caps as primary exit -->
 
 <script setup>
-const ap2Bad = `# Cap as PRIMARY exit -- silent partial result if hit
+const ap2Bad33 = `# Cap as PRIMARY exit -- silent partial result if hit
 for attempt in range(10):
     response = call_api()
     if done:
         break`
-const ap2Good = `# Cap as SAFETY guard -- loop exits on end_turn
+const ap2Good33 = `# Cap as SAFETY guard -- loop exits on end_turn
 while True:
     response = call_api()
     if response.stop_reason == "end_turn":
@@ -649,12 +807,12 @@ while True:
   eyebrow="Anti-Pattern 2"
   title="Using Iteration Caps as the Primary Exit"
   lang="python"
-  :badExample="ap2Bad"
+  :badExample="ap2Bad33"
   whyItFails="If the cap is reached before the task completes, you silently return a partial result. No error, no signal — the caller doesn't know why the loop ended. Caps are safety guards, not primary exits."
-  :fixExample="ap2Good"
+  :fixExample="ap2Good33"
   footerLabel="Lecture 3.3"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 />
 
 <!--
@@ -663,10 +821,10 @@ The second anti-pattern: using a for loop with a hard cap on iterations as the p
 
 ---
 
-<!-- SLIDE 4 — Anti-Pattern 3: skipping tool result append -->
+<!-- SLIDE 6 — Anti-Pattern 3: skipping tool result append -->
 
 <script setup>
-const ap3Bad = `Broken loop -- tool results never appended
+const ap3Bad33 = `Broken loop -- tool results never appended
 
 User
   -> Assistant (tool_use block)
@@ -674,7 +832,7 @@ User
 
 Claude has no memory of what the tool returned.
 It repeats the call, or invents an answer.`
-const ap3Good = `Correct loop -- tool results appended as a USER message
+const ap3Good33 = `Correct loop -- tool results appended as a USER message
 
 User
   -> Assistant (tool_use block)
@@ -686,12 +844,12 @@ User
   eyebrow="Anti-Pattern 3"
   title="Skipping Tool Result Appending"
   lang="text"
-  :badExample="ap3Bad"
+  :badExample="ap3Bad33"
   whyItFails="Claude has no side channel to your tool execution environment. It only knows what's in the message history. If you don't append the result, it's as if the tool never ran."
-  :fixExample="ap3Good"
+  :fixExample="ap3Good33"
   footerLabel="Lecture 3.3"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -700,10 +858,10 @@ Anti-pattern three: making the next API call without appending the tool results 
 
 ---
 
-<!-- SLIDE 5 — Anti-Pattern 4: treating tool errors as end_turn -->
+<!-- SLIDE 7 — Anti-Pattern 4: treating tool errors as end_turn -->
 
 <script setup>
-const ap4Bad = `Stop the loop on the first tool error
+const ap4Bad33 = `Stop the loop on the first tool error
 
 Tool call executes
   -> Tool returns error
@@ -711,7 +869,7 @@ Tool call executes
       -> Return error to user
 
 Claude never gets a chance to recover.`
-const ap4Good = `Pass the error to Claude -- let it reason
+const ap4Good33 = `Pass the error to Claude -- let it reason
 
 Tool call executes
   -> Tool returns error
@@ -725,12 +883,12 @@ Claude can retry, pivot, or explain.`
   eyebrow="Anti-Pattern 4"
   title="Treating Tool Errors as end_turn"
   lang="text"
-  :badExample="ap4Bad"
+  :badExample="ap4Bad33"
   whyItFails="Stopping on the first tool error collapses the agent's ability to recover. Claude can try a different tool, try different arguments, or acknowledge the error and explain it. The exam tests this with tools that fail partway through a workflow."
-  :fixExample="ap4Good"
+  :fixExample="ap4Good33"
   footerLabel="Lecture 3.3"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -739,10 +897,10 @@ Anti-pattern four: stopping the agentic loop when a tool returns an error. When 
 
 ---
 
-<!-- SLIDE 6 — Anti-Pattern 5: tool results in wrong role -->
+<!-- SLIDE 8 — Anti-Pattern 5: tool results in wrong role -->
 
 <script setup>
-const ap5Bad = `// Tool result inside an assistant message
+const ap5Bad33 = `// Tool result inside an assistant message
 {
   "role": "assistant",
   "content": [
@@ -753,7 +911,7 @@ const ap5Bad = `// Tool result inside an assistant message
     }
   ]
 }`
-const ap5Good = `// Tool result inside a USER message
+const ap5Good33 = `// Tool result inside a USER message
 {
   "role": "user",
   "content": [
@@ -770,12 +928,12 @@ const ap5Good = `// Tool result inside a USER message
   eyebrow="Anti-Pattern 5"
   title="Tool Results in the Wrong Role"
   lang="json"
-  :badExample="ap5Bad"
+  :badExample="ap5Bad33"
   whyItFails="Tool results are information from the external environment TO Claude → user role. The API may reject the request outright, or the conversation history becomes structurally invalid."
-  :fixExample="ap5Good"
+  :fixExample="ap5Good33"
   footerLabel="Lecture 3.3"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 />
 
 <!--
@@ -784,17 +942,17 @@ This one catches candidates who understand the loop conceptually but haven't imp
 
 ---
 
-<!-- SLIDE 7 — Exam Tip: anti-patterns as distractors -->
+<!-- SLIDE 9 — Exam Tip: anti-patterns as distractors -->
 
 <script setup>
-const examTipBad = `Common wrong answers the exam plants
+const examTipBad33 = `Common wrong answers the exam plants
 
 - Parsing response text for 'done' / 'complete'
 - for-loop with a fixed cap as the primary exit
 - Skipping the tool_result append step
 - Terminating the loop on a tool error
 - Tool results inside assistant messages`
-const examTipGood = `Decision rule
+const examTipGood33 = `Decision rule
 
 If you're stuck between two answers, ask:
 which one reads stop_reason AND follows
@@ -806,12 +964,12 @@ That's the right answer.`
   eyebrow="⚡ Exam Tip"
   title="Anti-Patterns as Distractors"
   lang="text"
-  :badExample="examTipBad"
+  :badExample="examTipBad33"
   whyItFails="Every anti-pattern in this lecture appears as a distractor somewhere on the exam. When you see an answer doing one of these things, it's wrong."
-  :fixExample="examTipGood"
+  :fixExample="examTipGood33"
   footerLabel="Lecture 3.3"
-  :footerNum="7"
-  :footerTotal="8"
+  :footerNum="9"
+  :footerTotal="10"
 />
 
 <!--
@@ -820,10 +978,10 @@ Every anti-pattern in this lecture appears as a distractor somewhere in the prac
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
-const takeawayBullets = [
+const takeawayBullets33 = [
   { label: '1. Text parsing for completion', detail: 'Use stop_reason, not response content text.' },
   { label: '2. Iteration caps as primary exit', detail: 'Use while True + break on end_turn; caps are safety guards only.' },
   { label: '3. Skipping tool result appending', detail: 'Always append BOTH the assistant msg AND the tool results.' },
@@ -835,14 +993,15 @@ const takeawayBullets = [
 <BulletReveal
   eyebrow="Takeaway"
   title="The 5 Agentic Loop Anti-Patterns"
-  :bullets="takeawayBullets"
-  footerLabel="Lecture 3.3"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeawayBullets33"
+  footer-label="Lecture 3.3"
+  :footer-num="10"
+  :footer-total="10"
+  :hide-footer="true"
 />
 
 <!--
-Five anti-patterns to recognize on sight. One: text parsing for completion — use stop_reason, not response content. Two: iteration caps as primary exit — use while True with break on end_turn; caps are safety guards only. Three: skipping tool result appending — always append both the assistant message and the tool results. Four: stopping on tool errors — append errors as is_error: true tool_results and let Claude reason. Five: tool results in assistant messages — tool results belong in user role messages.
+Here are the five anti-patterns to recognize on sight. One: text parsing for completion — use stop_reason, not response content. Two: iteration caps as primary exit — use while True with break on end_turn; caps are safety guards only. Three: skipping tool result appending — always append both the assistant message and the tool results. Four: stopping on tool errors — append errors as is_error: true tool_results and let Claude reason. Five: tool results in assistant messages — tool results belong in user role messages. In the next lecture, we shift from single-agent loops to multi-agent orchestration — introducing hub-and-spoke, the pattern the exam tests for the multi-agent research scenario.
 -->
 
 ---
@@ -870,20 +1029,72 @@ Five anti-patterns to recognize on sight. One: text parsing for completion — u
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
       <span>Lecture 3.4</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>~9 min</span>
+      <span>~10 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>8 slides</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-Single agents are powerful. But they have limits. They operate in a single context window. They can only do one thing at a time. And complex tasks — research, code review, customer support pipelines — often need multiple specialized capabilities running in parallel. Multi-agent systems solve these problems. But they introduce coordination challenges. The architecture that the CCA-F exam focuses on is hub-and-spoke — a central coordinator managing multiple specialized subagents.
+Single agents are powerful. But they have limits. One context window. One thing at a time. Complex tasks — research pipelines, code review, customer support — often need multiple specialized capabilities running in parallel. Multi-agent systems solve that — but they introduce coordination challenges. The architecture the CCA-F exam tests is hub-and-spoke: a central coordinator managing multiple specialized subagents. This is Scenario 3 territory — the Multi-Agent Research System — and it's where Domain 1's twenty-seven-percent weight earns its keep.
 -->
 
 ---
 
-<!-- SLIDE 2 — Hub-and-Spoke core structure
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
+<script setup>
+const lectureFitsTiles34 = [
+  {
+    label: 'Where we came from',
+    detail: 'Lectures 3.1-3.3 covered single-agent loops -- stop_reason, the tool_use and end_turn paths, and the five anti-patterns.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Introducing multi-agent orchestration. Hub-and-spoke topology, the coordinator triplet, fresh-context subagents, and the Task tool.',
+  },
+  {
+    label: 'Where we go next',
+    detail: 'The next five lectures all live in hub-and-spoke -- 3.5 coordinator deep dive; 3.6 context isolation; 3.7 Task tool; 3.8 parallel; 3.9 context passing.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles34"
+  footer-label="Lecture 3.4"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets34 = [
+  { label: 'The hub-and-spoke rule', detail: 'All communication flows through the coordinator -- subagents never talk to each other directly' },
+  { label: 'The coordinator triplet', detail: 'Decompose, delegate, aggregate -- the three jobs that keep the architecture predictable' },
+  { label: 'The Task tool', detail: 'How coordinators spawn subagents -- and why allowedTools MUST include "Task"' },
+  { label: 'Parallel = ONE turn', detail: 'All parallel subagent spawning happens in a single coordinator response turn' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets34"
+  footer-label="Lecture 3.4"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — Hub-and-Spoke core structure
      TODO: HubSpokeDiagram component needed. Wave 5 consolidator will
      either inline an SVG here or build a dedicated HubSpokeDiagram
      component. For now we use TwoColSlide with a text-rendered topology. -->
@@ -894,8 +1105,8 @@ Single agents are powerful. But they have limits. They operate in a single conte
   leftLabel="Topology"
   rightLabel="Mechanic"
   footerLabel="Lecture 3.4"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -925,10 +1136,10 @@ The hub-and-spoke pattern has one defining rule: all communication flows through
 
 ---
 
-<!-- SLIDE 3 — Coordinator's Three Jobs -->
+<!-- SLIDE 5 — Coordinator's Three Jobs -->
 
 <script setup>
-const jobsBullets = [
+const jobsBullets34 = [
   { label: '1. Decompose', detail: 'Break the task into pieces with clear, bounded responsibility -- no implicit dependencies.' },
   { label: '2. Delegate', detail: 'Spawn each subagent with its task and context. Subagents do NOT inherit coordinator history.' },
   { label: '3. Aggregate', detail: 'Collect outputs, synthesize, handle failures gracefully -- retry, skip, or surface.' },
@@ -938,10 +1149,10 @@ const jobsBullets = [
 <BulletReveal
   eyebrow="Coordinator responsibilities"
   title="The Coordinator's Three Jobs"
-  :bullets="jobsBullets"
-  footerLabel="Lecture 3.4"
-  :footerNum="3"
-  :footerTotal="8"
+  :bullets="jobsBullets34"
+  footer-label="Lecture 3.4"
+  :footer-num="5"
+  :footer-total="10"
 />
 
 <!--
@@ -950,7 +1161,7 @@ The coordinator has exactly three jobs: decompose, delegate, and aggregate. Deco
 
 ---
 
-<!-- SLIDE 4 — Subagent Context Isolation -->
+<!-- SLIDE 6 — Subagent Context Isolation -->
 
 <TwoColSlide
   variant="antipattern-fix"
@@ -958,8 +1169,8 @@ The coordinator has exactly three jobs: decompose, delegate, and aggregate. Deco
   leftLabel="❌ What candidates assume"
   rightLabel="✓ What actually happens"
   footerLabel="Lecture 3.4"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -986,10 +1197,10 @@ One of the most important things to understand about subagents: they don't inher
 
 ---
 
-<!-- SLIDE 5 — The Task Tool -->
+<!-- SLIDE 7 — The Task Tool -->
 
 <script setup>
-const taskCode = `# Coordinator spawns a subagent via the Task tool
+const taskCode34 = `# Coordinator spawns a subagent via the Task tool
 response = client.messages.create(
     model="claude-opus-4-7",
     tools=[{
@@ -1024,10 +1235,10 @@ response = client.messages.create(
   eyebrow="Spawning"
   title="The Task Tool — Spawning Subagents"
   lang="python"
-  :code="taskCode"
+  :code="taskCode34"
   footerLabel="Lecture 3.4"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -1036,7 +1247,7 @@ In Claude's agent framework, coordinators spawn subagents using the Task tool. A
 
 ---
 
-<!-- SLIDE 6 — Parallel vs Sequential -->
+<!-- SLIDE 8 — Parallel vs Sequential -->
 
 <TwoColSlide
   variant="compare"
@@ -1044,8 +1255,8 @@ In Claude's agent framework, coordinators spawn subagents using the Task tool. A
   leftLabel="Sequential"
   rightLabel="Parallel"
   footerLabel="Lecture 3.4"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -1082,10 +1293,10 @@ The hub-and-spoke architecture supports both sequential and parallel execution. 
 
 ---
 
-<!-- SLIDE 7 — Exam Tip -->
+<!-- SLIDE 9 — Exam Tip -->
 
 <script setup>
-const examBad = `Two traps the exam plants
+const examBad34 = `Two traps the exam plants
 
 Trap 1 -- Sequential spawning presented as parallel
   Coordinator emits one Task, waits, then emits another
@@ -1094,7 +1305,7 @@ Trap 1 -- Sequential spawning presented as parallel
 Trap 2 -- Direct subagent-to-subagent communication
   Subagent A sends data directly to Subagent B. Violates
   hub-and-spoke -- all traffic must go through the hub.`
-const examGood = `Two rules
+const examGood34 = `Two rules
 
 (1) Parallel spawning = ONE coordinator turn,
     multiple Task calls in the same response.
@@ -1107,12 +1318,12 @@ const examGood = `Two rules
   eyebrow="⚡ Exam Tip"
   title="Hub-and-Spoke Exam Patterns"
   lang="text"
-  :badExample="examBad"
+  :badExample="examBad34"
   whyItFails="Parallel means ONE coordinator turn with multiple Task calls. Hub-and-spoke means subagents never talk to each other."
-  :fixExample="examGood"
+  :fixExample="examGood34"
   footerLabel="Lecture 3.4"
-  :footerNum="7"
-  :footerTotal="8"
+  :footerNum="9"
+  :footerTotal="10"
 />
 
 <!--
@@ -1121,10 +1332,10 @@ Two patterns the exam tests heavily in the hub-and-spoke context. First: paralle
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
-const takeawayBullets = [
+const takeawayBullets34 = [
   { label: 'All traffic through the hub', detail: 'Subagents never talk directly to each other -- everything flows through the coordinator.' },
   { label: "Coordinator's three jobs", detail: 'Decompose -> Delegate -> Aggregate.' },
   { label: 'No inherited context', detail: 'Coordinator must pass everything the subagent needs, explicitly, in the task prompt.' },
@@ -1137,14 +1348,15 @@ const takeawayBullets = [
 <BulletReveal
   eyebrow="Takeaway"
   title="Hub-and-Spoke Architecture"
-  :bullets="takeawayBullets"
-  footerLabel="Lecture 3.4"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeawayBullets34"
+  footer-label="Lecture 3.4"
+  :footer-num="10"
+  :footer-total="10"
+  :hide-footer="true"
 />
 
 <!--
-Six things to carry forward. All communication flows through the coordinator — subagents never talk directly to each other. The coordinator's three jobs: Decompose, Delegate, Aggregate. Subagents have no inherited context — the coordinator must pass everything explicitly. allowedTools must include "Task" for a subagent to accept its assignment. Parallel spawning equals all subagents spawned in one coordinator response turn. Hub-and-spoke gives you centralized observability, consistent error handling, and predictable control flow.
+Here are the six takeaways to carry forward. All communication flows through the coordinator — subagents never talk directly to each other. The coordinator's three jobs: Decompose, Delegate, Aggregate. Subagents have no inherited context — the coordinator must pass everything explicitly. allowedTools must include "Task" for a subagent to accept its assignment. Parallel spawning equals all subagents spawned in one coordinator response turn. Hub-and-spoke gives you centralized observability, consistent error handling, and predictable control flow. In the next lecture, we'll dig deeper into the coordinator's role — the specific decompose, delegate, and aggregate mechanics that make a coordinator robust under failure and ambiguity.
 -->
 
 ---
@@ -1172,20 +1384,72 @@ Six things to carry forward. All communication flows through the coordinator —
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
       <span>Lecture 3.5</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>~8 min</span>
+      <span>~9 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>8 slides</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-In 3.4 we sketched the hub-and-spoke topology. Now we zoom into the hub itself — the coordinator. This lecture walks through its three jobs in detail: how to decompose a task well, how to delegate with explicit context, and how to aggregate results across every possible outcome. Get this right and your multi-agent system is debuggable and predictable. Get it wrong and it silently returns partial nonsense.
+In 3.4 we sketched the hub-and-spoke topology. Now we zoom into the hub itself — the coordinator. Three jobs done right turn a chaotic multi-agent system into one you can debug. Coming up: how this lecture fits into the section.
 -->
 
 ---
 
-<!-- SLIDE 2 — Coordinator is the brain -->
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
+<script setup>
+const lectureFitsTiles35 = [
+  {
+    label: 'Where we came from',
+    detail: '3.4 named the hub-and-spoke shape. We have the topology but not the contracts.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Opens the hub up and walks through the three jobs the coordinator owns: decompose, delegate, aggregate.',
+  },
+  {
+    label: 'Where we go next',
+    detail: '3.6 goes deep on the rule those three jobs depend on -- subagent context isolation.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles35"
+  footer-label="Lecture 3.5"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets35 = [
+  { label: 'Orchestrate vs operate', detail: 'The precise boundary between coordinator and subagent -- and why mixing them is the most common anti-pattern' },
+  { label: 'Decomposition contracts', detail: 'Bounded subtasks, clear output contracts, no implicit dependencies between subagents' },
+  { label: 'Three delegation rules', detail: 'Fresh context, self-contained prompts, least-privilege tools' },
+  { label: 'Aggregating every outcome', detail: 'Happy path, partial failure, total failure -- and never dropping silently' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets35"
+  footer-label="Lecture 3.5"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — Coordinator is the brain -->
 
 <TwoColSlide
   variant="compare"
@@ -1193,8 +1457,8 @@ In 3.4 we sketched the hub-and-spoke topology. Now we zoom into the hub itself �
   leftLabel="Does"
   rightLabel="Does NOT do"
   footerLabel="Lecture 3.5"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -1225,7 +1489,7 @@ The coordinator is the brain of a multi-agent system. It does five things: recei
 
 ---
 
-<!-- SLIDE 3 — Decompose -->
+<!-- SLIDE 5 — Decompose -->
 
 <TwoColSlide
   variant="antipattern-fix"
@@ -1233,8 +1497,8 @@ The coordinator is the brain of a multi-agent system. It does five things: recei
   leftLabel="❌ Poor decomposition"
   rightLabel="✓ Good decomposition"
   footerLabel="Lecture 3.5"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -1262,10 +1526,10 @@ Decompose is the first job and the easiest to get wrong. Poor decomposition bund
 
 ---
 
-<!-- SLIDE 4 — Delegate -->
+<!-- SLIDE 6 — Delegate -->
 
 <script setup>
-const delegateSteps = [
+const delegateSteps35 = [
   { number: 'Rule 1', title: 'Subagents start with fresh context', body: "The coordinator's conversation history is NOT passed down. Everything the subagent needs must be in the task prompt." },
   { number: 'Rule 2', title: 'Task prompt must include everything', body: 'Objective, relevant background, output format, constraints. If synthesis needs research facts, the coordinator injects them explicitly.' },
   { number: 'Rule 3', title: 'Least-privilege tools', body: 'Only give each subagent the tools it needs. Constrained tools = predictable, auditable behavior.' },
@@ -1275,10 +1539,10 @@ const delegateSteps = [
 <StepSequence
   eyebrow="Delegation"
   title="Delegate — Explicit Context Passing"
-  :steps="delegateSteps"
+  :steps="delegateSteps35"
   footerLabel="Lecture 3.5"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -1287,10 +1551,10 @@ Delegate is the second job. Three rules. Rule one: subagents start with fresh co
 
 ---
 
-<!-- SLIDE 5 — Aggregate -->
+<!-- SLIDE 7 — Aggregate -->
 
 <script setup>
-const aggregateSteps = [
+const aggregateSteps35 = [
   { number: 'Happy path', title: 'All subagents return results', body: 'Coordinator synthesizes -- combine, deduplicate, format into a single coherent output.' },
   { number: 'Partial failure', title: 'One subagent fails or returns no result', body: 'Coordinator decides: retry, proceed without, or surface the failure to the caller.' },
   { number: 'Total failure', title: 'A critical subagent fails', body: 'Coordinator surfaces clearly -- NOT a silently incomplete result.' },
@@ -1300,10 +1564,10 @@ const aggregateSteps = [
 <StepSequence
   eyebrow="Aggregation"
   title="Aggregate — Collecting and Synthesizing Results"
-  :steps="aggregateSteps"
+  :steps="aggregateSteps35"
   footerLabel="Lecture 3.5"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -1312,7 +1576,7 @@ Aggregate is the third job, and the one candidates underweight. Three outcomes t
 
 ---
 
-<!-- SLIDE 6 — Full lifecycle -->
+<!-- SLIDE 8 — Full lifecycle -->
 
 <TwoColSlide
   variant="compare"
@@ -1320,8 +1584,8 @@ Aggregate is the third job, and the one candidates underweight. Three outcomes t
   leftLabel="Flow"
   rightLabel="Per step"
   footerLabel="Lecture 3.5"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -1353,10 +1617,10 @@ Put it all together and the coordinator has a clean lifecycle: receive the user 
 
 ---
 
-<!-- SLIDE 7 — Exam Tip -->
+<!-- SLIDE 9 — Exam Tip -->
 
 <script setup>
-const examBad = `Two traps the exam plants
+const examBad35 = `Two traps the exam plants
 
 Trap 1 -- Coordinator doing domain work
   'Coordinator browses the web and writes the final report.'
@@ -1365,7 +1629,7 @@ Trap 1 -- Coordinator doing domain work
 Trap 2 -- Implicit context propagation
   'Subagent picks up where the coordinator left off.'
   There is no implicit channel -- subagents start fresh.`
-const examGood = `Remember
+const examGood35 = `Remember
 
 Coordinator = Decompose, Delegate (with explicit context),
               Aggregate (with error handling).
@@ -1379,12 +1643,12 @@ nature of the subtask.`
   eyebrow="⚡ Exam Tip"
   title="Coordinator Responsibility Boundaries"
   lang="text"
-  :badExample="examBad"
+  :badExample="examBad35"
   whyItFails="Coordinators only decompose, delegate, and aggregate. And subagents have no shared memory — everything must be passed explicitly."
-  :fixExample="examGood"
+  :fixExample="examGood35"
   footerLabel="Lecture 3.5"
-  :footerNum="7"
-  :footerTotal="8"
+  :footerNum="9"
+  :footerTotal="10"
 />
 
 <!--
@@ -1393,10 +1657,10 @@ Two traps the exam loves to plant in coordinator questions. Trap one: the coordi
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
-const takeawayBullets = [
+const takeaways35 = [
   { label: 'Orchestrator, never operator', detail: 'Coordinator orchestrates -- it never executes domain tasks directly.' },
   { label: 'Decompose cleanly', detail: 'Bounded subtasks with clear output contracts and no implicit dependencies.' },
   { label: 'Delegate explicitly', detail: 'Subagents start fresh -- everything they need lives in the task prompt.' },
@@ -1409,10 +1673,11 @@ const takeawayBullets = [
 <BulletReveal
   eyebrow="Takeaway"
   title="The Coordinator's Role"
-  :bullets="takeawayBullets"
+  :bullets="takeaways35"
+  :hide-footer="true"
   footerLabel="Lecture 3.5"
-  :footerNum="8"
-  :footerTotal="8"
+  :footerNum="10"
+  :footerTotal="10"
 />
 
 <!--
@@ -1444,20 +1709,72 @@ Six things to carry forward. Coordinator orchestrates — it never executes doma
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
       <span>Lecture 3.6</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>~8 min</span>
+      <span>~9 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>8 slides</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-In 3.4 and 3.5 we saw that subagents don't inherit the coordinator's history. This lecture goes deep on that rule — what isolation actually means, what the subagent does and doesn't have, and the design implications. Context isolation is the mechanism that makes multi-agent systems work. If you don't understand it, you'll pick distractors that assume implicit propagation.
+In 3.4 and 3.5 we saw that subagents don't inherit the coordinator's history. This lecture goes deep on that rule. Context isolation is the mechanism that makes multi-agent systems work — and one of Domain 1's most-tested traps. Coming up: how this lecture fits into the section.
 -->
 
 ---
 
-<!-- SLIDE 2 — What context isolation means -->
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
+<script setup>
+const lectureFitsTiles36 = [
+  {
+    label: 'Where we came from',
+    detail: "3.5 closed on 'delegate with explicit context.' We named the rule but did not unpack it.",
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Takes that one rule and turns it inside out -- what isolation IS, what each subagent CAN and CANNOT see, design implications.',
+  },
+  {
+    label: 'Where we go next',
+    detail: '3.7 shows you the mechanism that implements isolation: the Task tool, its parameters, and the allowedTools requirement.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles36"
+  footer-label="Lecture 3.6"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets36 = [
+  { label: 'Precise definition of isolation', detail: "What the subagent has access to, and what it doesn't" },
+  { label: 'What to pass and NOT pass', detail: 'Relevant context only -- why dumping full history hurts the subagent' },
+  { label: 'Benefits vs tradeoffs', detail: 'Parallelism, predictability, security -- bought with prompt-construction work in the coordinator' },
+  { label: 'No persistence between calls', detail: 'Each Task call is independent -- what that means for retry logic' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets36"
+  footer-label="Lecture 3.6"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — What context isolation means -->
 
 <TwoColSlide
   variant="compare"
@@ -1465,8 +1782,8 @@ In 3.4 and 3.5 we saw that subagents don't inherit the coordinator's history. Th
   leftLabel="Does NOT have"
   rightLabel="DOES have"
   footerLabel="Lecture 3.6"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -1494,10 +1811,10 @@ Let's be precise. The subagent does NOT have: the coordinator's conversation his
 
 ---
 
-<!-- SLIDE 3 — Code pattern: explicit injection -->
+<!-- SLIDE 5 — Code pattern: explicit injection -->
 
 <script setup>
-const codePattern = `# Coordinator has rich context accumulated across the run:
+const codePattern36 = `# Coordinator has rich context accumulated across the run:
 #   - original user objective
 #   - facts from the Research subagent
 #   - notes from the Document subagent
@@ -1534,10 +1851,10 @@ task_call = {
   eyebrow="Code pattern"
   title="Context Isolation in Code — What the Subagent Receives"
   lang="python"
-  :code="codePattern"
+  :code="codePattern36"
   footerLabel="Lecture 3.6"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 />
 
 <!--
@@ -1546,10 +1863,10 @@ Here's what this actually looks like in code. The coordinator has rich context: 
 
 ---
 
-<!-- SLIDE 4 — The explicit passing requirement -->
+<!-- SLIDE 6 — The explicit passing requirement -->
 
 <script setup>
-const reqSteps = [
+const reqSteps36 = [
   { number: 'What to pass', title: 'Everything relevant, explicitly', body: 'Original user objective, background facts/data, output format, constraints, and results from prior subagents that this subagent needs.' },
   { number: 'What fails without it', title: 'Incomplete or redundant work', body: "Subagent produces output that doesn't fit the broader task -- or re-collects information via tools, wasting resources." },
   { number: 'What to NOT pass', title: 'The full history', body: "Don't dump the entire coordinator history. Pass only what's relevant -- irrelevant context increases cost and confuses the subagent." },
@@ -1559,10 +1876,10 @@ const reqSteps = [
 <StepSequence
   eyebrow="Explicit context passing"
   title="The Requirement"
-  :steps="reqSteps"
+  :steps="reqSteps36"
   footerLabel="Lecture 3.6"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -1571,7 +1888,7 @@ Three rules about what to pass. What to pass: original user objective, backgroun
 
 ---
 
-<!-- SLIDE 5 — Benefits and challenges -->
+<!-- SLIDE 7 — Benefits and challenges -->
 
 <TwoColSlide
   variant="compare"
@@ -1579,8 +1896,8 @@ Three rules about what to pass. What to pass: original user objective, backgroun
   leftLabel="Benefits"
   rightLabel="Challenges"
   footerLabel="Lecture 3.6"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -1607,10 +1924,10 @@ Isolation has clear benefits and real costs. Benefits: predictability — behavi
 
 ---
 
-<!-- SLIDE 6 — No persistence across calls -->
+<!-- SLIDE 8 — No persistence across calls -->
 
 <script setup>
-const persistenceSteps = [
+const persistenceSteps36 = [
   { number: 'Implication 1', title: 'Two calls = two instances', body: 'Call Task twice with the same subagent description -> two independent instances. The second has no memory of the first.' },
   { number: 'Implication 2', title: 'Retry reconstructs context', body: 'Retry logic must rebuild the full task context. You cannot resume a failed subagent -- spawn fresh with the same (or corrected) prompt.' },
   { number: 'Implication 3', title: 'Coordinator is the only persistent entity', body: 'It accumulates results across subagent calls and maintains workflow state.' },
@@ -1620,10 +1937,10 @@ const persistenceSteps = [
 <StepSequence
   eyebrow="No persistence"
   title="Each Task Call Creates an Independent Instance"
-  :steps="persistenceSteps"
+  :steps="persistenceSteps36"
   footerLabel="Lecture 3.6"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 />
 
 <!--
@@ -1632,10 +1949,10 @@ Three implications of "no session persistence." Implication one: call the Task t
 
 ---
 
-<!-- SLIDE 7 — Exam Tip -->
+<!-- SLIDE 9 — Exam Tip -->
 
 <script setup>
-const examBad = `Two traps the exam plants
+const examBad36 = `Two traps the exam plants
 
 Trap 1 -- Implicit user-request access
   Answer assumes the subagent 'already knows' the user's
@@ -1645,7 +1962,7 @@ Trap 2 -- Cross-call memory
   Answer describes the subagent being 'updated' or
   'continuing' from a prior call. No -- there is no
   memory between Task calls.`
-const examGood = `Rule
+const examGood36 = `Rule
 
 Subagents start with a blank slate.
 The coordinator is the sole source of context
@@ -1657,12 +1974,12 @@ EVERYTHING must be passed explicitly.`
   eyebrow="⚡ Exam Tip"
   title="Context Isolation — The Exam Traps"
   lang="text"
-  :badExample="examBad"
+  :badExample="examBad36"
   whyItFails="Subagents start blank every time. The coordinator is the sole source of context."
-  :fixExample="examGood"
+  :fixExample="examGood36"
   footerLabel="Lecture 3.6"
-  :footerNum="7"
-  :footerTotal="8"
+  :footerNum="9"
+  :footerTotal="10"
 />
 
 <!--
@@ -1671,10 +1988,10 @@ Two traps to recognize. Trap one: an answer that assumes the subagent "already k
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
-const takeawayBullets = [
+const takeaways36 = [
   { label: 'No inherited history', detail: "Subagents do NOT inherit the coordinator's history -- each starts with a blank context." },
   { label: 'Independent per call', detail: 'Each Task call creates an independent instance -- no session persistence.' },
   { label: 'Explicit passing is mandatory', detail: 'Everything the subagent needs must live in the task prompt.' },
@@ -1687,10 +2004,11 @@ const takeawayBullets = [
 <BulletReveal
   eyebrow="Takeaway"
   title="Subagent Context Isolation"
-  :bullets="takeawayBullets"
+  :bullets="takeaways36"
+  :hide-footer="true"
   footerLabel="Lecture 3.6"
-  :footerNum="8"
-  :footerTotal="8"
+  :footerNum="10"
+  :footerTotal="10"
 />
 
 <!--
@@ -1722,20 +2040,72 @@ Six things to carry forward. Subagents do NOT inherit the coordinator's history 
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
       <span>Lecture 3.7</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>~8 min</span>
+      <span>~9 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>8 slides</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-The Task tool is the mechanism behind everything we covered in 3.4, 3.5, and 3.6. When we say "the coordinator spawns a subagent," what we mean, concretely, is "the coordinator calls the Task tool." This lecture covers what the Task tool is, its key parameters, the allowedTools requirement the exam tests, and the least-privilege principle. Get this right and the multi-agent patterns all fall into place.
+The Task tool is the mechanism behind everything we covered in 3.4, 3.5, and 3.6. When the coordinator "spawns a subagent," it's calling the Task tool. Three parameters, one required entry, and the trap the exam most loves to plant. Coming up: how this lecture fits into the section.
 -->
 
 ---
 
-<!-- SLIDE 2 — What the Task tool is / isn't -->
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
+<script setup>
+const lectureFitsTiles37 = [
+  {
+    label: 'Where we came from',
+    detail: '3.6 made the rule clear: subagents start with a blank slate. We had the rule but not the mechanism.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Gives you the API surface that implements the three coordinator jobs: the Task tool, its key parameters, and the allowedTools requirement.',
+  },
+  {
+    label: 'Where we go next',
+    detail: '3.8 takes the parallel-spawning pattern shown here and goes deep on what "parallel" structurally means.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles37"
+  footer-label="Lecture 3.7"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets37 = [
+  { label: 'What the Task tool is', detail: "Four things it does -- and four things it isn't" },
+  { label: 'Three key parameters', detail: 'Description, prompt (self-contained), and allowedTools' },
+  { label: 'allowedTools must include Task', detail: "The exam trap candidates fall into when 'Task' is missing from the allowed set" },
+  { label: 'Least-privilege capability shaping', detail: 'How narrow allowedTools lists turn Task from a primitive into a safety mechanism' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets37"
+  footer-label="Lecture 3.7"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — What the Task tool is / isn't -->
 
 <TwoColSlide
   variant="compare"
@@ -1743,8 +2113,8 @@ The Task tool is the mechanism behind everything we covered in 3.4, 3.5, and 3.6
   leftLabel="What it does"
   rightLabel="What it is NOT"
   footerLabel="Lecture 3.7"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 >
 <template #left>
 
@@ -1772,10 +2142,10 @@ Let's anchor what the Task tool actually is. It does four things: creates an ind
 
 ---
 
-<!-- SLIDE 3 — Key parameters -->
+<!-- SLIDE 5 — Key parameters -->
 
 <script setup>
-const taskStructCode = `task_call = {
+const taskStructCode37 = `task_call = {
     "name": "Task",
     "input": {
         "description": "Short label for this subagent run",
@@ -1789,10 +2159,10 @@ const taskStructCode = `task_call = {
   eyebrow="Structure"
   title="The Task Tool — Key Parameters"
   lang="python"
-  :code="taskStructCode"
+  :code="taskStructCode37"
   footerLabel="Lecture 3.7"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 />
 
 <!--
@@ -1801,14 +2171,14 @@ The Task tool takes three key parameters. Description: a short label for what th
 
 ---
 
-<!-- SLIDE 4 — allowedTools must include 'Task' -->
+<!-- SLIDE 6 — allowedTools must include 'Task' -->
 
 <script setup>
-const allowedBad = `// Missing "Task" -- subagent cannot properly accept its task
+const allowedBad37 = `// Missing "Task" -- subagent cannot properly accept its task
 {
   "allowedTools": ["read_file", "search_documents"]
 }`
-const allowedGood = `// "Task" present -- subagent can accept and execute
+const allowedGood37 = `// "Task" present -- subagent can accept and execute
 {
   "allowedTools": ["Task", "read_file", "search_documents"]
 }`
@@ -1818,12 +2188,12 @@ const allowedGood = `// "Task" present -- subagent can accept and execute
   eyebrow="Critical detail"
   title="The allowedTools Requirement"
   lang="json"
-  :badExample="allowedBad"
+  :badExample="allowedBad37"
   whyItFails="The Task tool is how an agent FORMALLY accepts an assignment. Without it in the allowed set, the subagent cannot acknowledge and execute the task specification."
-  :fixExample="allowedGood"
+  :fixExample="allowedGood37"
   footerLabel="Lecture 3.7"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -1832,10 +2202,10 @@ This is one of the highest-value slides in Domain 1. The allowedTools parameter 
 
 ---
 
-<!-- SLIDE 5 — Least privilege for subagent tools -->
+<!-- SLIDE 7 — Least privilege for subagent tools -->
 
 <script setup>
-const capabilityBullets = [
+const capabilityBullets37 = [
   { label: 'Principle of least privilege', detail: 'Each subagent only has tools required for its specific job. Doc analysis doesn\'t need web search. Web search doesn\'t need file write.' },
   { label: 'Why it matters', detail: 'Overpowered subagent = unintended actions. Write access where read-only was meant -> data corruption. Constrained = predictable, auditable, safer.' },
   { label: 'Examples', detail: "Research: ['Task', 'web_search', 'read_url'] · Report writer: ['Task', 'write_file'] · Code reviewer: ['Task', 'read_file', 'run_tests']" },
@@ -1845,10 +2215,10 @@ const capabilityBullets = [
 <BulletReveal
   eyebrow="Security"
   title="Constraining Subagent Capabilities via allowedTools"
-  :bullets="capabilityBullets"
+  :bullets="capabilityBullets37"
   footerLabel="Lecture 3.7"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -1857,10 +2227,10 @@ Beyond the required "Task," the rest of allowedTools is where you apply the prin
 
 ---
 
-<!-- SLIDE 6 — Parallel spawning setup -->
+<!-- SLIDE 8 — Parallel spawning setup -->
 
 <script setup>
-const parallelCode = `# Coordinator spawns two subagents in ONE response turn
+const parallelCode37 = `# Coordinator spawns two subagents in ONE response turn
 coordinator_response_content = [
     {
         "type": "tool_use",
@@ -1892,10 +2262,10 @@ coordinator_response_content = [
   eyebrow="Parallel spawning"
   title="Coordinator Spawning Multiple Subagents in One Turn"
   lang="python"
-  :code="parallelCode"
+  :code="parallelCode37"
   footerLabel="Lecture 3.7"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 />
 
 <!--
@@ -1904,10 +2274,10 @@ Here's what parallel spawning looks like at the Task-call level. The coordinator
 
 ---
 
-<!-- SLIDE 7 — Exam Tip -->
+<!-- SLIDE 9 — Exam Tip -->
 
 <script setup>
-const examBad = `Two traps the exam plants
+const examBad37 = `Two traps the exam plants
 
 Trap 1 -- Missing 'Task' in allowedTools
   Subagent fails to process its assignment; the question
@@ -1917,7 +2287,7 @@ Trap 1 -- Missing 'Task' in allowedTools
 Trap 2 -- Overly permissive allowedTools
   'Give every subagent access to all tools for flexibility.'
   Violates least privilege -- the right answer narrows the list.`
-const examGood = `Rule
+const examGood37 = `Rule
 
 Every subagent's allowedTools must include 'Task'
 PLUS only the tools needed for its specific job.
@@ -1928,12 +2298,12 @@ Nothing more.`
   eyebrow="⚡ Exam Tip"
   title="The Task Tool — Two Exam Traps"
   lang="text"
-  :badExample="examBad"
+  :badExample="examBad37"
   whyItFails="Task is required to accept an assignment. Every unnecessary tool expands the blast radius of a misbehaving subagent."
-  :fixExample="examGood"
+  :fixExample="examGood37"
   footerLabel="Lecture 3.7"
-  :footerNum="7"
-  :footerTotal="8"
+  :footerNum="9"
+  :footerTotal="10"
 />
 
 <!--
@@ -1942,10 +2312,10 @@ Two exam traps to watch for. Trap one: the subagent isn't processing its assignm
 
 ---
 
-<!-- SLIDE 8 — Takeaways -->
+<!-- SLIDE 10 — Takeaways -->
 
 <script setup>
-const takeawayBullets = [
+const takeaways37 = [
   { label: 'Task = the spawn mechanism', detail: 'The Task tool is how coordinators spawn independent subagent instances.' },
   { label: "allowedTools must include 'Task'", detail: 'Without it, the subagent cannot properly accept its assignment.' },
   { label: 'Each call = fresh instance', detail: 'No state persists between Task calls.' },
@@ -1958,10 +2328,11 @@ const takeawayBullets = [
 <BulletReveal
   eyebrow="Takeaway"
   title="The Task Tool — What to Know Cold"
-  :bullets="takeawayBullets"
+  :bullets="takeaways37"
+  :hide-footer="true"
   footerLabel="Lecture 3.7"
-  :footerNum="8"
-  :footerTotal="8"
+  :footerNum="10"
+  :footerTotal="10"
 />
 
 <!--
@@ -1971,6 +2342,8 @@ Six things to carry into 3.8. The Task tool is the mechanism coordinators use to
 ---
 
 <!-- LECTURE 3.8 - Parallel Subagent Execution -->
+
+<!-- SLIDE 1 — Cover -->
 
 <Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
   <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);"></div>
@@ -1985,28 +2358,82 @@ Six things to carry into 3.8. The Task tool is the mechanism coordinators use to
       <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1300px; line-height:1.3;">Multiple Task calls in a single coordinator response turn.</div>
     </div>
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
-      <span>Domain 1 · 27%</span>
+      <span>Lecture 3.8</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>Scenario 3 — Multi-Agent Research</span>
+      <span>~9 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>Hub-and-spoke</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-Welcome to Lecture 3.8 — Parallel Subagent Execution. In the last lecture we looked at how the Task tool spawns subagents. In this one we zero in on what "parallel" actually means inside Claude's agentic loop, because the term gets misused more than almost any other in Domain 1. Parallel subagent execution has a very precise structural signature, and the exam will try to catch you on it. Let's get that signature nailed down.
+In 3.7 we saw how the Task tool spawns subagents. Here we zero in on what "parallel" actually means inside Claude's agentic loop. The word gets misused more than any other in Domain 1 — and the exam will catch you on it. Coming up: how this lecture fits into the section.
 -->
 
 ---
+
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
+<script setup>
+const lectureFitsTiles38 = [
+  {
+    label: 'Where we came from',
+    detail: '3.7 closed by showing two Task calls in one coordinator response -- the parallel-spawning shape. We named the shape but did not unpack it.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Goes deep on what "parallel" structurally means, when to use it over sequential, and how results come back.',
+  },
+  {
+    label: 'Where we go next',
+    detail: '3.9 picks up where synthesis begins: HOW context hands across the fan-in.',
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles38"
+  footer-label="Lecture 3.8"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets38 = [
+  { label: 'Structural definition of parallel', detail: 'One coordinator response, many Task calls -- nothing about latency or async runtimes' },
+  { label: 'The single decision question', detail: 'Do the subagents depend on each other? That picks parallel or sequential' },
+  { label: 'How results return', detail: 'A single batch on the next user message -- and what that means for partial failures' },
+  { label: 'The exam vocabulary trap', detail: 'A scenario using the word "parallel" while describing sequential execution' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets38"
+  footer-label="Lecture 3.8"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — Precise definition -->
 
 <ConceptHero
   eyebrow="Precise definition"
   concept="Parallel = one response, many Task calls"
   supportLine="Sequential: spawn subagent 1 → wait → spawn subagent 2 → wait. Parallel: all Task calls in the SAME response — coordinator collects every result in one batch before its next turn."
   footerLabel="Exam phrase: all parallel subagent spawning happens in one coordinator response turn"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 />
 
 <!--
@@ -2015,13 +2442,15 @@ Here is the precise definition. Parallel subagent execution means the coordinato
 
 ---
 
+<!-- SLIDE 5 — Sequential vs Parallel -->
+
 <script setup>
-const compareLeft = [
+const compareLeft38 = [
   "Tasks do not depend on each other's output",
   'Web search + doc analysis + source verify -- each proceeds independently',
   'No need to know what others found',
 ]
-const compareRight = [
+const compareRight38 = [
   "Task B requires Task A's output",
   'Synthesis cannot happen until research produces findings',
   'Dependent subagent must wait',
@@ -2034,17 +2463,17 @@ const compareRight = [
   eyebrow="Decision rule"
   leftLabel="Use parallel when"
   rightLabel="Use sequential when"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 >
   <template #left>
     <ul>
-      <li v-for="(b, i) in compareLeft" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in compareLeft38" :key="i">{{ b }}</li>
     </ul>
   </template>
   <template #right>
     <ul>
-      <li v-for="(b, i) in compareRight" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in compareRight38" :key="i">{{ b }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -2055,8 +2484,10 @@ The decision rule is a single question: do the subagents depend on each other's 
 
 ---
 
+<!-- SLIDE 6 — Parallel spawning code -->
+
 <script setup>
-const parallelCode = `# Coordinator's single response contains THREE Task tool_use blocks.
+const parallelCode38 = `# Coordinator's single response contains THREE Task tool_use blocks.
 coordinator_response_content = [
 
     # 1 -- web search subagent
@@ -2103,9 +2534,9 @@ coordinator_response_content = [
   eyebrow="Code pattern"
   title="Parallel Spawning — Coordinator Response"
   lang="python"
-  :code="parallelCode"
-  :footerNum="4"
-  :footerTotal="8"
+  :code="parallelCode38"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -2114,8 +2545,10 @@ Here's what parallel spawning looks like in code. The coordinator's response con
 
 ---
 
+<!-- SLIDE 7 — Result collection -->
+
 <script setup>
-const flowSteps = [
+const flowSteps38 = [
   { label: 'Coordinator', sublabel: 'issues 3 Task calls in one response' },
   { label: 'Subagents run', sublabel: 'Web search · Doc analysis · Source verify -- all in parallel' },
   { label: 'user message', sublabel: '3 tool_results returned as a single batch' },
@@ -2126,10 +2559,10 @@ const flowSteps = [
 <FlowDiagram
   eyebrow="Result collection"
   title="Collecting Results from Parallel Subagents"
-  :steps="flowSteps"
+  :steps="flowSteps38"
   footerLabel="Parallel fan-out and fan-in"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -2138,15 +2571,17 @@ Let's walk the fan-out and fan-in. Step one: the coordinator issues three Task c
 
 ---
 
+<!-- SLIDE 8 — Full comparison -->
+
 <script setup>
-const seqLeft = [
+const seqLeft38 = [
   'One Task call per coordinator turn',
   'Coordinator waits for each result before proceeding',
   "Use when Task B depends on Task A's output",
   'Total time = sum of subagent times',
   'Example: Research -> wait -> Synthesis',
 ]
-const parRight = [
+const parRight38 = [
   'Multiple Task calls in ONE coordinator turn',
   'All subagents run simultaneously',
   'Use when tasks are independent',
@@ -2161,17 +2596,17 @@ const parRight = [
   eyebrow="Side-by-side"
   leftLabel="Sequential"
   rightLabel="Parallel"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 >
   <template #left>
     <ul>
-      <li v-for="(b, i) in seqLeft" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in seqLeft38" :key="i">{{ b }}</li>
     </ul>
   </template>
   <template #right>
     <ul>
-      <li v-for="(b, i) in parRight" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in parRight38" :key="i">{{ b }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -2196,7 +2631,7 @@ A side-by-side comparison. Sequential: one Task call per coordinator turn; coord
     </CalloutBox>
 </v-clicks>
   </div>
-  <SlideFooter label="Domain 1 · Key trap" :num="7" :total="8" />
+  <SlideFooter label="Domain 1 · Key trap" :num="9" :total="10" />
 </Frame>
 
 <!--
@@ -2206,7 +2641,7 @@ The exam trap you are most likely to see. A question describes "parallel" execut
 ---
 
 <script setup>
-const takeaways = [
+const takeaways38 = [
   { label: 'Parallel = multiple Task calls in ONE coordinator response turn', detail: 'Not across multiple turns. The structural signature is one response with many tool_use blocks.' },
   { label: 'Independent -> parallel; data dependency -> sequential', detail: "If Task B needs Task A's output, you cannot parallelise." },
   { label: 'All parallel results return as a SINGLE batch', detail: 'The next user message carries every tool_result before the coordinator continues.' },
@@ -2219,9 +2654,10 @@ const takeaways = [
 <BulletReveal
   eyebrow="Takeaways"
   title="Parallel Subagent Execution — What to Remember"
-  :bullets="takeaways"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeaways38"
+  :hide-footer="true"
+  :footerNum="10"
+  :footerTotal="10"
 />
 
 <!--
@@ -2231,6 +2667,8 @@ Six things to carry forward. One — parallel means multiple Task calls in ONE c
 ---
 
 <!-- LECTURE 3.9 - Explicit Context Passing Between Agents -->
+
+<!-- SLIDE 1 — Cover -->
 
 <Frame bg="var(--forest-900)" color="var(--mint-100)" :pad="false">
   <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 20% 80%, var(--forest-700) 0%, var(--forest-900) 60%);"></div>
@@ -2245,24 +2683,78 @@ Six things to carry forward. One — parallel means multiple Task calls in ONE c
       <div style="font-family: var(--font-display); font-size:44px; color: var(--mint-200); margin-top:40px; font-weight:400; max-width:1300px; line-height:1.3;">Structured payloads, not narrative summaries.</div>
     </div>
     <div style="display:flex; align-items:center; gap:48px; font-family: var(--font-body); font-size:26px; color: var(--mint-200); letter-spacing:0.06em;">
-      <span>Domain 1 · 27%</span>
+      <span>Lecture 3.9</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>Scenario 3 — Multi-Agent Research</span>
+      <span>~9 min</span>
       <span style="opacity:0.4;">&middot;</span>
-      <span>Provenance-preserving</span>
+      <span>10 slides</span>
     </div>
   </div>
 </Frame>
 
 <!--
-Welcome to Lecture 3.9 — Explicit Context Passing Between Agents. In the last lecture we saw how to spawn subagents in parallel. Now we tackle the question that trips up most multi-agent designs: how does information actually move from one agent to the next? Subagents share no ambient memory. Whatever downstream agents need to know, you have to pass in explicitly. And the way you pass it — narrative summary versus structured payload — decides whether your pipeline preserves truth or fabricates it.
+In 3.8 we spawned subagents in parallel. Now the question that trips up most multi-agent designs: how does information actually move between them? Subagents share no ambient memory. The way you pass it — narrative summary vs structured payload — decides whether your pipeline preserves truth or fabricates it. Coming up: how this lecture fits.
 -->
 
 ---
 
+<!-- SLIDE 2 — How This Lecture Fits Into the Course -->
+
 <script setup>
-const narrativeLeft = "Agent A finds three claims. Passes: 'Here is a summary of findings.' Agent B has no idea where the claims came from, how recent they are, or whether they were primary sources."
-const explicitRight = 'Agent A passes a structured payload: claim text, source URL, document name, page number, publication date, confidence level. Agent B can reason about the claims AND their provenance.'
+const lectureFitsTiles39 = [
+  {
+    label: 'Where we came from',
+    detail: '3.6 nailed the rule "subagents start with a blank slate." 3.7 and 3.8 gave us the Task tool and parallel spawning.',
+  },
+  {
+    label: 'Current lecture',
+    detail: 'Focuses on the HANDOFF -- what belongs in the prompt the coordinator hands each subagent, and the shape of a payload that survives a multi-agent pipeline.',
+  },
+  {
+    label: 'Where we go next',
+    detail: "3.10 shifts from 'what to pass' to 'what to enforce' -- programmatic guarantees vs prompt-based guidance.",
+  },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles39"
+  footer-label="Lecture 3.9"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 3 — What You'll Learn -->
+
+<script setup>
+const learnBullets39 = [
+  { label: 'Why context cannot flow automatically', detail: 'Implicit vs explicit handoff -- and the engineering constraint that forces explicit' },
+  { label: 'Five required payload fields', detail: 'The contract that lets attribution survive across agents' },
+  { label: 'Three injection channels', detail: 'System prompt, first user message, tool result -- and the rule that picks the right one' },
+  { label: 'The citation-fabrication trap', detail: 'How a pipeline-design failure forces downstream agents to invent sources' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets39"
+  footer-label="Lecture 3.9"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+---
+
+<!-- SLIDE 4 — Implicit vs explicit handoff -->
+
+<script setup>
+const narrativeLeft39 = "Agent A finds three claims. Passes: 'Here is a summary of findings.' Agent B has no idea where the claims came from, how recent they are, or whether they were primary sources."
+const explicitRight39 = 'Agent A passes a structured payload: claim text, source URL, document name, page number, publication date, confidence level. Agent B can reason about the claims AND their provenance.'
 </script>
 
 <TwoColSlide
@@ -2271,14 +2763,14 @@ const explicitRight = 'Agent A passes a structured payload: claim text, source U
   eyebrow="Implicit vs explicit handoff"
   leftLabel="❌ Implicit Handoff"
   rightLabel="✓ Explicit Handoff"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 >
   <template #left>
-    <p>{{ narrativeLeft }}</p>
+    <p>{{ narrativeLeft39 }}</p>
   </template>
   <template #right>
-    <p>{{ explicitRight }}</p>
+    <p>{{ explicitRight39 }}</p>
   </template>
 </TwoColSlide>
 
@@ -2298,7 +2790,7 @@ The mental model is simple. Agent A runs, produces findings, and hands off to Ag
     <SchemaField name="publication_date" type="ISO 8601" :required="true" description="Required for freshness evaluation. A 2019 claim may now be outdated." />
     <SchemaField name="confidence" type="'direct' | 'inferred'" :required="true" description="Was this directly stated or inferred? How much weight to give it." />
   </div>
-  <SlideFooter label="Structured-payload contract" :num="3" :total="8" />
+  <SlideFooter label="Structured-payload contract" :num="5" :total="10" />
 </Frame>
 
 <!--
@@ -2307,8 +2799,10 @@ The contract. A claim payload that survives a multi-agent pipeline has five requ
 
 ---
 
+<!-- SLIDE 6 — Code: structured payload -->
+
 <script setup>
-const payloadCode = `# Build a structured context payload -- not a narrative summary.
+const payloadCode39 = `# Build a structured context payload -- not a narrative summary.
 def build_claim_payload(extracted_claims):
     return [
         {
@@ -2348,9 +2842,9 @@ def synthesize_with_context(claim_payload):
   eyebrow="Code pattern"
   title="Structured Context Payload"
   lang="python"
-  :code="payloadCode"
-  :footerNum="4"
-  :footerTotal="8"
+  :code="payloadCode39"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -2359,15 +2853,17 @@ Here's the implementation. build_claim_payload takes a list of extracted claims 
 
 ---
 
+<!-- SLIDE 7 — Narrative vs structured -->
+
 <script setup>
-const narrativeBullets = [
+const narrativeBullets39 = [
   'Fast to produce -- just ask the first agent to summarise',
   'Easy to read -- easy to misinterpret',
   'Loses source attribution',
   'Loses publication dates and page references',
   "Embeds the first agent's paraphrase bias",
 ]
-const structuredBullets = [
+const structuredBullets39 = [
   'More design effort -- preserves all provenance',
   'Claim text is verbatim -- no interpretation loss',
   'All metadata intact: URL, date, page, confidence',
@@ -2382,17 +2878,17 @@ const structuredBullets = [
   eyebrow="The real cost of summaries"
   leftLabel="Narrative Summary"
   rightLabel="Structured Payload"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 >
   <template #left>
     <ul>
-      <li v-for="(b, i) in narrativeBullets" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in narrativeBullets39" :key="i">{{ b }}</li>
     </ul>
   </template>
   <template #right>
     <ul>
-      <li v-for="(b, i) in structuredBullets" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in structuredBullets39" :key="i">{{ b }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -2403,8 +2899,10 @@ Here's the real cost of the two approaches. A narrative summary is fast, easy to
 
 ---
 
+<!-- SLIDE 8 — Injection patterns -->
+
 <script setup>
-const injectionSteps = [
+const injectionSteps39 = [
   { title: 'System prompt injection', body: "Stable, reusable context -- agent's role, domain rules, output schema. Doesn't change per request." },
   { title: 'First user message injection', body: "Per-request context -- structured claim payload, task state, prior agent's output. Format clearly inside the first user turn." },
   { title: 'Tool result injection', body: 'Dynamic context fetched mid-task -- retrieved documents, DB lookups. Arrives via the tool result loop, appended to history.' },
@@ -2414,10 +2912,10 @@ const injectionSteps = [
 <StepSequence
   eyebrow="Three injection patterns"
   title="How to Inject Context Into the Next Agent"
-  :steps="injectionSteps"
+  :steps="injectionSteps39"
   footerLabel="Match channel to lifecycle"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 />
 
 <!--
@@ -2441,7 +2939,7 @@ Three ways to inject context, and choosing the right one matters. Pattern one: s
     </CalloutBox>
 </v-clicks>
   </div>
-  <SlideFooter label="Domain 1 · Multi-agent traps" :num="7" :total="8" />
+  <SlideFooter label="Domain 1 · Multi-agent traps" :num="9" :total="10" />
 </Frame>
 
 <!--
@@ -2450,8 +2948,10 @@ The exam-tested trap. Scenario: a research agent extracts claims, summarizes the
 
 ---
 
+<!-- SLIDE 10 — Takeaways -->
+
 <script setup>
-const takeaways = [
+const takeaways39 = [
   { label: 'Each agent has only what you give it', detail: 'No ambient shared memory -- everything must be passed explicitly in system prompt, first user message, or tool result.' },
   { label: 'Structured payloads beat narrative summaries', detail: 'Always pass structured payloads whenever attribution or accuracy matters downstream.' },
   { label: 'Full claim payload has five fields', detail: 'Verbatim text, source URL, document name, page number, publication date, confidence level.' },
@@ -2464,9 +2964,10 @@ const takeaways = [
 <BulletReveal
   eyebrow="Takeaways"
   title="Explicit Context Passing — What to Remember"
-  :bullets="takeaways"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeaways39"
+  :hide-footer="true"
+  :footerNum="10"
+  :footerTotal="10"
 />
 
 <!--
@@ -2500,14 +3001,61 @@ Six things to carry forward. One — each agent has only what you give it; there
 </Frame>
 
 <!--
-Welcome to Lecture 3.10 — Programmatic Enforcement vs Prompt-Based Guidance. This is one of the most frequently tested distinctions in Domain 1, and it's a distinction you have to internalize before the rest of the domain makes sense. Every rule in your agent system has a home: either your code enforces it, or your prompt requests it. Get the home wrong and you get production incidents. This lecture gives you the diagnostic test — and Lecture 3.11 will show you the mechanism.
+Welcome to Lecture 3.10 — Programmatic Enforcement vs Prompt-Based Guidance. Every rule in your agent system has a home: either your code enforces it, or your prompt requests it. Get the home wrong and you get production incidents. Coming up next, the diagnostic test that picks the right home every time.
 -->
 
 ---
 
 <script setup>
-const progContent = "Your code prevents it -- unconditionally. The model never gets the opportunity to make a different choice. Reliability: deterministic. Example: block any refund > $500 in the tool execution layer."
-const promptContent = "You instruct the model in the system prompt to follow a rule. The model generally will -- but it's a statistical outcome, not a guarantee. Reliability: probabilistic. Example: 'Always use a professional tone when responding to customers.'"
+const lectureFitsTiles310 = [
+  { label: 'Just covered (3.4-3.9)', detail: 'Multi-agent orchestration -- coordinators, subagents, parallel execution, context passing.' },
+  { label: 'This lecture (3.10)', detail: 'The reliability layer: which rules belong in code, which belong in the prompt.' },
+  { label: 'Coming next (3.11)', detail: 'Hooks -- the Agent SDK mechanism that implements the code side of this decision cleanly.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the section"
+  :tiles="lectureFitsTiles310"
+  footer-label="Agentic Architecture"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+<!--
+Here's how this lecture fits in. We just spent lectures 3.4 through 3.9 on multi-agent orchestration — coordinators, subagents, parallel execution, and context passing. Now we shift to the reliability layer that wraps all of that: which rules belong in code, and which belong in the prompt. After this, lecture 3.11 introduces hooks, the specific mechanism that implements the code side of this decision cleanly.
+-->
+
+---
+
+<script setup>
+const learnBullets310 = [
+  { label: 'Deterministic vs probabilistic', detail: 'The distinction that separates the two reliability models.' },
+  { label: 'Four "always in code" categories', detail: 'Financial, authorization, compliance, irreversible.' },
+  { label: 'Four "always in prompt" categories', detail: 'Tone, format, scope, UX preferences.' },
+  { label: 'The one diagnostic question', detail: 'Would a violation require incident response? Yes = code. No = prompt.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets310"
+  footer-label="Agentic Architecture"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+<!--
+Here are the four things you'll walk away knowing. First, the deterministic versus probabilistic distinction that separates these two mechanisms. Second, the four categories that always belong in code. Third, the four categories that always belong in the prompt. And fourth, the one diagnostic question that resolves almost every exam item in this category.
+-->
+
+---
+
+<script setup>
+const progContent310 = "Your code prevents it -- unconditionally. The model never gets the opportunity to make a different choice. Reliability: deterministic. Example: block any refund > $500 in the tool execution layer."
+const promptContent310 = "You instruct the model in the system prompt to follow a rule. The model generally will -- but it's a statistical outcome, not a guarantee. Reliability: probabilistic. Example: 'Always use a professional tone when responding to customers.'"
 </script>
 
 <TwoColSlide
@@ -2516,14 +3064,14 @@ const promptContent = "You instruct the model in the system prompt to follow a r
   eyebrow="Two reliability models"
   leftLabel="Programmatic Enforcement"
   rightLabel="Prompt-Based Guidance"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 >
   <template #left>
-    <p>{{ progContent }}</p>
+    <p>{{ progContent310 }}</p>
   </template>
   <template #right>
-    <p>{{ promptContent }}</p>
+    <p>{{ promptContent310 }}</p>
   </template>
 </TwoColSlide>
 
@@ -2534,7 +3082,7 @@ Here's the fundamental fork. Programmatic enforcement means your code prevents a
 ---
 
 <script setup>
-const enforceBullets = [
+const enforceBullets310 = [
   { label: 'Financial operations', detail: 'Refund limits, transfer caps, transaction thresholds -- enforce in the tool execution layer, NOT the prompt.' },
   { label: 'Identity and authorization', detail: 'Only allow actions on resources the authenticated user owns -- verified by your code against your DB.' },
   { label: 'Compliance boundaries', detail: 'Data residency, PII handling, regulated data access -- legal consequences if violated.' },
@@ -2545,9 +3093,9 @@ const enforceBullets = [
 <BulletReveal
   eyebrow="Enforce in code"
   title="When Programmatic Enforcement Is Required"
-  :bullets="enforceBullets"
-  :footerNum="3"
-  :footerTotal="8"
+  :bullets="enforceBullets310"
+  :footerNum="5"
+  :footerTotal="10"
 />
 
 <!--
@@ -2557,7 +3105,7 @@ Four categories where programmatic enforcement is required. Financial operations
 ---
 
 <script setup>
-const guideBullets = [
+const guideBullets310 = [
   { label: 'Tone and style', detail: "'Always respond professionally.' 'Avoid jargon.' Deviation is awkward, not catastrophic." },
   { label: 'Output format preferences', detail: "'Bullet points.' 'Markdown tables when comparing.' The model can exercise judgment." },
   { label: 'Scope guidance', detail: "'Focus on topics relevant to our product.' Violations are annoying, not harmful." },
@@ -2568,9 +3116,9 @@ const guideBullets = [
 <BulletReveal
   eyebrow="Prompt is enough"
   title="When Prompt-Based Guidance Is Appropriate"
-  :bullets="guideBullets"
-  :footerNum="4"
-  :footerTotal="8"
+  :bullets="guideBullets310"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -2580,7 +3128,7 @@ On the other side of the fork, four categories where prompt-based guidance is no
 ---
 
 <script setup>
-const enforceCode = `# Programmatic enforcement -- the $500 limit is NOT in the system prompt.
+const enforceCode310 = `# Programmatic enforcement -- the $500 limit is NOT in the system prompt.
 def process_refund(order_id: str, amount_cents: int, user_id: str) -> dict:
     order = db.orders.get(order_id)
 
@@ -2621,9 +3169,9 @@ and professionally. Explain next steps clearly.
   eyebrow="Code pattern"
   title="Programmatic Enforcement in Code"
   lang="python"
-  :code="enforceCode"
-  :footerNum="5"
-  :footerTotal="8"
+  :code="enforceCode310"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -2633,7 +3181,7 @@ Here's enforcement in practice. The process_refund function does two things befo
 ---
 
 <script setup>
-const progLeft = [
+const progLeft310 = [
   'Irreversible actions (delete, send, deploy)',
   'Financial thresholds and limits',
   'Identity and authorization checks',
@@ -2641,7 +3189,7 @@ const progLeft = [
   'Security controls (rate limits, input validation)',
   "Anything where 'almost always' is not good enough",
 ]
-const promptRight = [
+const promptRight310 = [
   'Tone, voice, and style',
   'Output format preferences',
   'Domain focus and scope',
@@ -2657,17 +3205,17 @@ const promptRight = [
   eyebrow="Use this checklist"
   leftLabel="Use Programmatic Enforcement"
   rightLabel="Use Prompt-Based Guidance"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 >
   <template #left>
     <ul>
-      <li v-for="(b, i) in progLeft" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in progLeft310" :key="i">{{ b }}</li>
     </ul>
   </template>
   <template #right>
     <ul>
-      <li v-for="(b, i) in promptRight" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in promptRight310" :key="i">{{ b }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -2693,7 +3241,7 @@ A decision matrix you can apply on exam day and in production. On the left — p
     </CalloutBox>
 </v-clicks>
   </div>
-  <SlideFooter label="Domain 1 · Enforcement distinction" :num="7" :total="8" />
+  <SlideFooter label="Domain 1 · Enforcement distinction" :num="9" :total="10" />
 </Frame>
 
 <!--
@@ -2703,7 +3251,7 @@ The exam trap. A question describes a scenario with a hard constraint — a fina
 ---
 
 <script setup>
-const takeaways = [
+const takeaways310 = [
   { label: 'Programmatic enforcement = deterministic', detail: 'Code prevents violations unconditionally; the model never gets the chance to make a different call.' },
   { label: 'Prompt-based guidance = probabilistic', detail: 'The model generally follows instructions -- a statistical outcome, not a guarantee.' },
   { label: 'Use code for hard constraints', detail: 'Financial limits, authorization, compliance, irreversible actions, security controls.' },
@@ -2716,9 +3264,10 @@ const takeaways = [
 <BulletReveal
   eyebrow="Takeaways"
   title="Programmatic Enforcement vs Prompt Guidance"
-  :bullets="takeaways"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeaways310"
+  :footerNum="10"
+  :footerTotal="10"
+  :hide-footer="true"
 />
 
 <!--
@@ -2752,14 +3301,61 @@ Six takeaways. One — programmatic enforcement is deterministic: your code prev
 </Frame>
 
 <!--
-Welcome to Lecture 3.11 — Agent SDK Hooks: PostToolUse and Tool Call Interception. In the previous lecture we drew the line between programmatic enforcement and prompt-based guidance. Hooks are the specific mechanism the Agent SDK gives you to implement the programmatic side of that line. They're also exam-tested in their own right. By the end of this lecture you will know when to reach for PreToolUse, when to reach for PostToolUse, and how each delivers a centralized, deterministic guarantee that an individual tool function cannot.
+Welcome to Lecture 3.11 — Agent SDK Hooks: PostToolUse and Tool Call Interception. In 3.10 we drew the line between enforcement in code and guidance in the prompt. Hooks are the Agent SDK mechanism that makes the code side clean. Coming up, the two hook points, the two canonical examples, and the trap that splits them.
 -->
 
 ---
 
 <script setup>
-const flowContent = 'Claude emits tool_use block -> [PreToolUse hook: inspect / block / modify] -> Tool executes -> [PostToolUse hook: inspect / normalize / enrich] -> Result returned to Claude.'
-const mechanics = [
+const lectureFitsTiles311 = [
+  { label: 'Just covered (3.10)', detail: 'The decision rule: enforce in code when consequences are serious; prompt-based guidance for stylistic preferences.' },
+  { label: 'This lecture (3.11)', detail: 'Hooks -- PreToolUse and PostToolUse -- the SDK mechanism that implements that code centrally.' },
+  { label: 'Coming next (3.12)', detail: 'Task structure: prompt chaining vs dynamic adaptive decomposition.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the section"
+  :tiles="lectureFitsTiles311"
+  footer-label="Agentic Architecture"
+  :footer-num="2"
+  :footer-total="9"
+/>
+
+<!--
+Here's how this lecture fits in. Lecture 3.10 gave you the decision rule: enforce in code when consequences are serious. This lecture gives you the mechanism — PreToolUse and PostToolUse hooks — that implements that code centrally instead of scattering it across every tool. After this, 3.12 leaves runtime interception behind and shifts to task structure: prompt chaining versus dynamic adaptive decomposition.
+-->
+
+---
+
+<script setup>
+const learnBullets311 = [
+  { label: 'Where hooks sit in the loop', detail: 'PreToolUse before execution, PostToolUse after execution.' },
+  { label: 'Canonical PostToolUse example', detail: 'Unix timestamp -> ISO 8601 normalization for unambiguous date reasoning.' },
+  { label: 'Canonical PreToolUse example', detail: 'Block any refund above the auto-approval limit before the tool runs.' },
+  { label: 'The dividing rule the exam tests', detail: 'Enforcement before execution vs data quality after execution.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets311"
+  footer-label="Agentic Architecture"
+  :footer-num="3"
+  :footer-total="9"
+/>
+
+<!--
+Here are the four things you'll walk away knowing. First, where PreToolUse and PostToolUse sit in the agentic loop. Second, the canonical PostToolUse example — Unix timestamp normalization. Third, the canonical PreToolUse example — blocking a refund above the financial limit. And fourth, the dividing rule the exam tests: enforcement before execution versus data quality after execution.
+-->
+
+---
+
+<script setup>
+const flowContent311 = 'Claude emits tool_use block -> [PreToolUse hook: inspect / block / modify] -> Tool executes -> [PostToolUse hook: inspect / normalize / enrich] -> Result returned to Claude.'
+const mechanics311 = [
   { label: 'PreToolUse', detail: 'Runs before the tool executes. Validate, enforce limits, or block unauthorized actions entirely.' },
   { label: 'PostToolUse', detail: 'Runs after the tool executes, before the result is returned to Claude. Normalize, enrich, or validate the output.' },
   { label: 'Key property', detail: 'Both are synchronous interception points -- stop the flow, modify data, or pass through.' },
@@ -2772,16 +3368,16 @@ const mechanics = [
   eyebrow="Where hooks run"
   leftLabel="Flow"
   rightLabel="Mechanics"
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="9"
 >
   <template #left>
-    <p>{{ flowContent }}</p>
+    <p>{{ flowContent311 }}</p>
     <p><strong>PreToolUse</strong> sits between Claude's tool_use block and the tool function. <strong>PostToolUse</strong> sits between the tool function's return and the result Claude sees.</p>
   </template>
   <template #right>
     <ul>
-      <li v-for="(m, i) in mechanics" :key="i"><strong>{{ m.label }}.</strong> {{ m.detail }}</li>
+      <li v-for="(m, i) in mechanics311" :key="i"><strong>{{ m.label }}.</strong> {{ m.detail }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -2793,7 +3389,7 @@ Here's where hooks fit in the agentic loop. Claude emits a tool_use block. Befor
 ---
 
 <script setup>
-const postCode = `class TimestampNormalizationHook(PostToolUseHook):
+const postCode311 = `class TimestampNormalizationHook(PostToolUseHook):
     """Convert any Unix timestamps in tool results to ISO 8601."""
 
     def on_tool_result(self, tool_name: str, result: dict) -> dict:
@@ -2817,9 +3413,9 @@ agent = AgentLoop(
   eyebrow="PostToolUse"
   title="Normalizing Tool Results"
   lang="python"
-  :code="postCode"
-  :footerNum="3"
-  :footerTotal="8"
+  :code="postCode311"
+  :footerNum="5"
+  :footerTotal="9"
 />
 
 <!--
@@ -2829,7 +3425,7 @@ Here's a canonical PostToolUse example: converting Unix timestamps to ISO 8601. 
 ---
 
 <script setup>
-const preCode = `class RefundGuardHook(PreToolUseHook):
+const preCode311 = `class RefundGuardHook(PreToolUseHook):
     """Block refunds above the auto-approval limit before execution."""
 
     max_refund_cents = 50_000  # $500
@@ -2864,9 +3460,9 @@ const preCode = `class RefundGuardHook(PreToolUseHook):
   eyebrow="PreToolUse"
   title="Blocking Unauthorized Tool Calls"
   lang="python"
-  :code="preCode"
-  :footerNum="4"
-  :footerTotal="8"
+  :code="preCode311"
+  :footerNum="6"
+  :footerTotal="9"
 />
 
 <!--
@@ -2876,7 +3472,7 @@ And here's a canonical PreToolUse example: the RefundGuardHook. Two gates. First
 ---
 
 <script setup>
-const useCases = [
+const useCases311 = [
   { label: 'PreToolUse -- Validation', detail: 'Check inputs before execution. Validate formats, required fields, data types.' },
   { label: 'PreToolUse -- Authorization', detail: 'Verify the user is allowed to invoke this tool with these inputs. Block unauthorized calls before any side effect.' },
   { label: 'PreToolUse -- Limit Enforcement', detail: 'Financial thresholds, rate limits, quota checks. Block with an explanatory error before execution.' },
@@ -2889,9 +3485,10 @@ const useCases = [
 <BulletReveal
   eyebrow="Use cases"
   title="Hook Use Cases at a Glance"
-  :bullets="useCases"
-  :footerNum="5"
-  :footerTotal="8"
+  :bullets="useCases311"
+  :footerNum="7"
+  :footerTotal="9"
+  :hide-footer="true"
 />
 
 <!--
@@ -2917,7 +3514,7 @@ Six common hook use cases. PreToolUse validation: check inputs before execution 
     </CalloutBox>
 </v-clicks>
   </div>
-  <SlideFooter label="Domain 1 · Hook traps" :num="6" :total="8" />
+  <SlideFooter label="Domain 1 · Hook traps" :num="8" :total="9" />
 </Frame>
 
 <!--
@@ -2927,7 +3524,7 @@ Three traps the exam reliably tests. First: using a prompt instruction to enforc
 ---
 
 <script setup>
-const takeaways = [
+const takeaways311 = [
   { label: 'PreToolUse runs before execution', detail: 'Intercept, validate, authorize, or block the call before the tool side effect.' },
   { label: 'PostToolUse runs after execution', detail: 'Normalize, enrich, or log the result before Claude sees it.' },
   { label: 'Classic PostToolUse: Unix -> ISO 8601', detail: 'Converting timestamps so Claude reasons about dates unambiguously across every tool.' },
@@ -2940,9 +3537,10 @@ const takeaways = [
 <BulletReveal
   eyebrow="Takeaways"
   title="Agent SDK Hooks — What to Know Cold"
-  :bullets="takeaways"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeaways311"
+  :footerNum="9"
+  :footerTotal="9"
+  :hide-footer="true"
 />
 
 <!--
@@ -2976,7 +3574,54 @@ Six takeaways to carry forward. One — PreToolUse runs before tool execution: i
 </Frame>
 
 <!--
-Welcome to Lecture 3.12 — Task Decomposition: Prompt Chaining vs Dynamic Adaptive. Every non-trivial agentic workflow is decomposed into sub-tasks. The exam-tested question is what KIND of decomposition to use. There are two main patterns — prompt chaining, where you define the steps upfront in code, and dynamic adaptive, where Claude decides the next step at runtime. This lecture gives you the decision rule and the safeguards each pattern needs to be production-safe.
+Welcome to Lecture 3.12 — Task Decomposition: Prompt Chaining vs Dynamic Adaptive. Every non-trivial agentic workflow is decomposed into sub-tasks. The exam-tested question is WHAT KIND of decomposition to use. Coming up, the one diagnostic question that picks the right pattern and the safeguards each pattern needs to be production-safe.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles312 = [
+  { label: 'Just covered (3.10-3.11)', detail: 'The enforcement layer -- what to guarantee in code via hooks and tool-level checks.' },
+  { label: 'This lecture (3.12)', detail: 'The structural layer: how to break a task into steps in the first place.' },
+  { label: 'Coming next (3.13)', detail: 'Session management -- what to do when a workflow spans multiple sessions.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the section"
+  :tiles="lectureFitsTiles312"
+  footer-label="Agentic Architecture"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+<!--
+Here's how this lecture fits in. Lectures 3.10 and 3.11 covered the enforcement layer — what to guarantee in code. Now we step back to the structural layer: how to break a task into steps in the first place. After this, 3.13 looks at session management — what to do when a workflow spans multiple sessions and the context starts drifting.
+-->
+
+---
+
+<script setup>
+const learnBullets312 = [
+  { label: 'Why decompose at all', detail: 'Focused prompts beat kitchen-sink prompts -- four reasons.' },
+  { label: 'Two patterns side-by-side', detail: 'Prompt chaining (fixed) vs dynamic adaptive (model-driven).' },
+  { label: 'Canonical examples', detail: 'Code review for chaining; investigation loops for dynamic.' },
+  { label: 'The one decision rule + safety limits', detail: 'Can you enumerate the steps upfront? Yes = chain. No = dynamic + max_steps.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets312"
+  footer-label="Agentic Architecture"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+<!--
+Here are the four things you'll walk away knowing. First, why decomposition raises output quality in the first place. Second, the two patterns — prompt chaining and dynamic adaptive — side-by-side. Third, the canonical examples: code review for chaining, investigation loops for dynamic. And fourth, the one decision rule the exam tests, plus the safety limits each pattern requires.
 -->
 
 ---
@@ -2986,8 +3631,8 @@ Welcome to Lecture 3.12 — Task Decomposition: Prompt Chaining vs Dynamic Adapt
   concept="One question, many focused calls"
   supportLine="Single calls have context and attention limits. Focused prompts produce higher-quality outputs. Sub-tasks can be verified independently. Parallel execution is possible when steps are independent."
   footerLabel="Design question: fixed sequence → Prompt Chaining. Each step determines the next → Dynamic Adaptive."
-  :footerNum="2"
-  :footerTotal="8"
+  :footerNum="4"
+  :footerTotal="10"
 />
 
 <!--
@@ -2997,14 +3642,14 @@ Why decompose at all? Four reasons. First, single calls have context and attenti
 ---
 
 <script setup>
-const chainBullets = [
+const chainBullets312 = [
   'Steps defined upfront in code',
   "Each step receives the prior step's output",
   'Sequence never changes -- same order every time',
   'Easy to reason about, test, and debug',
   'Output quality of each step is independently verifiable',
 ]
-const adaptiveBullets = [
+const adaptiveBullets312 = [
   'Claude decides what to do next based on results',
   'Step sequence emerges from the task, not from code',
   'Handles novel paths and unexpected findings',
@@ -3019,17 +3664,17 @@ const adaptiveBullets = [
   eyebrow="Two decomposition patterns"
   leftLabel="Prompt Chaining (Fixed Sequential)"
   rightLabel="Dynamic Adaptive"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 >
   <template #left>
     <ul>
-      <li v-for="(b, i) in chainBullets" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in chainBullets312" :key="i">{{ b }}</li>
     </ul>
   </template>
   <template #right>
     <ul>
-      <li v-for="(b, i) in adaptiveBullets" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in adaptiveBullets312" :key="i">{{ b }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -3041,7 +3686,7 @@ The two patterns side-by-side. Prompt chaining is fixed sequential — you defin
 ---
 
 <script setup>
-const chainCode = `def run_code_review_pipeline(repo_path: str, changed_files: list[str]) -> dict:
+const chainCode312 = `def run_code_review_pipeline(repo_path: str, changed_files: list[str]) -> dict:
     """Fixed sequential pipeline. Same three steps every time."""
 
     # Step 1 -- per-file analysis (can be parallel internally, still fixed stage)
@@ -3062,9 +3707,9 @@ const chainCode = `def run_code_review_pipeline(repo_path: str, changed_files: l
   eyebrow="Example"
   title="Prompt Chaining — Code Review Pipeline"
   lang="python"
-  :code="chainCode"
-  :footerNum="4"
-  :footerTotal="8"
+  :code="chainCode312"
+  :footerNum="6"
+  :footerTotal="10"
 />
 
 <!--
@@ -3074,7 +3719,7 @@ Here's prompt chaining in practice — the canonical code review pipeline. Step 
 ---
 
 <script setup>
-const adaptiveCode = `def run_investigation(initial_prompt: str, max_steps: int = 20) -> dict:
+const adaptiveCode312 = `def run_investigation(initial_prompt: str, max_steps: int = 20) -> dict:
     """Dynamic adaptive -- Claude decides the next step each turn."""
 
     messages = [{"role": "user", "content": initial_prompt}]
@@ -3105,9 +3750,9 @@ const adaptiveCode = `def run_investigation(initial_prompt: str, max_steps: int 
   eyebrow="Example"
   title="Dynamic Adaptive — Open-Ended Investigation"
   lang="python"
-  :code="adaptiveCode"
-  :footerNum="5"
-  :footerTotal="8"
+  :code="adaptiveCode312"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -3117,7 +3762,7 @@ And here's dynamic adaptive — an investigation loop. The sequence is not defin
 ---
 
 <script setup>
-const chooseSteps = [
+const chooseSteps312 = [
   { title: 'Prompt chaining -- use when', body: 'Steps are known, sequence is fixed, correctness at each step is independently verifiable. Code review, report generation, data-transformation pipelines.' },
   { title: 'Dynamic adaptive -- use when', body: 'Task is open-ended, the relevant path depends on findings, and the task space is too large to enumerate upfront. Debugging, research, investigation.' },
   { title: 'Hybrid -- use when', body: 'Outer structure is known (phases) but each phase is open-ended. Phase 1 = gather evidence (dynamic). Phase 2 = write report (chained).' },
@@ -3127,10 +3772,10 @@ const chooseSteps = [
 <StepSequence
   eyebrow="Choose strategy"
   title="Choosing the Right Decomposition Strategy"
-  :steps="chooseSteps"
+  :steps="chooseSteps312"
   footerLabel="Default to chaining unless the task requires dynamic"
-  :footerNum="6"
-  :footerTotal="8"
+  :footerNum="8"
+  :footerTotal="10"
 />
 
 <!--
@@ -3154,7 +3799,7 @@ Three scenarios and the right pattern for each. Prompt chaining — use when the
     </CalloutBox>
 </v-clicks>
   </div>
-  <SlideFooter label="Domain 1 · Decomposition" :num="7" :total="8" />
+  <SlideFooter label="Domain 1 · Decomposition" :num="9" :total="10" />
 </Frame>
 
 <!--
@@ -3164,7 +3809,7 @@ The exam trap. A question describes a code-review pipeline, and one of the distr
 ---
 
 <script setup>
-const takeaways = [
+const takeaways312 = [
   { label: 'Prompt chaining = fixed sequence in code', detail: 'Predictable, testable, each step is independently verifiable.' },
   { label: 'Dynamic adaptive = model-driven', detail: 'Claude decides the next step based on results; requires explicit safety limits.' },
   { label: 'Code review is always prompt chaining', detail: 'Per-file -> cross-file integration -> report. Fixed steps, never dynamic.' },
@@ -3177,9 +3822,10 @@ const takeaways = [
 <BulletReveal
   eyebrow="Takeaways"
   title="Task Decomposition — What to Remember"
-  :bullets="takeaways"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeaways312"
+  :footerNum="10"
+  :footerTotal="10"
+  :hide-footer="true"
 />
 
 <!--
@@ -3213,13 +3859,60 @@ Six takeaways. One — prompt chaining is a fixed sequence in code: predictable,
 </Frame>
 
 <!--
-Welcome to Lecture 3.13 — Session Management: resume, fork_session, and when to start fresh. A non-trivial agentic workflow almost always lives across more than one session. Sometimes a session gets interrupted. Sometimes you need two parallel branches from the same starting point. Sometimes the context you've accumulated is actively wrong and needs to be discarded. The Agent SDK gives you three primitives — resume, fork, and start-fresh-with-summary — and each has a specific situation where it is the right call. This lecture is about recognising the signals that pick which one.
+Welcome to Lecture 3.13 — Session Management: resume, fork_session, and when to start fresh. A non-trivial agentic workflow almost always lives across more than one session. Sometimes the context you've accumulated is actively wrong and needs to be discarded. Coming up, three primitives and the specific signal that picks each one.
 -->
 
 ---
 
 <script setup>
-const decisions = [
+const lectureFitsTiles313 = [
+  { label: 'Just covered (3.12)', detail: 'How to STRUCTURE a task -- prompt chaining vs dynamic adaptive.' },
+  { label: 'This lecture (3.13)', detail: 'Session lifecycle: resume, fork, or start fresh when work spans multiple sessions.' },
+  { label: 'Coming next (3.14)', detail: 'The final hand-off -- structured summaries for human escalation.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the section"
+  :tiles="lectureFitsTiles313"
+  footer-label="Agentic Architecture"
+  :footer-num="2"
+  :footer-total="10"
+/>
+
+<!--
+Here's how this lecture fits in. Lecture 3.12 covered how to STRUCTURE a task — chaining versus dynamic. This lecture covers what happens to that structure ACROSS sessions: when to resume, when to fork, when to start fresh. After this, 3.14 closes Section 3 with the final hand-off pattern — what to send a human agent when the workflow leaves the autonomous loop entirely.
+-->
+
+---
+
+<script setup>
+const learnBullets313 = [
+  { label: 'Three session primitives', detail: 'Resume (--resume), Fork (fork_session), Start fresh with injected summary.' },
+  { label: 'When to resume', detail: 'Context still valid -- interrupted task, stable multi-phase work, reusable tool results.' },
+  { label: 'When to fork', detail: 'Divergent branches from a shared baseline -- A/B evaluation, hypothesis testing.' },
+  { label: 'When to start fresh', detail: 'Stale tool results, context-window pressure, or phase boundary with different tools.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets313"
+  footer-label="Agentic Architecture"
+  :footer-num="3"
+  :footer-total="10"
+/>
+
+<!--
+Here are the four things you'll walk away knowing. First, the three session primitives the Agent SDK gives you. Second, the signal that picks resume — when context is still valid. Third, the signal that picks fork — divergent branches from a shared baseline. And fourth, the signal that picks start-fresh-with-injected-summary — and why stale tool results are worse than they sound.
+-->
+
+---
+
+<script setup>
+const decisions313 = [
   { label: 'Resume (--resume)', detail: "Continue from exactly where the session left off. Full history -- tool calls, results, reasoning -- available to Claude." },
   { label: 'Fork (fork_session)', detail: 'Duplicate the current context and start two independent branches from the same baseline. Explore divergent approaches without cross-contamination.' },
   { label: 'Start Fresh', detail: 'New session with no prior history. Inject a structured summary of what was learned. Use when prior raw context is stale or too expensive.' },
@@ -3229,9 +3922,9 @@ const decisions = [
 <BulletReveal
   eyebrow="Three decisions"
   title="The Three Session Management Decisions"
-  :bullets="decisions"
-  :footerNum="2"
-  :footerTotal="8"
+  :bullets="decisions313"
+  :footerNum="4"
+  :footerTotal="10"
 />
 
 <!--
@@ -3241,7 +3934,7 @@ Here are the three primitives at a glance. Resume, with the --resume flag, conti
 ---
 
 <script setup>
-const resumeSteps = [
+const resumeSteps313 = [
   { title: 'Interrupted task', body: 'Session cut off mid-execution -- network failure, timeout, graceful pause. Context still accurate. Resume.' },
   { title: 'Multi-phase work', body: 'Phase 1 completed with stable results. Phase 2 builds directly on Phase 1 output. Resume and continue.' },
   { title: 'Tool result reuse', body: 'Claude already retrieved data that is still current. Resuming avoids redundant tool calls -- saves latency and cost.' },
@@ -3251,10 +3944,10 @@ const resumeSteps = [
 <StepSequence
   eyebrow="Resume path"
   title="When to Resume a Session"
-  :steps="resumeSteps"
+  :steps="resumeSteps313"
   footerLabel="Do NOT resume when tool results reference live data that has changed"
-  :footerNum="3"
-  :footerTotal="8"
+  :footerNum="5"
+  :footerTotal="10"
 />
 
 <!--
@@ -3264,8 +3957,8 @@ Three situations where resume is the right choice. First, an interrupted task: t
 ---
 
 <script setup>
-const forkBaseline = 'Same research findings, same document context, same task history -> Branch A: approach 1 · Branch B: approach 2. Both branches evolve independently.'
-const forkUses = [
+const forkBaseline313 = 'Same research findings, same document context, same task history -> Branch A: approach 1 · Branch B: approach 2. Both branches evolve independently.'
+const forkUses313 = [
   { label: 'A/B evaluation', detail: 'Generate two candidate outputs from the same context for human review or automated scoring. Forking prevents cross-contamination.' },
   { label: 'Hypothesis testing', detail: 'Explore two investigative paths from the same starting evidence. A dead-end in one branch leaves the other unaffected.' },
 ]
@@ -3277,16 +3970,16 @@ const forkUses = [
   eyebrow="Branch from a shared baseline"
   leftLabel="Shared baseline"
   rightLabel="Use cases"
-  :footerNum="4"
-  :footerTotal="8"
+  :footerNum="6"
+  :footerTotal="10"
 >
   <template #left>
-    <p>{{ forkBaseline }}</p>
+    <p>{{ forkBaseline313 }}</p>
     <p>Forking is cheaper than running two independent sessions from scratch — the shared baseline is only established once.</p>
   </template>
   <template #right>
     <ul>
-      <li v-for="(u, i) in forkUses" :key="i"><strong>{{ u.label }}.</strong> {{ u.detail }}</li>
+      <li v-for="(u, i) in forkUses313" :key="i"><strong>{{ u.label }}.</strong> {{ u.detail }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -3298,7 +3991,7 @@ Fork is the right primitive when you need divergent branches from the same trust
 ---
 
 <script setup>
-const freshSteps = [
+const freshSteps313 = [
   { title: 'Stale tool results', body: 'Session has tool outputs referencing live data that has changed. Carrying forward causes incorrect reasoning. Summarize what was LEARNED (conclusions), discard raw results.' },
   { title: 'Context window pressure', body: 'Session history is large and approaching limits. Use /compact for in-session reduction, or start fresh for a clean slate.' },
   { title: 'Phase boundary with different tools', body: 'Phase 2 needs a different tool set and system prompt. Start fresh and inject Phase 1 conclusions as structured input.' },
@@ -3308,10 +4001,10 @@ const freshSteps = [
 <StepSequence
   eyebrow="Fresh start path"
   title="When to Start Fresh with an Injected Summary"
-  :steps="freshSteps"
+  :steps="freshSteps313"
   footerLabel="Summary = conclusions and validated facts only — never raw tool outputs"
-  :footerNum="5"
-  :footerTotal="8"
+  :footerNum="7"
+  :footerTotal="10"
 />
 
 <!--
@@ -3321,7 +4014,7 @@ Start-fresh is the right primitive in three situations. First, stale tool result
 ---
 
 <script setup>
-const freshCode = `def build_session_summary(prior_session_messages: list[dict]) -> str:
+const freshCode313 = `def build_session_summary(prior_session_messages: list[dict]) -> str:
     """Extract validated conclusions from a completed session."""
 
     prompt = (
@@ -3361,9 +4054,9 @@ def start_fresh_with_summary(prior_summary: str, next_task_prompt: str):
   eyebrow="Code pattern"
   title="The Fresh Start + Injected Summary Pattern"
   lang="python"
-  :code="freshCode"
-  :footerNum="6"
-  :footerTotal="8"
+  :code="freshCode313"
+  :footerNum="8"
+  :footerTotal="10"
 />
 
 <!--
@@ -3390,7 +4083,7 @@ Here's the pattern in code. build_session_summary takes the prior session's mess
     </CalloutBox>
 </v-clicks>
   </div>
-  <SlideFooter label="Domain 1 · Session strategy" :num="7" :total="8" />
+  <SlideFooter label="Domain 1 · Session strategy" :num="9" :total="10" />
 </Frame>
 
 <!--
@@ -3400,7 +4093,7 @@ The exam-tested traps in this area. Trap one: resuming a session whose tool resu
 ---
 
 <script setup>
-const takeaways = [
+const takeaways313 = [
   { label: 'Resume when context is still valid', detail: 'Interrupted tasks, stable multi-phase work, reuse of still-current tool results.' },
   { label: 'Fork for divergent branches from a shared baseline', detail: 'A/B evaluation and hypothesis testing -- both branches start from the same trusted context.' },
   { label: 'Start fresh when results are stale or window is full', detail: 'Inject a structured summary of conclusions; never carry raw stale tool outputs.' },
@@ -3413,9 +4106,10 @@ const takeaways = [
 <BulletReveal
   eyebrow="Takeaways"
   title="Session Management — What to Remember"
-  :bullets="takeaways"
-  :footerNum="8"
-  :footerTotal="8"
+  :bullets="takeaways313"
+  :footerNum="10"
+  :footerTotal="10"
+  :hide-footer="true"
 />
 
 <!--
@@ -3449,19 +4143,66 @@ Six takeaways. One — resume when context is still valid: interrupted tasks, st
 </Frame>
 
 <!--
-Welcome to Lecture 3.14 — Structured Handoff Summaries for Human Escalation. This is the closer for Section 3, and the capstone of the human-in-the-loop story inside Domain 1. Every production agent eventually hits a situation it cannot resolve autonomously — a refund above a limit, an authorization edge case, an ambiguous request. When that happens, the agent hands off to a human. Whether the human experience is thirty seconds of reading or five minutes of spelunking depends on the structure of that handoff. This lecture shows you the five required fields and the code pattern that enforces them.
+Welcome to Lecture 3.14 — Structured Handoff Summaries for Human Escalation. Every production agent eventually hits a situation it cannot resolve autonomously. Whether the human experience is thirty seconds of reading or five minutes of spelunking depends on the structure of that handoff. Coming up, the five required fields and the code pattern that enforces them.
 -->
 
 ---
 
 <script setup>
-const withoutBullets = [
+const lectureFitsTiles314 = [
+  { label: 'Just covered (3.13)', detail: 'Session lifecycle: resume, fork, or start fresh across multi-session work.' },
+  { label: 'This lecture (3.14)', detail: 'The final hand-off when the agent leaves the loop -- structured escalation to a human.' },
+  { label: 'Coming next (Section 4)', detail: 'Domain 3 opens with the most important piece of prompt engineering for tools.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the section"
+  :tiles="lectureFitsTiles314"
+  footer-label="Agentic Architecture"
+  :footer-num="2"
+  :footer-total="9"
+/>
+
+<!--
+Here's how this lecture fits in. This is the closer for Section 3 and the capstone of the human-in-the-loop story inside Domain 1. We've covered the loop, the subagents, the enforcement, the hooks, the decomposition, and the sessions — all of it autonomous. This lecture covers the final hand-off, when the agent has to leave the loop and ask a human to take over. After this, Section 4 opens with the most important piece of prompt engineering for tools.
+-->
+
+---
+
+<script setup>
+const learnBullets314 = [
+  { label: "What the human has -- and doesn't", detail: 'No transcript, no tool calls, no reasoning. Design for that gap.' },
+  { label: 'The five required fields', detail: 'Who, what happened, what was tried, what is recommended, urgency.' },
+  { label: 'Build from verified state, not transcript', detail: 'Extract structured fields first, then generate the handoff from those.' },
+  { label: 'The missing-field exam trap', detail: 'Tone and format are distractors -- the right answer is always missing fields.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets314"
+  footer-label="Agentic Architecture"
+  :footer-num="3"
+  :footer-total="9"
+/>
+
+<!--
+Here are the four things you'll walk away knowing. First, what the human agent actually has — and doesn't have — when an escalation lands on their queue. Second, the five fields every complete handoff must include. Third, the code pattern that builds the handoff from verified state instead of from the transcript. And fourth, the exam trap built around missing-field detection.
+-->
+
+---
+
+<script setup>
+const withoutBullets314 = [
   'Human reads from the top -- wasting 3-5 minutes on context',
   'May miss a critical detail buried in tool output #7',
   'May re-run steps the agent already tried',
   'Has to guess at the recommended action',
 ]
-const withBullets = [
+const withBullets314 = [
   'Human reads one concise summary -- 30 seconds',
   'Knows exactly what was found, tried, and recommended',
   'Starts from where the agent stopped -- no duplicated work',
@@ -3475,17 +4216,17 @@ const withBullets = [
   eyebrow="Why structure matters"
   leftLabel="❌ Without structured handoff"
   rightLabel="✓ With structured handoff"
-  :footerNum="2"
-  :footerTotal="7"
+  :footerNum="4"
+  :footerTotal="9"
 >
   <template #left>
     <ul>
-      <li v-for="(b, i) in withoutBullets" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in withoutBullets314" :key="i">{{ b }}</li>
     </ul>
   </template>
   <template #right>
     <ul>
-      <li v-for="(b, i) in withBullets" :key="i">{{ b }}</li>
+      <li v-for="(b, i) in withBullets314" :key="i">{{ b }}</li>
     </ul>
   </template>
 </TwoColSlide>
@@ -3497,7 +4238,7 @@ Here's the reality you have to design for. Human agents do not have the transcri
 ---
 
 <script setup>
-const requiredFields = [
+const requiredFields314 = [
   { label: 'Who is this about?', detail: 'Customer ID, account number, case identifier. The human must pull up the right record instantly.' },
   { label: 'What happened?', detail: 'Root cause the agent determined -- with relevant amounts, dates, identifiers.' },
   { label: 'What was already tried?', detail: 'Every action attempted -- succeeded, failed, and why. The human must not retry failed approaches.' },
@@ -3509,9 +4250,10 @@ const requiredFields = [
 <BulletReveal
   eyebrow="The five required fields"
   title="What a Handoff Summary Must Include"
-  :bullets="requiredFields"
-  :footerNum="3"
-  :footerTotal="7"
+  :bullets="requiredFields314"
+  :footerNum="5"
+  :footerTotal="9"
+  :hide-footer="true"
 />
 
 <!--
@@ -3521,7 +4263,7 @@ The five required fields of any complete handoff. One — who is this about? Cus
 ---
 
 <script setup>
-const handoffCode = `from dataclasses import dataclass
+const handoffCode314 = `from dataclasses import dataclass
 
 @dataclass
 class HandoffSummary:
@@ -3566,9 +4308,9 @@ def generate_handoff_summary(session_state) -> HandoffSummary:
   eyebrow="Code pattern"
   title="Generating a Structured Handoff Summary"
   lang="python"
-  :code="handoffCode"
-  :footerNum="4"
-  :footerTotal="7"
+  :code="handoffCode314"
+  :footerNum="6"
+  :footerTotal="9"
 />
 
 <!--
@@ -3584,8 +4326,8 @@ Here's the implementation pattern. We define a HandoffSummary dataclass with the
   leadLine="$750 refund for damaged order — verified. Exceeds $500 auto-approval. Four-year customer requesting full refund after declining the $500 partial."
   supportLine="WHAT WAS TRIED: account lookup ✓ · damage verified ✓ · auto-refund blocked (limit exceeded) ✗ · partial $500 offered, declined by customer ✗. RECOMMENDATION: approve full $750 refund — legitimate claim, long-standing customer. Suggested response: apologise, issue refund, add $25 goodwill credit."
   footerLabel="Every element maps to one of the five required fields — nothing missing, nothing filler"
-  :footerNum="5"
-  :footerTotal="7"
+  :footerNum="7"
+  :footerTotal="9"
 />
 
 <!--
@@ -3612,7 +4354,7 @@ Here's what a handoff looks like when the pattern is working. Notice how every e
     </CalloutBox>
 </v-clicks>
   </div>
-  <SlideFooter label="Domain 1 · Handoff traps" :num="6" :total="7" />
+  <SlideFooter label="Domain 1 · Handoff traps" :num="8" :total="9" />
 </Frame>
 
 <!--
@@ -3622,7 +4364,7 @@ The exam trap. A question shows an incomplete handoff — something like "custom
 ---
 
 <script setup>
-const takeaways = [
+const takeaways314 = [
   { label: "Human agents don't have the transcript", detail: 'Everything the AI learned must be explicitly communicated in the handoff.' },
   { label: 'A complete handoff answers five questions', detail: 'Who, what happened, what was tried, what is recommended, urgency.' },
   { label: 'Always include verified identifiers', detail: 'Customer/case ID, root cause with specifics, actions attempted with outcomes, the recommended action, and the reason for escalation.' },
@@ -3635,9 +4377,10 @@ const takeaways = [
 <BulletReveal
   eyebrow="Takeaways"
   title="Structured Handoff Summaries — What to Remember"
-  :bullets="takeaways"
-  :footerNum="7"
-  :footerTotal="7"
+  :bullets="takeaways314"
+  :footerNum="9"
+  :footerTotal="9"
+  :hide-footer="true"
 />
 
 <!--

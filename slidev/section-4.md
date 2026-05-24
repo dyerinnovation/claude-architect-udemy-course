@@ -35,7 +35,48 @@ aspectRatio: 16/9
 </style>
 
 <!--
-Welcome to Domain 2. Eighteen percent of your exam. And if you only take one thing from this entire section, take this: the single most important piece of code you'll write for an agent isn't the agent loop, the system prompt, or the tool implementation. It's the tool description. This lecture is about why.
+Welcome to Domain 2. Eighteen percent of your exam. And if you only take one thing from this entire section, take this: the single most important piece of code you'll write for an agent isn't the agent loop, the system prompt, or the tool implementation. It's the tool description. This lecture is about why — and where this lecture sits in the course.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles41 = [
+  { label: 'After API + agents', detail: 'Section 2 gave you the API surface. Section 3 gave you agents. Section 4 turns to tool design.' },
+  { label: 'Domain 2 opener', detail: 'Eighteen percent of the exam. 4.1 starts with the single highest-leverage move in the whole domain.' },
+  { label: 'Anchor for 4.2 - 4.14', detail: 'Every later lecture in Domain 2 either applies or recovers from a description failure introduced here.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how this lecture fits into the course"
+  :tiles="lectureFitsTiles41"
+/>
+
+<!--
+Here's how this lecture fits into the course. Section 2 gave you the API surface — messages, stop reason, tool use. Section 3 gave you agents — the loop, subagents, context. Now Section 4 is Domain 2 — tool design — and 4.1 opens it with the single highest-leverage move in the whole domain. Next slide: the four outcomes you'll walk away with.
+-->
+
+---
+
+<script setup>
+const learnBullets41 = [
+  { label: 'The lever', detail: "Why tool descriptions drive selection reliability -- not few-shots, not routers." },
+  { label: '12% misroute', detail: 'What the exam-cited failure rate actually looks like in production.' },
+  { label: 'What Claude sees', detail: 'The four pieces of context Claude reads when it picks a tool.' },
+  { label: 'Proportionate fix', detail: 'Why infrastructure answers are distractors -- and how to spot the trap.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets41"
+/>
+
+<!--
+Here are the four things you'll walk away knowing. Why tool descriptions are the lever for selection reliability — not few-shots, not routers, the description. What the twelve-percent misroute rate actually looks like in production. The four pieces of context Claude sees when it picks a tool. And the proportionate-fix instinct — why the exam will tempt you with infrastructure answers and how to spot the trap. Let's start with the production logs.
 -->
 
 ---
@@ -92,7 +133,7 @@ Look at the difference. On the left, the minimal version — the one that produc
 ---
 
 <script setup>
-const s5_bullets = [
+const whatClaudeSeesBullets41 = [
   { label: 'Name', detail: 'The identifier Claude sees first -- semantic weight.' },
   { label: 'One-line summary', detail: 'Short hint, usually insufficient on its own.' },
   { label: 'Input schema', detail: 'Argument shapes -- matters for calling, not routing.' },
@@ -102,7 +143,7 @@ const s5_bullets = [
 
 <BulletReveal
   title="The description is a context-window line item"
-  :bullets="s5_bullets"
+  :bullets="whatClaudeSeesBullets41"
 />
 
 <!--
@@ -213,6 +254,47 @@ Last lecture I told you descriptions are the lever. This one is about what a gre
 
 ---
 
+<script setup>
+const lectureFitsTiles42 = [
+  { label: 'After 4.1 (the lever)', detail: 'Descriptions drive selection -- 4.1 named it. 4.2 builds it.' },
+  { label: 'Before 4.3 (the fix)', detail: 'When even good descriptions misfire, 4.3 walks the diagnostic. This lecture is the constructive step.' },
+  { label: 'The four-part anatomy', detail: 'Purpose, input formats, example queries, boundaries -- the exam-cited shape.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how 4.2 fits into the course"
+  :tiles="lectureFitsTiles42"
+/>
+
+<!--
+Here's how 4.2 fits into the course. 4.1 named the lever — descriptions drive selection. 4.3 will hand you the diagnostic workflow for when even good descriptions misfire. This middle lecture, 4.2, is the constructive piece — what goes into a description that actually works. Four parts. Next slide: the four outcomes.
+-->
+
+---
+
+<script setup>
+const learnBullets42 = [
+  { label: 'Four-part anatomy', detail: 'Purpose, input formats, example queries, boundaries -- and which lifts the most.' },
+  { label: 'The versus clause', detail: 'One sentence that breaks the tie between plausible tools.' },
+  { label: 'Targeted edge cases', detail: 'Which weird inputs to call out -- and which to skip.' },
+  { label: 'Sample Q2 phrasing', detail: 'The four words the exam will reward verbatim.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets42"
+/>
+
+<!--
+Four things you'll walk away knowing. The four-part anatomy every great description has — purpose, input formats, example queries, boundaries. The versus clause — one sentence that breaks the tie between plausible tools. Which edge cases to include and which to skip. And the Sample Question 2 phrasing the exam will reward verbatim. Let's start with the recap.
+-->
+
+---
+
 <ConceptHero
   leadLine="Last lecture: descriptions are the lever."
   concept="This lecture: what goes in one."
@@ -226,7 +308,7 @@ Quick recap. Last lecture: tool descriptions are the number-one lever for select
 ---
 
 <script setup>
-const anatomy_bullets = [
+const anatomyBullets42 = [
   { label: 'Purpose', detail: 'One sentence, unambiguous. What does this tool do?' },
   { label: 'Input formats', detail: 'What identifiers this tool actually accepts.' },
   { label: 'Example queries', detail: 'Two or three concrete examples of valid calls.' },
@@ -236,7 +318,7 @@ const anatomy_bullets = [
 
 <BulletReveal
   title="Anatomy of a useful description"
-  :bullets="anatomy_bullets"
+  :bullets="anatomyBullets42"
 />
 
 <!--
@@ -246,7 +328,7 @@ Here are the four. Purpose — one sentence, unambiguous. Input formats — what
 ---
 
 <script setup>
-const process_refund_code = `{
+const processRefundCode42 = `{
   "name": "process_refund",
   "description": "Issues a refund against a verified customer order.
 
@@ -266,7 +348,7 @@ const process_refund_code = `{
 <CodeBlockSlide
   title="Applied: process_refund"
   lang="json"
-  :code="process_refund_code"
+  :code="processRefundCode42"
 />
 
 <!--
@@ -288,7 +370,7 @@ That last line is the one to pay attention to. "Use for refunds up to five hundr
 ---
 
 <script setup>
-const edge_bullets = [
+const edgeBullets42 = [
   { label: 'Weird formats', detail: 'Pound signs, "order" prefixes, extra whitespace -- say so.' },
   { label: 'Empty / null handling', detail: 'Return an error? Ask for one? Spell it out.' },
   { label: 'Collision case', detail: 'When two tools could apply -- which wins and why.' },
@@ -297,7 +379,7 @@ const edge_bullets = [
 
 <BulletReveal
   title="Include the weird inputs"
-  :bullets="edge_bullets"
+  :bullets="edgeBullets42"
 />
 
 <!--
@@ -393,6 +475,47 @@ You've written the description. You've included all four parts. And the agent is
 
 ---
 
+<script setup>
+const lectureFitsTiles43 = [
+  { label: 'After 4.1 + 4.2', detail: '4.1 named the lever. 4.2 built the four-part anatomy. 4.3 is the recovery move.' },
+  { label: 'Diagnostic, not constructive', detail: "Even well-built descriptions misfire. This lecture is the 'now what?' lecture." },
+  { label: 'Before 4.4 (the zoom-out)', detail: '4.4 zooms from one tool to the tool set: splitting vs consolidating.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how 4.3 fits into the course"
+  :tiles="lectureFitsTiles43"
+/>
+
+<!--
+Here's where 4.3 sits in the course. 4.1 named descriptions as the lever. 4.2 built the four-part anatomy. This lecture is the recovery step — what to do when even a four-part description isn't selecting cleanly. After this you're ready for 4.4, which zooms out to splitting versus consolidating at the tool-set level. Next slide: the four things you'll walk away knowing.
+-->
+
+---
+
+<script setup>
+const learnBullets43 = [
+  { label: 'Three failure modes', detail: 'Overlap, keyword hijack, missing boundary -- each has a different fix.' },
+  { label: 'Four-step flow', detail: "Log -> read descriptions -> audit system prompt -> rewrite or rename." },
+  { label: 'Three fixes', detail: 'Rename and rescope, system-prompt audit, and the one-line versus clause.' },
+  { label: 'Proportionate fix, again', detail: 'Why routing classifiers stay off the table as the first move.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets43"
+/>
+
+<!--
+Four outcomes from these eight minutes. The three failure modes hiding behind "wrong tool" — overlap, keyword hijack, missing boundary. The four-step diagnostic flow from log to fix. Three concrete fixes — rename, system-prompt audit, and the versus clause. And the proportionate-fix instinct again — why routing classifiers stay off the table as the first move. Now let's start with the scenario.
+-->
+
+---
+
 <BigQuote
   quote="The agent keeps calling <em>analyze_content</em> when it should call <em>analyze_document</em>. Both tools work. Why is it picking wrong?"
 />
@@ -404,7 +527,7 @@ Here's the setup. Scenario from the exam: "The agent keeps calling analyze_conte
 ---
 
 <script setup>
-const failure_modes = [
+const failureModes43 = [
   { label: 'Overlap', detail: 'Two descriptions that look near-identical to the model.' },
   { label: 'Keyword hijack', detail: 'A word in the system prompt steers the pick.' },
   { label: 'Missing boundary', detail: "Neither description rules itself out when the other applies." },
@@ -413,7 +536,7 @@ const failure_modes = [
 
 <BulletReveal
   title="What 'wrong tool' actually means"
-  :bullets="failure_modes"
+  :bullets="failureModes43"
 />
 
 <!--
@@ -423,7 +546,7 @@ When we say "wrong tool," we actually mean one of three things, and they look si
 ---
 
 <script setup>
-const diagnostic_steps = [
+const diagnosticSteps43 = [
   { label: 'Observe wrong pick', sublabel: 'In logs -- confirm it\'s a pattern' },
   { label: 'Read descriptions', sublabel: 'Side-by-side on one screen' },
   { label: 'Audit system prompt', sublabel: 'Keyword collisions with tool names' },
@@ -433,7 +556,7 @@ const diagnostic_steps = [
 
 <FlowDiagram
   title="From log to fix"
-  :steps="diagnostic_steps"
+  :steps="diagnosticSteps43"
 />
 
 <!--
@@ -470,7 +593,7 @@ First fix. Rename and rescope. Left column — the before: analyze_content. Righ
 ---
 
 <script setup>
-const keyword_collision = `System prompt:
+const keywordCollision43 = `System prompt:
   "Analyze the user's request carefully before acting."
 
 Tools available:
@@ -484,7 +607,7 @@ Fix: swap the word ("evaluate"), rename the tool, or both.`
 <CodeBlockSlide
   title="Fix 2 — System prompt audit"
   lang="text"
-  :code="keyword_collision"
+  :code="keywordCollision43"
 />
 
 <!--
@@ -585,6 +708,47 @@ Two failure modes sit on opposite ends of the same spectrum. One tool doing thre
 
 ---
 
+<script setup>
+const lectureFitsTiles44 = [
+  { label: 'Zoom out from 4.1 - 4.3', detail: 'Those lectures lived at the single-tool level. 4.4 looks at the tool set as a whole.' },
+  { label: 'Bridge to 4.5 - 4.7', detail: 'Once the tool set is right, attention turns to error response design.' },
+  { label: 'Scenarios 3 + 6', detail: 'Multi-agent research and structured extraction both rely on this split-vs-consolidate call.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how 4.4 fits into the course"
+  :tiles="lectureFitsTiles44"
+/>
+
+<!--
+Here's where 4.4 fits into the course. 4.1 through 4.3 zoomed in on the single-tool description. 4.4 zooms out to the tool set — how many tools, and how distinct from each other. This is the bridge between description-level fixes and the error-design block that starts in 4.5. Next slide: the four outcomes.
+-->
+
+---
+
+<script setup>
+const learnBullets44 = [
+  { label: 'Two failure modes', detail: 'Too generic (one tool, three jobs) vs too fragmented (three tools, one job).' },
+  { label: 'Split rule', detail: 'Different contracts -> different tools.' },
+  { label: 'Consolidate rule', detail: 'Same contract -> one tool. Avoid cosmetic splits.' },
+  { label: 'Decision tree', detail: 'Four questions you can run on any pair in ten seconds.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets44"
+/>
+
+<!--
+Four things from these seven minutes. The two failure modes on opposite ends — too generic and too fragmented. The split rule — different contracts mean different tools. The consolidate rule — same contract means one tool, not three. And a four-question decision tree you can run on any pair in about ten seconds. Now let's look at the two failure modes.
+-->
+
+---
+
 <TwoColSlide
   title="Two failure modes"
   leftLabel="Too generic"
@@ -625,7 +789,7 @@ Here's the split rule. Different input/output contracts means different tools. I
 ---
 
 <script setup>
-const split_code = `# Before -- generic
+const splitCode44 = `# Before -- generic
 analyze_document(doc, mode)
 
 # After -- three tools, three contracts
@@ -641,7 +805,7 @@ verify_claim_against_source(doc, claim)  # returns verdict + evidence
 <CodeBlockSlide
   title="analyze_document → three tools"
   lang="python"
-  :code="split_code"
+  :code="splitCode44"
 />
 
 <!--
@@ -689,7 +853,7 @@ Here's the exam move. Splitting is the right answer when the descriptions overla
 ---
 
 <script setup>
-const decision_steps = [
+const decisionSteps44 = [
   { label: 'Different inputs?', sublabel: 'Schema differs across calls' },
   { label: 'Different outputs?', sublabel: 'Return shape differs' },
   { label: 'Different agents?', sublabel: 'Used by separate roles' },
@@ -699,7 +863,7 @@ const decision_steps = [
 
 <FlowDiagram
   title="Split or consolidate?"
-  :steps="decision_steps"
+  :steps="decisionSteps44"
 />
 
 <!--
@@ -752,6 +916,47 @@ Next up, Lecture 4.5 — MCP error response design. Three fields. Memorize them.
 
 <!--
 Three fields. Memorize them. errorCategory. isRetryable. Human-readable description. Miss one and you'll pick a distractor that looks almost right but isn't. This lecture is the most exam-critical thing in Domain 2. Nine minutes. Pay attention.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles45 = [
+  { label: 'End of the selection block', detail: '4.1 - 4.4 were all about picking the right tool. From here, the focus shifts to what happens when a tool fails.' },
+  { label: 'Foundation for 4.6 + 4.7', detail: '4.6 categorizes errors. 4.7 routes them. Both stand on the three-field shape this lecture defines.' },
+  { label: 'Sample Q1 + Q3 hinge', detail: 'Customer support and multi-agent research both turn on whether the agent can read these three fields.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how 4.5 fits into the course"
+  :tiles="lectureFitsTiles45"
+/>
+
+<!--
+Here's where 4.5 sits in the course. 4.1 through 4.4 were all selection — getting the right tool called. From here on we're talking about what happens when that tool fails. This lecture defines the shape of a structured error. 4.6 categorizes them. 4.7 decides who handles them — subagent or coordinator. So 4.5 is the foundation the next two lectures stand on. Next slide: the four outcomes.
+-->
+
+---
+
+<script setup>
+const learnBullets45 = [
+  { label: 'Why generic fails', detail: 'A plain "operation failed" string strips the agent of any recovery basis.' },
+  { label: 'Three required fields', detail: 'errorCategory, isRetryable, description -- one per agent question.' },
+  { label: 'isError flag', detail: 'The MCP envelope that prevents the silent-failure trap.' },
+  { label: '2-of-3 distractor', detail: 'The almost-right exam pattern -- count the fields.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets45"
+/>
+
+<!--
+Four things from these nine minutes. Why generic error strings break agent recovery. The three required fields in a structured MCP error response. The isError flag and the silent-failure trap it prevents. And the two-of-three distractor pattern the exam loves. Now let's start with the line from the exam guide.
 -->
 
 ---
@@ -809,7 +1014,7 @@ Here's the shape of a structured MCP error response. Three fields. First: errorC
 ---
 
 <script setup>
-const field_questions = [
+const fieldQuestions45 = [
   { label: 'errorCategory -> which recovery path?', detail: 'Retry, reformat, escalate, run prereq?' },
   { label: 'isRetryable -> try again right now, or not?', detail: 'The fast-path decision.' },
   { label: 'description -> what do I tell the user?', detail: 'Customer-facing string. Shown to the user or used in escalation.' },
@@ -818,7 +1023,7 @@ const field_questions = [
 
 <BulletReveal
   title="Each field answers one question"
-  :bullets="field_questions"
+  :bullets="fieldQuestions45"
 />
 
 <!--
@@ -828,7 +1033,7 @@ Each field answers one question the agent has to answer. errorCategory answers "
 ---
 
 <script setup>
-const good_error = `{
+const goodError45 = `{
   "isError": true,
   "errorCategory": "business",
   "isRetryable": false,
@@ -841,7 +1046,7 @@ const good_error = `{
 <CodeBlockSlide
   title="process_refund: business-rule violation"
   lang="json"
-  :code="good_error"
+  :code="goodError45"
 />
 
 <!--
@@ -966,6 +1171,47 @@ Four categories. Four recovery paths. One exam lecture. Last time I told you err
 
 ---
 
+<script setup>
+const lectureFitsTiles46 = [
+  { label: 'Built on 4.5 (the shape)', detail: '4.5 defined the three-field structured error. 4.6 zooms into the first field.' },
+  { label: 'Before 4.7 (the routing)', detail: '4.7 decides who handles each category -- subagent vs coordinator.' },
+  { label: 'Task 2.2 anchor', detail: 'Recovery-path knowledge is the heart of every Task 2.2 question on the exam.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how 4.6 fits into the course"
+  :tiles="lectureFitsTiles46"
+/>
+
+<!--
+Here's where 4.6 fits in. 4.5 defined the three-field shape — category, retryable, description. This lecture zooms into the first field — errorCategory — and unpacks the four valid values. 4.7 takes the next step: who handles each category, subagent or coordinator. So this lecture is the meat between the shape and the routing. Next slide: the four outcomes.
+-->
+
+---
+
+<script setup>
+const learnBullets46 = [
+  { label: 'Four valid values', detail: 'Transient, validation, business, permission -- what each one means.' },
+  { label: 'Recovery path per category', detail: 'Retry, reformat, escalate, or run a prerequisite.' },
+  { label: 'Collapse-trap distractors', detail: 'The wrong-neighbor pattern the exam loves.' },
+  { label: 'Scenario 1 hinge', detail: 'Why customer support stands or falls on this one decision.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets46"
+/>
+
+<!--
+Four outcomes. The four valid categories and what each one means. The recovery path that each category implies — retry, reformat, escalate, or run a prereq. The collapse-trap distractor pattern the exam loves — treating one category as a wrong neighbor. And why Scenario 1 customer support lives or dies on this one decision. Now let's start with the anchor concept.
+-->
+
+---
+
 <ConceptHero
   leadLine="Category drives recovery"
   concept="errorCategory → next action."
@@ -1035,8 +1281,8 @@ Category four. Permission. Missing authentication, missing scope, missing prereq
 ---
 
 <script setup>
-const recovery_columns = ['isRetryable', 'Recovery path']
-const recovery_rows = [
+const recoveryColumns46 = ['isRetryable', 'Recovery path']
+const recoveryRows46 = [
   {
     label: 'Transient',
     cells: [
@@ -1070,8 +1316,8 @@ const recovery_rows = [
 
 <ComparisonTable
   title="Category → recovery"
-  :columns="recovery_columns"
-  :rows="recovery_rows"
+  :columns="recoveryColumns46"
+  :rows="recoveryRows46"
 />
 
 <!--
@@ -1152,6 +1398,47 @@ Something broke in a subagent. Should the subagent handle it, or kick it up? Tha
 
 ---
 
+<script setup>
+const lectureFitsTiles47 = [
+  { label: 'Closes the error block', detail: '4.5 defined the shape, 4.6 categorized -- 4.7 routes. Last error-design lecture in Domain 2.' },
+  { label: 'Built on 4.6 categories', detail: 'The transient/validation/business/permission split decides who acts.' },
+  { label: 'Scenario 3 hinge', detail: 'Multi-agent research stands or falls on partial-results propagation.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's how 4.7 fits into the course"
+  :tiles="lectureFitsTiles47"
+/>
+
+<!--
+Here's where 4.7 sits in the course. 4.5 gave us the structured-error shape. 4.6 gave us the four categories. This lecture answers the obvious next question — who acts on each category, the subagent or the coordinator? After this we close the error block and move to 4.8, on tool count. This is the last error-design lecture in Domain 2. Next slide: the four outcomes.
+-->
+
+---
+
+<script setup>
+const learnBullets47 = [
+  { label: 'Heal where you can', detail: 'The default rule -- and the cut line between subagent and coordinator.' },
+  { label: 'Local recovery loop', detail: 'Retry with exponential backoff inside the subagent.' },
+  { label: 'Four-element propagation', detail: 'Failure type, attempted query, partial results, alternatives.' },
+  { label: 'The middle path', detail: 'Two anti-patterns -- and why neither extreme works.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets47"
+/>
+
+<!--
+Four outcomes. The default rule — heal where you can — and the cut line between subagent and coordinator. The local-recovery loop pattern. The four-element propagation shape Sample Question 8 rewards. And the two anti-patterns that bracket the middle path. Now let's start with the question itself.
+-->
+
+---
+
 <BigQuote quote="Should this subagent handle it, or kick it up?" />
 
 <!--
@@ -1173,7 +1460,7 @@ Here's the rule. Default: heal where you can. Subagents recover transient and va
 ---
 
 <script setup>
-const local_recovery_code = `# Inside the search subagent
+const localRecoveryCode47 = `# Inside the search subagent
 for attempt in range(3):
     try:
         result = web_search(query)
@@ -1193,7 +1480,7 @@ return propagate_to_coordinator(
 <CodeBlockSlide
   title="Retry with backoff inside the subagent"
   lang="python"
-  :code="local_recovery_code"
+  :code="localRecoveryCode47"
 />
 
 <!--
@@ -1203,7 +1490,7 @@ Here's what local recovery looks like inside a subagent. Pseudocode. You wrap th
 ---
 
 <script setup>
-const propagation_code = `{
+const propagationCode47 = `{
   "isError": true,
   "failure_type": "transient_timeout",
   "attempted_query": "effects of sleep deprivation on cognitive performance",
@@ -1222,7 +1509,7 @@ const propagation_code = `{
 <CodeBlockSlide
   title="Structured error → coordinator"
   lang="json"
-  :code="propagation_code"
+  :code="propagationCode47"
 />
 
 <!--
@@ -1326,7 +1613,48 @@ Next up, Lecture 4.8 — how many tools per agent. Four to five. Eighteen breaks
 </style>
 
 <!--
-Four to five tools per agent. That's the ceiling. Past it, selection reliability degrades sharply. This lecture explains why, what scoped tool access looks like in practice, and the one exception the exam tests explicitly.
+Four to five tools per agent. That's the ceiling. Past it, selection reliability falls off a cliff — even with the best descriptions from Lecture 4.1. This lecture is about why the ceiling exists, what scoped tool access looks like in practice, and the one exception the exam tests explicitly.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles48 = [
+  { label: 'After description + errors', detail: '4.1-4.4 made descriptions the lever. 4.5-4.7 handled error shape, taxonomy, and recovery.' },
+  { label: 'Pivot to distribution', detail: 'This lecture asks a different question: not how to write a tool, but how many to give an agent.' },
+  { label: 'Sets up 4.9', detail: 'Once distribution is solved, 4.9 turns to tool_choice — controlling which tool fires once an agent has them.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's where 4.8 sits in the course"
+  :tiles="lectureFitsTiles48"
+/>
+
+<!--
+Here's where 4.8 sits in the course. Lectures 4.1 through 4.4 gave you the description as the lever for selection. 4.5 through 4.7 handled error design. This lecture pivots — it's not about description quality anymore. It's about how many tools you put in front of an agent in the first place. Distribution. Scoping. Up next: the four outcomes you'll walk away with.
+-->
+
+---
+
+<script setup>
+const learnBullets48 = [
+  { label: 'The ceiling', detail: 'Four to five tools per agent -- and the 18-tool failure number the exam guide cites.' },
+  { label: 'Why it gets worse', detail: 'Selection cost grows worse than linearly with tool count.' },
+  { label: 'Scoped distribution', detail: 'How tools land across coordinator and subagents.' },
+  { label: 'Narrow exception', detail: 'The scoped cross-role tool Sample Question 9 rewards.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets48"
+/>
+
+<!--
+Four outcomes you'll leave with. The ceiling — four to five — and the eighteen-tool failure number the exam guide cites. Why selection cost grows worse than linearly with tool count. The scoped-distribution pattern across coordinator and subagents. And the narrow cross-role exception Sample Question 9 rewards. Let's start with the ceiling itself.
 -->
 
 ---
@@ -1339,7 +1667,7 @@ Four to five tools per agent. That's the ceiling. Past it, selection reliability
 />
 
 <!--
-Four to five. That's the number. Selection reliability stays high in that range and drops off fast past it. Eighteen tools on one agent, the number the exam guide explicitly cites, produces selection failures even with well-written descriptions. The lever from 4.1 — prose differentiation — only goes so far. Past a handful of tools, you run out of room to differentiate them all against each other.
+Four to five. That's the number. Selection reliability stays high in that range and drops off fast past it. Eighteen tools on one agent, the number the exam guide explicitly cites, produces selection failures even with well-written descriptions. The lever from 4.1 — prose differentiation — only goes so far. Past a handful of tools, you run out of room to differentiate them all against each other. Next slide: why the math gets worse, not better.
 -->
 
 ---
@@ -1351,7 +1679,7 @@ Four to five. That's the number. Selection reliability stays high in that range 
 />
 
 <!--
-Here's why. Tool selection is a decision, and each extra tool adds another "not this one" the model has to reason through. Eighteen tools is not eighteen times the capability — it's eighteen times the selection overhead. Claude isn't picking the right tool from a menu; it's ruling out every wrong tool on the way to the right one. More tools, more wrong tools to rule out, more chances to get it wrong. The math isn't linear. It's worse. And it compounds with weak descriptions from Lecture 4.1 — add bad descriptions to a big tool set and the misroute rate doesn't just add, it multiplies.
+Here's why. Tool selection is a decision, and each extra tool adds another "not this one" the model has to reason through. Eighteen tools is not eighteen times the capability — it's eighteen times the selection overhead. Claude isn't picking the right tool from a menu; it's ruling out every wrong tool on the way to the right one. More tools, more wrong tools to rule out, more chances to get it wrong. The math isn't linear. It's worse. And it compounds with weak descriptions from Lecture 4.1 — add bad descriptions to a big tool set and the misroute rate doesn't just add, it multiplies. Next slide: the canonical anti-pattern.
 -->
 
 ---
@@ -1375,13 +1703,13 @@ Synthesis gets one narrow tool (verify_fact) for the common case.`
 />
 
 <!--
-Anti-pattern. Dump every tool onto one agent. The exam's canonical example: a synthesis agent that has web-search tools attached to it. Now the synthesis agent — whose job is combining findings — starts running web searches on its own. It's using tools outside its role, because they're right there in its toolbelt. The right pattern: scope tools to role. If synthesis needs web data, it routes through the coordinator, which delegates to the search subagent. Cross-role work runs through the coordinator.
+Anti-pattern. Dump every tool onto one agent. The exam's canonical example: a synthesis agent that has web-search tools attached to it. Now the synthesis agent — whose job is combining findings — starts running web searches on its own. It's using tools outside its role, because they're right there in its toolbelt. The right pattern: scope tools to role. If synthesis needs web data, it routes through the coordinator, which delegates to the search subagent. Cross-role work runs through the coordinator. Next slide: what scoped distribution actually looks like.
 -->
 
 ---
 
 <script setup>
-const distribution_bullets = [
+const distributionBullets48 = [
   { label: 'Coordinator', detail: 'Task + a few policy/routing tools. Three, maybe four.' },
   { label: 'Search subagent', detail: 'web_search, load_document. Two tools, tightly scoped.' },
   { label: 'Synthesis subagent', detail: 'verify_fact only -- narrow cross-role for the 85% case.' },
@@ -1391,11 +1719,11 @@ const distribution_bullets = [
 
 <BulletReveal
   title="The right distribution"
-  :bullets="distribution_bullets"
+  :bullets="distributionBullets48"
 />
 
 <!--
-Here's what scoped distribution looks like. Coordinator — gets the Task tool for spawning subagents, plus a few policy or routing tools. Three, maybe four. Search subagent — web_search, load_document. That's it. Two tools, tightly scoped. Synthesis subagent — verify_fact only, and we'll come back to why it has even that. Everything else routes through the coordinator. Each agent has a small, purpose-fit toolbelt. Nothing it can misuse. Nothing extraneous that dilutes its selection decisions. Each subagent is effectively specialized by its tool set.
+Here's what scoped distribution looks like. Coordinator — gets the Task tool for spawning subagents, plus a few policy or routing tools. Three, maybe four. Search subagent — web_search, load_document. That's it. Two tools, tightly scoped. Synthesis subagent — verify_fact only, and we'll come back to why it has even that. Everything else routes through the coordinator. Each agent has a small, purpose-fit toolbelt. Nothing it can misuse. Nothing extraneous that dilutes its selection decisions. Each subagent is effectively specialized by its tool set. Next slide: the exception that proves the rule.
 -->
 
 ---
@@ -1409,7 +1737,7 @@ Synthesis verifies claims — dates, names, stats — in 85% of cases on simple 
 </CalloutBox>
 
 <!--
-Now the exception, and this is Sample Question 9 from the exam guide, almost word-for-word. Synthesis needs to verify specific claims — dates, names, statistics — and the data says it does this eighty-five percent of the time on simple lookups. If every verification round-trips through the coordinator, latency climbs forty percent. The right answer isn't "give synthesis all the web search tools" — that's the anti-pattern from slide 4, the exact distractor the question tests. The right answer is a narrow, scoped verify_fact tool on synthesis for the eighty-five-percent common case, and route the fifteen-percent complex cases through the coordinator. Principle of least privilege with a targeted exception. Scope tightly. Exception narrowly. That's the pattern.
+Now the exception, and this is Sample Question 9 from the exam guide, almost word-for-word. Synthesis needs to verify specific claims — dates, names, statistics — and the data says it does this eighty-five percent of the time on simple lookups. If every verification round-trips through the coordinator, latency climbs forty percent. The right answer isn't "give synthesis all the web search tools" — that's the anti-pattern from slide 6, the exact distractor the question tests. The right answer is a narrow, scoped verify_fact tool on synthesis for the eighty-five-percent common case, and route the fifteen-percent complex cases through the coordinator. Principle of least privilege with a targeted exception. Scope tightly. Exception narrowly. That's the pattern. Next slide: the exam framing.
 -->
 
 ---
@@ -1423,7 +1751,7 @@ Now the exception, and this is Sample Question 9 from the exam guide, almost wor
 </CalloutBox>
 
 <!--
-Here's the exam move. "Give the agent more tools" is almost always a distractor. "Give the agent access to every search tool" — wrong. "Consolidate into one mega-tool" — wrong. Both options miss the principle of least privilege that the exam rewards. The correct answer usually scopes the tools to the role and, when latency or round-trip cost demands it, adds a narrow cross-role tool for the frequent need. Scoped plus a narrow exception. That's the pattern. Remember the scoping pattern cold — Scenario 3 leans on it hard, and remember the six-pick-four from 1.1: you don't know which four scenarios will appear, so skipping Scenario 3's tool distribution isn't an option.
+Here's the exam move. "Give the agent more tools" is almost always a distractor. "Give the agent access to every search tool" — wrong. "Consolidate into one mega-tool" — wrong. Both options miss the principle of least privilege that the exam rewards. The correct answer usually scopes the tools to the role and, when latency or round-trip cost demands it, adds a narrow cross-role tool for the frequent need. Scoped plus a narrow exception. That's the pattern. Remember the scoping pattern cold — Scenario 3 leans on it hard, and remember the six-pick-four from 1.1: you don't know which four scenarios will appear, so skipping Scenario 3's tool distribution isn't an option. Next slide: one last framing reminder.
 -->
 
 ---
@@ -1435,7 +1763,7 @@ Here's the exam move. "Give the agent more tools" is almost always a distractor.
 />
 
 <!--
-One more framing before we close. Domain 2 is eighteen percent. Task 2.3 — tool distribution — is a chunk of that. And Scenario 3's questions almost always touch distribution in some way. If you walk in knowing four-to-five is the ceiling, knowing the scoped-plus-narrow-exception pattern, and knowing that "give the agent more tools" is a distractor signal — you've covered a real share of your exam. Low effort, high payoff. Bank it.
+One more framing before we close. Domain 2 is eighteen percent. Task 2.3 — tool distribution — is a chunk of that. And Scenario 3's questions almost always touch distribution in some way. If you walk in knowing four-to-five is the ceiling, knowing the scoped-plus-narrow-exception pattern, and knowing that "give the agent more tools" is a distractor signal — you've covered a real share of your exam. Low effort, high payoff. Bank it. Next slide closes us out with a look ahead to 4.9.
 -->
 
 ---
@@ -1484,14 +1812,55 @@ Next up, Lecture 4.9 — tool_choice. Three modes. Each guarantees something dif
 </style>
 
 <!--
-Three modes. Three guarantees. auto guarantees nothing. any guarantees a tool is called. Forced guarantees a specific tool is called. This lecture is about knowing which guarantee you need, and reaching for the matching mode.
+Three modes. Three guarantees. auto guarantees nothing. any guarantees a tool is called. Forced guarantees a specific tool is called. This lecture is about knowing which guarantee you need, and reaching for the matching mode — and where the exam trips you with the wrong match.
 -->
 
 ---
 
 <script setup>
-const mode_columns = ['Guarantees', 'Use when']
-const mode_rows = [
+const lectureFitsTiles49 = [
+  { label: 'After distribution', detail: '4.8 set the tool count — four to five, scoped to role. Now we control which one fires.' },
+  { label: 'Per-request lever', detail: 'tool_choice turns intent into a guarantee on the current API call.' },
+  { label: 'Bridges to Domain 4', detail: 'any + a schema-shaped tool is the cleanest path to structured JSON — Section 6 picks this up again.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's where 4.9 sits in the course"
+  :tiles="lectureFitsTiles49"
+/>
+
+<!--
+Here's where 4.9 sits. Lecture 4.8 set the tool count — four to five, scoped to role. Now we control which one fires. tool_choice is the per-request lever that turns intent into a guarantee. It also bridges Domain 2 to Domain 4 — structured output — which is why it shows up on questions about both tool calling and JSON schemas. Next slide: the four takeaways.
+-->
+
+---
+
+<script setup>
+const learnBullets49 = [
+  { label: 'Three modes', detail: 'auto, any, forced -- and what each one guarantees.' },
+  { label: 'When to reach', detail: 'Conversational vs structured vs ordered -- the matching pick.' },
+  { label: 'Structured-output trick', detail: 'any + schema-shaped tool = reliable JSON without prompt gymnastics.' },
+  { label: 'Forced vs any trap', detail: 'The classic swap distractor the exam loves.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets49"
+/>
+
+<!--
+Four things. The three tool_choice modes and what each guarantees. When auto versus any versus forced is the right reach. The structured-output trick — any plus a schema-shaped tool is how you get reliable JSON. And the anti-pattern that swaps forced for any. Let's start with the table.
+-->
+
+---
+
+<script setup>
+const modeColumns49 = ['Guarantees', 'Use when']
+const modeRows49 = [
   {
     label: 'auto',
     cells: [
@@ -1518,18 +1887,18 @@ const mode_rows = [
 
 <ComparisonTable
   title="tool_choice options"
-  :columns="mode_columns"
-  :rows="mode_rows"
+  :columns="modeColumns49"
+  :rows="modeRows49"
 />
 
 <!--
-Here's the table. Three rows. auto — Claude decides whether to call a tool or return text. That's the default. Use it for conversational agents where sometimes a reply is the right move and sometimes a tool call is. any — a tool is called. Claude picks which one from your set. Use it for structured output or when you're choosing among multiple schemas. Forced — {type: "tool", name: "X"} — specific tool X is called. Use it to force ordering. Those three modes cover every real case.
+Here's the table. Three rows. auto — Claude decides whether to call a tool or return text. That's the default. Use it for conversational agents where sometimes a reply is the right move and sometimes a tool call is. any — a tool is called. Claude picks which one from your set. Use it for structured output or when you're choosing among multiple schemas. Forced — {type: "tool", name: "X"} — specific tool X is called. Use it to force ordering. Those three modes cover every real case. Next slide: auto in detail.
 -->
 
 ---
 
 <script setup>
-const auto_code = `{
+const autoCode49 = `{
   "tool_choice": { "type": "auto" }
 }
 // Claude may return text.
@@ -1540,17 +1909,17 @@ const auto_code = `{
 <CodeBlockSlide
   title="auto — the default"
   lang="json"
-  :code="auto_code"
+  :code="autoCode49"
 />
 
 <!--
-Mode one. auto. This is what you get if you don't pass tool_choice at all. Claude may return text, Claude may call a tool — it decides based on the conversation and what the user actually needs. Perfect for a conversational agent where half the time the answer is "here's your refund status, processing now" — text — and half the time it's a tool call to look the order up. The trade-off: auto gives you no guarantee of any particular output shape. That matters when you're downstream of structured output, or when your pipeline assumes a tool call on every turn. For those cases, auto is the wrong mode.
+Mode one. auto. This is what you get if you don't pass tool_choice at all. Claude may return text, Claude may call a tool — it decides based on the conversation and what the user actually needs. Perfect for a conversational agent where half the time the answer is "here's your refund status, processing now" — text — and half the time it's a tool call to look the order up. The trade-off: auto gives you no guarantee of any particular output shape. That matters when you're downstream of structured output, or when your pipeline assumes a tool call on every turn. For those cases, auto is the wrong mode. Next slide: any, the mode that guarantees a call.
 -->
 
 ---
 
 <script setup>
-const any_code = `{
+const anyCode49 = `{
   "tool_choice": { "type": "any" },
   "tools": [extract_invoice, extract_receipt, extract_po]
 }
@@ -1561,17 +1930,17 @@ const any_code = `{
 <CodeBlockSlide
   title="any — guaranteed tool use"
   lang="json"
-  :code="any_code"
+  :code="anyCode49"
 />
 
 <!--
-Mode two. any. The model must call a tool. It picks which one from your set, but it can't skip straight to text. This is the mode you reach for when you need structured output and you have multiple schemas to choose between. Scenario 6 pattern — you're extracting from a hundred documents, and each doc might be an invoice or a receipt or a purchase order. You register three extraction tools, one per schema. Set tool_choice: any. Claude reads the doc, picks the right schema, returns a tool call. Always a tool call. Never conversational text.
+Mode two. any. The model must call a tool. It picks which one from your set, but it can't skip straight to text. This is the mode you reach for when you need structured output and you have multiple schemas to choose between. Scenario 6 pattern — you're extracting from a hundred documents, and each doc might be an invoice or a receipt or a purchase order. You register three extraction tools, one per schema. Set tool_choice: any. Claude reads the doc, picks the right schema, returns a tool call. Always a tool call. Never conversational text. Next slide: forced, the most specific guarantee.
 -->
 
 ---
 
 <script setup>
-const forced_code = `{
+const forcedCode49 = `{
   "tool_choice": { "type": "tool", "name": "extract_metadata" }
 }
 // Guarantees extract_metadata runs first, every time.
@@ -1581,11 +1950,11 @@ const forced_code = `{
 <CodeBlockSlide
   title="Forced — exact tool"
   lang="json"
-  :code="forced_code"
+  :code="forcedCode49"
 />
 
 <!--
-Mode three. Forced. The JSON looks like {"type": "tool", "name": "extract_metadata"}. This guarantees that exact tool runs, every time, on the current turn. Use case: you want extract_metadata to run first on every document, before any enrichment or follow-up calls. Forced selection is how you order operations when the ordering matters. The exam guide calls this out explicitly in Task 2.3 — forcing a specific tool to guarantee ordering, then handling subsequent steps in follow-up turns with auto or any. Force first, free up the model after.
+Mode three. Forced. The JSON looks like {"type": "tool", "name": "extract_metadata"}. This guarantees that exact tool runs, every time, on the current turn. Use case: you want extract_metadata to run first on every document, before any enrichment or follow-up calls. Forced selection is how you order operations when the ordering matters. The exam guide calls this out explicitly in Task 2.3 — forcing a specific tool to guarantee ordering, then handling subsequent steps in follow-up turns with auto or any. Force first, free up the model after. Next slide: the Domain 2 / Domain 4 crossover.
 -->
 
 ---
@@ -1599,7 +1968,7 @@ No JSON parsing fragility. No "please output valid JSON" in the prompt. Schema e
 </CalloutBox>
 
 <!--
-Here's where Domain 2 and Domain 4 shake hands, and the exam tests it. Structured output via tool use. The most reliable way to get schema-compliant JSON from Claude is to define your schema as a tool's input, set tool_choice: any so Claude is forced to call it, and extract the arguments from the tool-use response. No JSON parsing fragility. No "please output valid JSON" in the system prompt. No regex wrangling on malformed output. Schema enforcement comes from the tool-use protocol, not from prompting. Task 4.3 tests this directly — we'll come back to it in Section 6, but the tool_choice: any lever is how Domain 2 contributes to reliable structured output. That's the cleanest way to do it.
+Here's where Domain 2 and Domain 4 shake hands, and the exam tests it. Structured output via tool use. The most reliable way to get schema-compliant JSON from Claude is to define your schema as a tool's input, set tool_choice: any so Claude is forced to call it, and extract the arguments from the tool-use response. No JSON parsing fragility. No "please output valid JSON" in the system prompt. No regex wrangling on malformed output. Schema enforcement comes from the tool-use protocol, not from prompting. Task 4.3 tests this directly — we'll come back to it in Section 6, but the tool_choice: any lever is how Domain 2 contributes to reliable structured output. That's the cleanest way to do it. Next slide: a concrete example.
 -->
 
 ---
@@ -1613,7 +1982,7 @@ Define <code>extract_invoice</code>, <code>extract_receipt</code>, <code>extract
 </CalloutBox>
 
 <!--
-Concrete. Scenario 6. Batch-processing a hundred varied documents. Mixed types — some invoices, some receipts, some purchase orders. You define extract_invoice, extract_receipt, extract_po — three tools, three JSON schemas. You set tool_choice: any. For each document, Claude picks the right extraction tool per doc and always returns a tool call. You get structured data every time, matched to the doc type, no wasted calls on conversational filler. This is the structured-extraction pattern the exam tests.
+Concrete. Scenario 6. Batch-processing a hundred varied documents. Mixed types — some invoices, some receipts, some purchase orders. You define extract_invoice, extract_receipt, extract_po — three tools, three JSON schemas. You set tool_choice: any. For each document, Claude picks the right extraction tool per doc and always returns a tool call. You get structured data every time, matched to the doc type, no wasted calls on conversational filler. This is the structured-extraction pattern the exam tests. Next slide: the inverse anti-pattern.
 -->
 
 ---
@@ -1637,7 +2006,7 @@ Let Claude pick per doc. Schema-compliant every time.`
 />
 
 <!--
-Anti-pattern. Forcing a specific tool when you want structured output across multiple schemas. If you set tool_choice: {type: "tool", name: "extract_v1"} and feed in a receipt, Claude still runs extract_v1 — on a receipt, against an invoice schema. Garbage out. The right move: offer the three schemas, set any, let Claude pick per doc. Force is for ordering a single specific tool. any is for guaranteeing something gets called when the choice depends on the input. Don't mix them up.
+Anti-pattern. Forcing a specific tool when you want structured output across multiple schemas. If you set tool_choice: {type: "tool", name: "extract_v1"} and feed in a receipt, Claude still runs extract_v1 — on a receipt, against an invoice schema. Garbage out. The right move: offer the three schemas, set any, let Claude pick per doc. Force is for ordering a single specific tool. any is for guaranteeing something gets called when the choice depends on the input. Don't mix them up. Next slide closes us out with a look ahead to 4.10.
 -->
 
 ---
@@ -1685,7 +2054,48 @@ Next up, Lecture 4.10 — MCP server scoping. Project versus user. Two locations
 </style>
 
 <!--
-Two locations. Two purposes. Get them mixed up and a new team member silently has fewer tools than you do. This lecture is short, but the question it answers is one of the highest-frequency onboarding bugs in Claude Code. Know it cold.
+Two locations. Two purposes. Get them mixed up and a new team member silently has fewer tools than you do. This lecture is short, but the question it answers is one of the highest-frequency onboarding bugs in Claude Code — and the Task 2.4 fact the exam puts in front of you cold.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles410 = [
+  { label: 'After tool shape', detail: '4.1-4.9 covered descriptions, errors, distribution, choice. Now we shift from shape to configuration.' },
+  { label: 'First of three MCP configs', detail: 'Where do MCP servers live? Who sees them? This is the decision rule the next two assume.' },
+  { label: 'Sets up 4.11 and 4.12', detail: '4.11 layers secrets onto project scope. 4.12 picks the right MCP primitive — tools vs resources.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's where 4.10 sits in the course"
+  :tiles="lectureFitsTiles410"
+/>
+
+<!--
+Here's where 4.10 sits. We've spent the first nine lectures on tool shape — descriptions, errors, distribution, choice. Now we shift to tool configuration. Where do MCP servers live? Who sees them? This is the first of three MCP-config lectures, and it teaches the decision rule the next two assume. Next slide: the four takeaways.
+-->
+
+---
+
+<script setup>
+const learnBullets410 = [
+  { label: 'Two files', detail: '.mcp.json vs ~/.claude.json -- and what each scope means.' },
+  { label: 'One-question rule', detail: '"Team uses it, or just you?" That picks the scope.' },
+  { label: 'Three symptoms', detail: 'How you discover you picked the wrong scope.' },
+  { label: 'Task 2.4 distractor', detail: 'The exact phrasing the exam slips into wrong answer choices.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets410"
+/>
+
+<!--
+Four outcomes. The two files — .mcp.json versus ~/.claude.json — and what each scope means. The one-question decision rule: "team uses it, or just you?" The three symptoms that mean you picked the wrong scope. And the Task 2.4 distractor phrasing the exam loves to slip into answer choices. Let's start with the two locations.
 -->
 
 ---
@@ -1712,7 +2122,7 @@ Two locations. Two purposes. Get them mixed up and a new team member silently ha
 </TwoColSlide>
 
 <!--
-Here are the two. On the left — .mcp.json at your project root. Shared via version control. Committed to the repo. Everyone who clones gets it automatically the next time they launch Claude Code. On the right — ~/.claude.json in your home directory. Personal. Not shared. Only you see it. Never ships to the repo, never touches CI, never touches your teammates' machines. Two files, two scopes. The distinction looks trivial until it bites somebody three weeks into a new hire's onboarding.
+Here are the two. On the left — .mcp.json at your project root. Shared via version control. Committed to the repo. Everyone who clones gets it automatically the next time they launch Claude Code. On the right — ~/.claude.json in your home directory. Personal. Not shared. Only you see it. Never ships to the repo, never touches CI, never touches your teammates' machines. Two files, two scopes. The distinction looks trivial until it bites somebody three weeks into a new hire's onboarding. Next slide: the rule that decides which one.
 -->
 
 ---
@@ -1724,13 +2134,13 @@ Here are the two. On the left — .mcp.json at your project root. Shared via ver
 />
 
 <!--
-Here's the decision rule. Where does this server belong? If the team uses it, it goes in project scope — .mcp.json. If it's you alone, user scope — ~/.claude.json. That's the whole rule. One question to ask. The team's Jira server, the company's internal MCP, the shared GitHub integration — project. Your experimental local server, your personal productivity tool, your homegrown prototype — user. Get this wrong and new hires silently lack tools, CI silently fails, and you silently wonder why it only works on your machine. Classic scope-confusion bug.
+Here's the decision rule. Where does this server belong? If the team uses it, it goes in project scope — .mcp.json. If it's you alone, user scope — ~/.claude.json. That's the whole rule. One question to ask. The team's Jira server, the company's internal MCP, the shared GitHub integration — project. Your experimental local server, your personal productivity tool, your homegrown prototype — user. Get this wrong and new hires silently lack tools, CI silently fails, and you silently wonder why it only works on your machine. Classic scope-confusion bug. Next slide: a real project-scoped config.
 -->
 
 ---
 
 <script setup>
-const project_code = `// .mcp.json at project root -- committed to repo
+const projectCode410 = `// .mcp.json at project root -- committed to repo
 {
   "mcpServers": {
     "company-jira": {
@@ -1748,17 +2158,17 @@ const project_code = `// .mcp.json at project root -- committed to repo
 <CodeBlockSlide
   title=".mcp.json — checked into the repo"
   lang="json"
-  :code="project_code"
+  :code="projectCode410"
 />
 
 <!--
-Here's a project-scoped .mcp.json. Checked into the repo. Contains the team's Jira server, the company's internal-docs MCP, a shared GitHub server. Everyone on the team gets these automatically when they clone. This is how you make MCP servers part of the team's toolchain — not something each developer has to install and configure separately. Version-controlled. Reviewable in PRs. Reproducible. If someone adds a new shared server, it ships in the same commit as the code that depends on it. That's the whole point of project scope — config travels with the codebase.
+Here's a project-scoped .mcp.json. Checked into the repo. Contains the team's Jira server, the company's internal-docs MCP, a shared GitHub server. Everyone on the team gets these automatically when they clone. This is how you make MCP servers part of the team's toolchain — not something each developer has to install and configure separately. Version-controlled. Reviewable in PRs. Reproducible. If someone adds a new shared server, it ships in the same commit as the code that depends on it. That's the whole point of project scope — config travels with the codebase. Next slide: the user-scoped flavor.
 -->
 
 ---
 
 <script setup>
-const user_code = `// ~/.claude.json -- personal, never committed
+const userCode410 = `// ~/.claude.json -- personal, never committed
 {
   "mcpServers": {
     "local-prototype": {
@@ -1772,17 +2182,17 @@ const user_code = `// ~/.claude.json -- personal, never committed
 <CodeBlockSlide
   title="~/.claude.json — personal"
   lang="json"
-  :code="user_code"
+  :code="userCode410"
 />
 
 <!--
-Here's the user-scoped flavor. ~/.claude.json. Your experimental local-database MCP. A personal utility server you're prototyping. A server with your personal credentials that you don't want to foist on teammates. A server that only makes sense on your specific machine setup. These stay in your home directory. They don't ship to the repo. They don't affect the team. Same server config format — totally different scope. And critically — they're discovered and loaded at the same time project-scoped servers are, so both kinds of servers are available simultaneously to the agent. Scope determines where the config lives, not whether the tools are available.
+Here's the user-scoped flavor. ~/.claude.json. Your experimental local-database MCP. A personal utility server you're prototyping. A server with your personal credentials that you don't want to foist on teammates. A server that only makes sense on your specific machine setup. These stay in your home directory. They don't ship to the repo. They don't affect the team. Same server config format — totally different scope. And critically — they're discovered and loaded at the same time project-scoped servers are, so both kinds of servers are available simultaneously to the agent. Scope determines where the config lives, not whether the tools are available. Next slide: how you discover you got it wrong.
 -->
 
 ---
 
 <script setup>
-const symptom_bullets = [
+const symptomBullets410 = [
   { label: 'New team member', detail: '"Tool not found" -- clones the repo, launches Claude Code, missing Jira MCP.' },
   { label: 'CI build', detail: 'Same story. CI doesn\'t have your home directory.' },
   { label: 'You', detail: 'Works fine -- because you have it locally in ~/.claude.json.' },
@@ -1791,11 +2201,11 @@ const symptom_bullets = [
 
 <BulletReveal
   title="How you find out you got this wrong"
-  :bullets="symptom_bullets"
+  :bullets="symptomBullets410"
 />
 
 <!--
-Here's how you find out you got this wrong. New team member joins, clones the repo, opens Claude Code — "tool not found" when they try to use the company's Jira MCP. Because you put the server in your ~/.claude.json instead of the project's .mcp.json. CI build — same story, missing MCP server, because CI doesn't have your home directory. And on your machine, everything works fine, because you have it locally. Those three symptoms together mean scope is wrong. The fix is one move — relocate the server config from ~/.claude.json to .mcp.json at the project root, commit it, and every teammate and every CI job picks it up.
+Here's how you find out you got this wrong. New team member joins, clones the repo, opens Claude Code — "tool not found" when they try to use the company's Jira MCP. Because you put the server in your ~/.claude.json instead of the project's .mcp.json. CI build — same story, missing MCP server, because CI doesn't have your home directory. And on your machine, everything works fine, because you have it locally. Those three symptoms together mean scope is wrong. The fix is one move — relocate the server config from ~/.claude.json to .mcp.json at the project root, commit it, and every teammate and every CI job picks it up. Next slide: the exam framing.
 -->
 
 ---
@@ -1809,7 +2219,7 @@ Watch for distractors: <strong>"user-scoped <code>.mcp.json</code>"</strong> is 
 </CalloutBox>
 
 <!--
-Here's the exam move. "Shared team MCP server goes in .mcp.json." Memorize it. That's the Task 2.4 knowledge nugget you need. And watch for distractors — "user-scoped .mcp.json" is a nonsense phrase the exam puts in answer choices to catch skimmers who are matching on keywords instead of reading carefully. .mcp.json is always project-scoped. ~/.claude.json is always user-scoped. There's no cross-over. If an answer choice implies otherwise, it's wrong, and you now have the domain knowledge to catch it cold. One more "almost-right" distractor defused.
+Here's the exam move. "Shared team MCP server goes in .mcp.json." Memorize it. That's the Task 2.4 knowledge nugget you need. And watch for distractors — "user-scoped .mcp.json" is a nonsense phrase the exam puts in answer choices to catch skimmers who are matching on keywords instead of reading carefully. .mcp.json is always project-scoped. ~/.claude.json is always user-scoped. There's no cross-over. If an answer choice implies otherwise, it's wrong, and you now have the domain knowledge to catch it cold. One more "almost-right" distractor defused. Next slide: the Domain 2 / Domain 3 handshake.
 -->
 
 ---
@@ -1821,7 +2231,7 @@ Here's the exam move. "Shared team MCP server goes in .mcp.json." Memorize it. T
 />
 
 <!--
-This is where Domain 2 and Domain 3 shake hands. Scenario 2, Scenario 4, and Scenario 5 all touch Claude Code configuration for teams. The .mcp.json question is a Domain 2 item living in Domain 3 territory — tool integration inside a team-configured environment. If you took Path B or C from 1.1 — some or lots of experience — you've probably run into this bug in the wild. Lock it in, because the same pattern shows up under several scenario framings on the exam.
+This is where Domain 2 and Domain 3 shake hands. Scenario 2, Scenario 4, and Scenario 5 all touch Claude Code configuration for teams. The .mcp.json question is a Domain 2 item living in Domain 3 territory — tool integration inside a team-configured environment. If you took Path B or C from 1.1 — some or lots of experience — you've probably run into this bug in the wild. Lock it in, because the same pattern shows up under several scenario framings on the exam. Next slide closes us out with a look ahead to 4.11.
 -->
 
 ---
@@ -1870,7 +2280,48 @@ Next up, Lecture 4.11 — how to put secrets in .mcp.json without committing sec
 </style>
 
 <!--
-Short lecture. Six minutes. One pattern. ${GITHUB_TOKEN}. Commit the config — don't commit the secret. This is one of those memorize-it-and-ship-it topics the exam likes to test. It sits right on top of Lecture 4.10's project-scope pattern, and together they answer every shared-MCP-with-auth question.
+Short lecture. Six minutes. One pattern. ${GITHUB_TOKEN}. Commit the config — don't commit the secret. This is one of those memorize-it-and-ship-it topics the exam likes to test, and it sits right on top of Lecture 4.10's project-scope pattern.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles411 = [
+  { label: 'After 4.10 project scope', detail: '4.10 said the team\'s shared MCP server lives in .mcp.json -- committed to the repo.' },
+  { label: 'The secrets problem', detail: 'But that server needs a GitHub token. You can\'t commit secrets. So how do you ship both?' },
+  { label: '4.10 + 4.11 = the answer', detail: 'Together these two lectures answer every shared-MCP-with-auth question on the exam.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's where 4.11 sits in the course"
+  :tiles="lectureFitsTiles411"
+/>
+
+<!--
+Here's where 4.11 sits. Lecture 4.10 said the team's shared MCP server belongs in .mcp.json, committed to the repo. Great — but that server needs a GitHub token, or a Jira API key, or a database URL. You can't commit those. So how do you commit the config without committing the secret? That's this lecture. Together, 4.10 and 4.11 answer every shared-MCP-with-auth question. Next slide: the four takeaways.
+-->
+
+---
+
+<script setup>
+const learnBullets411 = [
+  { label: 'The tension', detail: 'Team-shared config vs no committed secrets -- the two requirements that fight.' },
+  { label: '${VAR} syntax', detail: 'The literal placeholder Claude Code substitutes at runtime.' },
+  { label: 'Commit vs don\'t', detail: 'The .env / .env.example split that ships safely.' },
+  { label: 'Inline-token trap', detail: 'The anti-pattern the exam uses as a distractor.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets411"
+/>
+
+<!--
+Four outcomes. The tension between "team-shared config" and "no committed secrets." The ${VAR} expansion syntax — literal placeholder, runtime substitution. What gets committed and what doesn't — the .env / .env.example split. And the inline-token anti-pattern the exam uses as a trap distractor. Let's start with the tension.
 -->
 
 ---
@@ -1878,13 +2329,13 @@ Short lecture. Six minutes. One pattern. ${GITHUB_TOKEN}. Commit the config — 
 <BigQuote quote="I need credentials in config, but I can't commit credentials." />
 
 <!--
-Here's the tension. You need credentials in your MCP config — GitHub tokens, Jira API keys, database URLs. But your config lives in .mcp.json, which is committed to the repo. You can't commit credentials. That's a security incident and a compliance problem, and every team-wide GitHub scanner will flag it in seconds. And you can't not have credentials — without them, the MCP server can't authenticate against whatever backend it talks to. So how do you commit the config without committing the secret? That's the question this lecture answers in one pattern. It's a pattern every mature repo already uses for other secrets — you're just applying it to .mcp.json specifically.
+Here's the tension. You need credentials in your MCP config — GitHub tokens, Jira API keys, database URLs. But your config lives in .mcp.json, which is committed to the repo. You can't commit credentials. That's a security incident and a compliance problem, and every team-wide GitHub scanner will flag it in seconds. And you can't not have credentials — without them, the MCP server can't authenticate against whatever backend it talks to. So how do you commit the config without committing the secret? That's the question this lecture answers in one pattern. It's a pattern every mature repo already uses for other secrets — you're just applying it to .mcp.json specifically. Next slide: the syntax.
 -->
 
 ---
 
 <script setup>
-const expansion_code = `// .mcp.json -- committed, with env placeholders
+const expansionCode411 = `// .mcp.json -- committed, with env placeholders
 {
   "mcpServers": {
     "github": {
@@ -1902,11 +2353,11 @@ const expansion_code = `// .mcp.json -- committed, with env placeholders
 <CodeBlockSlide
   title=".mcp.json with env expansion"
   lang="json"
-  :code="expansion_code"
+  :code="expansionCode411"
 />
 
 <!--
-Environment variable expansion. Inside .mcp.json, you write "${GITHUB_TOKEN}" — literal dollar-sign-curly-brace-GITHUB_TOKEN-curly-brace — as the value for the token field, usually in an env block attached to a server definition. At runtime, Claude Code reads the file, sees the placeholder, and substitutes the value of the GITHUB_TOKEN environment variable from the shell launching the process. The committed file has the placeholder. The running process has the real value. Same mechanism you've used in docker-compose files and Kubernetes manifests. Same pattern. No magic.
+Environment variable expansion. Inside .mcp.json, you write "${GITHUB_TOKEN}" — literal dollar-sign-curly-brace-GITHUB_TOKEN-curly-brace — as the value for the token field, usually in an env block attached to a server definition. At runtime, Claude Code reads the file, sees the placeholder, and substitutes the value of the GITHUB_TOKEN environment variable from the shell launching the process. The committed file has the placeholder. The running process has the real value. Same mechanism you've used in docker-compose files and Kubernetes manifests. Same pattern. No magic. Next slide: what lives in git and what doesn't.
 -->
 
 ---
@@ -1937,13 +2388,13 @@ Environment variable expansion. Inside .mcp.json, you write "${GITHUB_TOKEN}" �
 </TwoColSlide>
 
 <!--
-Here's the split. On the left — commit. The .mcp.json with "${GITHUB_TOKEN}" placeholders. Reviewable, reproducible, no secrets. Anyone can read it in a PR without spilling credentials. Also commit a .env.example — a template showing which variables need to be set, with fake values. That's how you tell new teammates what to fill in. On the right — don't commit. The .env file with the actual token value ghp_abc123.... That stays in .gitignore. Each developer has their own. Same config, different secrets, no shared-credential problems. If that secret ever rotates, only the individual updates their .env — nobody needs a repo change.
+Here's the split. On the left — commit. The .mcp.json with "${GITHUB_TOKEN}" placeholders. Reviewable, reproducible, no secrets. Anyone can read it in a PR without spilling credentials. Also commit a .env.example — a template showing which variables need to be set, with fake values. That's how you tell new teammates what to fill in. On the right — don't commit. The .env file with the actual token value ghp_abc123.... That stays in .gitignore. Each developer has their own. Same config, different secrets, no shared-credential problems. If that secret ever rotates, only the individual updates their .env — nobody needs a repo change. Next slide: the onboarding flow this enables.
 -->
 
 ---
 
 <script setup>
-const onboard_steps = [
+const onboardSteps411 = [
   { title: 'Clone the repo', body: 'New teammate pulls the project. The .mcp.json is already there, with placeholders.' },
   { title: 'cp .env.example .env', body: 'Template becomes their personal env file. Shows which variables to fill in.' },
   { title: 'Fill in personal tokens', body: 'Each developer uses their own credentials. Scales across the team.' },
@@ -1953,11 +2404,11 @@ const onboard_steps = [
 
 <StepSequence
   title="Onboarding steps"
-  :steps="onboard_steps"
+  :steps="onboardSteps411"
 />
 
 <!--
-Here's the onboarding flow for a new teammate. One — clone the repo. Two — copy .env.example to .env. Three — fill in their personal tokens into the .env file. Four — launch Claude Code; the MCP server reads the config, Claude Code substitutes the env-var placeholders with real values from the environment, authenticates, and works. Four steps, zero committed secrets, every developer using their own credentials against the shared config. This is the pattern every reasonable repo ships. It scales to as many servers and as many teammates as you need, and it plays nicely with CI — CI sets the env vars from its secret store and runs the same config.
+Here's the onboarding flow for a new teammate. One — clone the repo. Two — copy .env.example to .env. Three — fill in their personal tokens into the .env file. Four — launch Claude Code; the MCP server reads the config, Claude Code substitutes the env-var placeholders with real values from the environment, authenticates, and works. Four steps, zero committed secrets, every developer using their own credentials against the shared config. This is the pattern every reasonable repo ships. It scales to as many servers and as many teammates as you need, and it plays nicely with CI — CI sets the env vars from its secret store and runs the same config. Next slide: the anti-pattern that breaks it all.
 -->
 
 ---
@@ -1990,7 +2441,7 @@ const antipattern_fix_411 = `// .mcp.json -- committed safely
 />
 
 <!--
-Anti-pattern. Inline the token. The .mcp.json has "token": "ghp_abc123..." with the literal secret. Committed. Pushed. Now it's in your git history forever, even if you remove it in the next commit — GitHub's secret scanners will find it, security will find it, and you'll be rotating the token and rewriting git history before lunch. The right version uses "token": "${GITHUB_TOKEN}" and keeps the real value out of git entirely. Two different lines, two radically different security postures. This is a rotating-credentials incident waiting to happen, and the exam tests the distinction because the industry has seen this bug a thousand times. It's one of the easiest distractor traps to spot once you know to look for it — any answer choice that literally commits a token is wrong.
+Anti-pattern. Inline the token. The .mcp.json has "token": "ghp_abc123..." with the literal secret. Committed. Pushed. Now it's in your git history forever, even if you remove it in the next commit — GitHub's secret scanners will find it, security will find it, and you'll be rotating the token and rewriting git history before lunch. The right version uses "token": "${GITHUB_TOKEN}" and keeps the real value out of git entirely. Two different lines, two radically different security postures. This is a rotating-credentials incident waiting to happen, and the exam tests the distinction because the industry has seen this bug a thousand times. It's one of the easiest distractor traps to spot once you know to look for it — any answer choice that literally commits a token is wrong. Next slide: the exam framing.
 -->
 
 ---
@@ -2007,7 +2458,7 @@ Separate auth service → over-engineered.<br/>
 </CalloutBox>
 
 <!--
-Here's the exam move. If the question mentions team sharing AND credentials, the answer includes ${VAR} environment expansion. Inline tokens is always wrong. Committing a credential file is always wrong. Creating a separate auth service just to dodge the question is over-engineered. The correct pattern is project-scoped .mcp.json — the project scope from Lecture 4.10 — plus env-var expansion for anything sensitive. That's the shape of the right answer for every shared-MCP-with-auth question on this exam. Two lectures, one combined pattern. Hold onto both.
+Here's the exam move. If the question mentions team sharing AND credentials, the answer includes ${VAR} environment expansion. Inline tokens is always wrong. Committing a credential file is always wrong. Creating a separate auth service just to dodge the question is over-engineered. The correct pattern is project-scoped .mcp.json — the project scope from Lecture 4.10 — plus env-var expansion for anything sensitive. That's the shape of the right answer for every shared-MCP-with-auth question on this exam. Two lectures, one combined pattern. Hold onto both. Next slide closes us out with a look ahead to 4.12.
 -->
 
 ---
@@ -2055,7 +2506,48 @@ Next up, Lecture 4.12 — MCP resources versus MCP tools. When to use each. Tool
 </style>
 
 <!--
-MCP gives you two primitives. Tools and resources. Not the same thing. Not interchangeable. And the exam tests whether you know which is which. Seven minutes to lock it down.
+MCP gives you two primitives. Tools and resources. Not the same thing. Not interchangeable. And the exam tests whether you know which is which. Seven minutes to lock the distinction down — verbs versus nouns.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles412 = [
+  { label: 'After MCP config', detail: '4.10 and 4.11 covered where servers live and how to handle secrets.' },
+  { label: 'Up the stack', detail: 'This lecture moves to the content the server exposes -- the two primitives MCP gives you.' },
+  { label: 'Loops back to 4.8', detail: 'Right primitive choice cuts tool count -- directly easing the 4-5 ceiling pressure.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's where 4.12 sits in the course"
+  :tiles="lectureFitsTiles412"
+/>
+
+<!--
+Here's where 4.12 sits. Lectures 4.10 and 4.11 covered MCP configuration — where servers live, how to handle secrets. This lecture moves up the stack to the content the server exposes. MCP gives you two primitives, and the right pick reduces tool count — which loops directly back to 4.8's ceiling. Next slide: the four takeaways.
+-->
+
+---
+
+<script setup>
+const learnBullets412 = [
+  { label: 'Verbs vs nouns', detail: 'Tools DO. Resources EXPOSE. That\'s the distinction in three words.' },
+  { label: 'When to reach', detail: 'Three conditions each -- side effects vs browsable catalog.' },
+  { label: 'Cost + reliability', detail: 'Resources cut exploratory tool calls and shrink selection load.' },
+  { label: 'Keyword cues', detail: 'The phrases the exam uses to signal which primitive applies.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets412"
+/>
+
+<!--
+Four outcomes. The verbs-versus-nouns distinction — tools do, resources expose. When to reach for each primitive. The cost-and-reliability win that resources buy you. And the keyword cues the exam uses to signal which primitive the question is testing. Let's start with the core distinction.
 -->
 
 ---
@@ -2067,13 +2559,13 @@ MCP gives you two primitives. Tools and resources. Not the same thing. Not inter
 />
 
 <!--
-Here's the distinction. Verbs versus nouns. Tools do. Resources expose. A tool call changes state, or fetches something dynamically based on arguments. A resource exposes a catalog of what's available, and Claude can read it without making a tool call. One is an action. The other is a listing. Once you internalize "verbs versus nouns," the rest of this lecture is just application.
+Here's the distinction. Verbs versus nouns. Tools do. Resources expose. A tool call changes state, or fetches something dynamically based on arguments. A resource exposes a catalog of what's available, and Claude can read it without making a tool call. One is an action. The other is a listing. Once you internalize "verbs versus nouns," the rest of this lecture is just application. Next slide: when to use a tool.
 -->
 
 ---
 
 <script setup>
-const tool_bullets = [
+const toolBullets412 = [
   { label: 'Side effects', detail: 'Creates, modifies, or triggers something downstream.' },
   { label: 'Parameters drive the result', detail: 'Different inputs, different outputs.' },
   { label: 'Claude reasons about WHEN to call', detail: 'The decision to invoke is part of the agent\'s reasoning.' },
@@ -2082,17 +2574,17 @@ const tool_bullets = [
 
 <BulletReveal
   title="Use a tool when..."
-  :bullets="tool_bullets"
+  :bullets="toolBullets412"
 />
 
 <!--
-Use a tool when three conditions hold. One — the action has side effects. It creates something, modifies something, triggers something downstream. Two — parameters drive the result. Different inputs, different outputs; the call is meaningful because of what you pass in. Three — you want Claude to reason about when to call it, not just that it exists — the decision to invoke is part of the agent's reasoning. Tools are for doing. Reach for a tool whenever the semantics include a verb and an effect.
+Use a tool when three conditions hold. One — the action has side effects. It creates something, modifies something, triggers something downstream. Two — parameters drive the result. Different inputs, different outputs; the call is meaningful because of what you pass in. Three — you want Claude to reason about when to call it, not just that it exists — the decision to invoke is part of the agent's reasoning. Tools are for doing. Reach for a tool whenever the semantics include a verb and an effect. Next slide: when to use a resource instead.
 -->
 
 ---
 
 <script setup>
-const resource_bullets = [
+const resourceBullets412 = [
   { label: 'See the catalog upfront', detail: 'No call needed to discover what\'s there.' },
   { label: 'Browsable content', detail: 'Issues, schemas, docs, configs -- scan and pick.' },
   { label: 'Reduce exploratory tool calls', detail: 'If Claude knows what exists, it doesn\'t guess-and-search.' },
@@ -2101,11 +2593,11 @@ const resource_bullets = [
 
 <BulletReveal
   title="Use a resource when..."
-  :bullets="resource_bullets"
+  :bullets="resourceBullets412"
 />
 
 <!--
-Use a resource when three different conditions hold. One — you want Claude to see the catalog upfront, without having to call anything to discover what's there. Two — the content is browsable. Issues, schemas, docs, configs — stuff Claude can scan and pick from. Three — you want to reduce exploratory tool calls. If Claude knows what's available, it doesn't have to guess-and-search. Resources are for exposing. Think of them as the "here's what exists" layer, sitting alongside the "here's how you act on it" layer that tools provide.
+Use a resource when three different conditions hold. One — you want Claude to see the catalog upfront, without having to call anything to discover what's there. Two — the content is browsable. Issues, schemas, docs, configs — stuff Claude can scan and pick from. Three — you want to reduce exploratory tool calls. If Claude knows what's available, it doesn't have to guess-and-search. Resources are for exposing. Think of them as the "here's what exists" layer, sitting alongside the "here's how you act on it" layer that tools provide. Next slide: a concrete pair, same backend.
 -->
 
 ---
@@ -2136,7 +2628,7 @@ Use a resource when three different conditions hold. One — you want Claude to 
 </TwoColSlide>
 
 <!--
-Concrete. On the left — a tool: search_jira_issue. Takes a query, runs a search, returns matching issues dynamically. Call it, run it, get results back. Different query, different result set. On the right — a resource: jira://issues/open. Exposes the current list of all open issues as browsable content Claude can read without making a tool call at all. No parameters. No execution. Claude already knows what's there, just by reading the resource. Same backend — Jira — powering both. Different MCP primitive. Radically different agent behavior. The resource makes open-issue discovery cheap; the tool handles the targeted follow-up search.
+Concrete. On the left — a tool: search_jira_issue. Takes a query, runs a search, returns matching issues dynamically. Call it, run it, get results back. Different query, different result set. On the right — a resource: jira://issues/open. Exposes the current list of all open issues as browsable content Claude can read without making a tool call at all. No parameters. No execution. Claude already knows what's there, just by reading the resource. Same backend — Jira — powering both. Different MCP primitive. Radically different agent behavior. The resource makes open-issue discovery cheap; the tool handles the targeted follow-up search. Next slide: why this choice matters for cost and reliability.
 -->
 
 ---
@@ -2150,7 +2642,7 @@ Going back to 4.8 — tool count degrades selection reliability. <strong>Stuff r
 </CalloutBox>
 
 <!--
-This matters for cost and reliability both. Resources cut exploratory tool calls. If Claude can see the open-issue list upfront as a resource, it doesn't call list_issues() to find out what exists — which means fewer tool-call round-trips, less latency, less token cost, and frankly less chance of the agent getting confused about which tool to call. Every tool you don't need is a selection decision Claude doesn't have to make. Which, going back to Lecture 4.8, matters — tool count degrades selection reliability, and "stuff I can read as a resource" is stuff I don't need as a tool. Exposing content as resources removes a class of selection decisions from the agent's plate entirely.
+This matters for cost and reliability both. Resources cut exploratory tool calls. If Claude can see the open-issue list upfront as a resource, it doesn't call list_issues() to find out what exists — which means fewer tool-call round-trips, less latency, less token cost, and frankly less chance of the agent getting confused about which tool to call. Every tool you don't need is a selection decision Claude doesn't have to make. Which, going back to Lecture 4.8, matters — tool count degrades selection reliability, and "stuff I can read as a resource" is stuff I don't need as a tool. Exposing content as resources removes a class of selection decisions from the agent's plate entirely. Next slide: the exam framing.
 -->
 
 ---
@@ -2166,7 +2658,7 @@ Distractors swap the two primitives to catch inattentive readers.
 </CalloutBox>
 
 <!--
-Here's the exam move. Keywords matter. If the question mentions "content catalog," "database schemas," "issue summaries," "documentation hierarchy" — anything that sounds like browsable listings — that's a resource. If the question mentions "action," "query with parameters," "execute," "process," "trigger" — anything that sounds like a verb with side effects — that's a tool. Task 2.4 tests this distinction directly, and the distractors often swap the two primitives in answer choices to catch candidates who aren't paying attention. Train your ear on those keywords, and when you see them, you'll know which primitive is correct before you've finished reading the answers.
+Here's the exam move. Keywords matter. If the question mentions "content catalog," "database schemas," "issue summaries," "documentation hierarchy" — anything that sounds like browsable listings — that's a resource. If the question mentions "action," "query with parameters," "execute," "process," "trigger" — anything that sounds like a verb with side effects — that's a tool. Task 2.4 tests this distinction directly, and the distractors often swap the two primitives in answer choices to catch candidates who aren't paying attention. Train your ear on those keywords, and when you see them, you'll know which primitive is correct before you've finished reading the answers. Next slide: the canonical anti-pattern.
 -->
 
 ---
@@ -2192,7 +2684,7 @@ const antipattern_fix_412 = `docs://catalog
 />
 
 <!--
-Anti-pattern. Forcing a catalog into a tool. Left side — search_all_docs() — a tool Claude calls every turn to discover what docs exist. Token cost every call. Round-trip latency every call. Worse, Claude sometimes skips the call entirely and guesses at what's available, which is the worst of both worlds. Right side — expose docs://catalog as a resource. Claude sees the catalog directly in context at the start of the conversation, references it without calling, and only uses a targeted tool call — like get_doc(id) — when it needs specific content. Better cost, better reliability, same underlying data. That's the cleanest pattern.
+Anti-pattern. Forcing a catalog into a tool. Left side — search_all_docs() — a tool Claude calls every turn to discover what docs exist. Token cost every call. Round-trip latency every call. Worse, Claude sometimes skips the call entirely and guesses at what's available, which is the worst of both worlds. Right side — expose docs://catalog as a resource. Claude sees the catalog directly in context at the start of the conversation, references it without calling, and only uses a targeted tool call — like get_doc(id) — when it needs specific content. Better cost, better reliability, same underlying data. That's the cleanest pattern. Next slide closes us out with a look ahead to 4.13.
 -->
 
 ---
@@ -2246,8 +2738,49 @@ Four tools. Four jobs. Pick wrong, waste context. Grep is content. Glob is paths
 ---
 
 <script setup>
-const tool_columns = ['Job', 'Use when']
-const tool_rows = [
+const lectureFitsTiles413 = [
+  { label: 'After MCP', detail: '4.10-4.12 covered custom tooling via MCP. This one pivots to the built-in toolbelt.' },
+  { label: 'Scenario 4 anchor', detail: 'Grep, Glob, Read, Edit show up in every developer-productivity question.' },
+  { label: 'Sets up 4.14', detail: 'This is the toolkit. 4.14 is the workflow that combines them into incremental exploration.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's where 4.13 sits in the course"
+  :tiles="lectureFitsTiles413"
+/>
+
+<!--
+Here's where 4.13 sits. Lectures 4.10 through 4.12 covered MCP — custom tooling. This one pivots to the built-in toolbelt every Claude Code session ships with: Grep, Glob, Read, Edit. These four come up in every Scenario 4 question — developer productivity. And they're a 4-pick test, which is why the exam guide singles them out. Next slide: the four takeaways.
+-->
+
+---
+
+<script setup>
+const learnBullets413 = [
+  { label: 'One job each', detail: 'The four-tool table -- memorize it.' },
+  { label: 'Content vs paths', detail: 'Grep for what\'s inside; Glob for what\'s named what.' },
+  { label: 'Edit fallback', detail: 'Read-modify-Write when Edit can\'t find a unique anchor.' },
+  { label: 'Task 2.5 distractor', detail: 'The classic Grep/Glob swap the exam slips into answer choices.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets413"
+/>
+
+<!--
+Four outcomes. The one-job-per-tool table. Grep for content, Glob for paths. The Read-Write fallback when Edit can't find a unique anchor. And the classic Task 2.5 distractor that swaps Grep and Glob. Let's start with the table.
+-->
+
+---
+
+<script setup>
+const toolColumns413 = ['Job', 'Use when']
+const toolRows413 = [
   {
     label: 'Grep',
     cells: [
@@ -2281,18 +2814,18 @@ const tool_rows = [
 
 <ComparisonTable
   title="Built-in tools"
-  :columns="tool_columns"
-  :rows="tool_rows"
+  :columns="toolColumns413"
+  :rows="toolRows413"
 />
 
 <!--
-Here's the table. Grep — search file contents for a pattern. Use it for function callers, error message locations, import statements. Glob — match file paths. Use it for "find all **/*.test.tsx." Read — load a full file. Use it when you need the whole thing to understand one specific file. Edit — make a targeted change using unique anchor text. Use it when you want to modify a small slice without rewriting the file. Four rows. Memorize them. Treating one as the other is a distractor classic.
+Here's the table. Grep — search file contents for a pattern. Use it for function callers, error message locations, import statements. Glob — match file paths. Use it for "find all **/*.test.tsx." Read — load a full file. Use it when you need the whole thing to understand one specific file. Edit — make a targeted change using unique anchor text. Use it when you want to modify a small slice without rewriting the file. Four rows. Memorize them. Treating one as the other is a distractor classic. Next slide: Grep in detail.
 -->
 
 ---
 
 <script setup>
-const grep_code = `# Grep -- content search
+const grepCode413 = `# Grep -- content search
 grep "process_refund" **/*.py
 
 # Returns files + line numbers for every caller.
@@ -2302,17 +2835,17 @@ grep "process_refund" **/*.py
 <CodeBlockSlide
   title="Grep — content search"
   lang="bash"
-  :code="grep_code"
+  :code="grepCode413"
 />
 
 <!--
-Grep first. It searches content, not paths. The canonical use: find every caller of process_refund across the codebase. You Grep for the string process_refund and you get a list of files and line numbers. From there you Read the relevant handlers. Grep is how you start understanding a function's footprint. It's the content search tool. Nothing else in the toolbelt does content search.
+Grep first. It searches content, not paths. The canonical use: find every caller of process_refund across the codebase. You Grep for the string process_refund and you get a list of files and line numbers. From there you Read the relevant handlers. Grep is how you start understanding a function's footprint. It's the content search tool. Nothing else in the toolbelt does content search. Next slide: Glob, the path-only counterpart.
 -->
 
 ---
 
 <script setup>
-const glob_code = `# Glob -- path match
+const globCode413 = `# Glob -- path match
 **/*.test.tsx
 infra/**/*.tf
 
@@ -2323,11 +2856,11 @@ infra/**/*.tf
 <CodeBlockSlide
   title="Glob — path match"
   lang="bash"
-  :code="glob_code"
+  :code="globCode413"
 />
 
 <!--
-Glob next. It matches file paths, not contents. Use it for "find me every test file" — **/*.test.tsx. Or "find every Terraform module" — infra/**/*.tf. It answers the question "which files match this naming pattern?" Doesn't look inside them. Doesn't care what's in them. Just returns paths. If you want to find files by name or extension, Glob is the right tool. If you use Grep for this, you pay for reading every file when all you wanted was a name match.
+Glob next. It matches file paths, not contents. Use it for "find me every test file" — **/*.test.tsx. Or "find every Terraform module" — infra/**/*.tf. It answers the question "which files match this naming pattern?" Doesn't look inside them. Doesn't care what's in them. Just returns paths. If you want to find files by name or extension, Glob is the right tool. If you use Grep for this, you pay for reading every file when all you wanted was a name match. Next slide: the Edit fallback move.
 -->
 
 ---
@@ -2341,7 +2874,7 @@ Edit needs unique anchor text. If the snippet appears three times, Edit fails �
 </CalloutBox>
 
 <!--
-Edit needs unique anchor text. If you tell Edit to replace a snippet and that snippet appears three times in the file, Edit fails — it can't tell which occurrence you meant. The right move when Edit fails: Read the full file, make your change in memory, Write the file back. That's the fallback. Don't loop on failed edits with slightly longer anchors — that wastes context and rarely converges. Read, modify, Write. One pass. Done. Task 2.5 calls this fallback out explicitly, and the exam will test whether you reach for it or whether you get stuck retrying Edit.
+Edit needs unique anchor text. If you tell Edit to replace a snippet and that snippet appears three times in the file, Edit fails — it can't tell which occurrence you meant. The right move when Edit fails: Read the full file, make your change in memory, Write the file back. That's the fallback. Don't loop on failed edits with slightly longer anchors — that wastes context and rarely converges. Read, modify, Write. One pass. Done. Task 2.5 calls this fallback out explicitly, and the exam will test whether you reach for it or whether you get stuck retrying Edit. Next slide: the read-everything anti-pattern.
 -->
 
 ---
@@ -2365,7 +2898,7 @@ Each Read is motivated by what the last Grep told you.`
 />
 
 <!--
-Here's the anti-pattern. Reading every file upfront "so you understand the codebase." You hit the context wall before you understand anything. The right move: Grep for entry points — function names, key identifiers — and then Read only the files the Grep surfaces. Each Read is motivated by what the last Grep told you. You never touch files irrelevant to the question. That's incremental exploration, which is the next lecture in detail.
+Here's the anti-pattern. Reading every file upfront "so you understand the codebase." You hit the context wall before you understand anything. The right move: Grep for entry points — function names, key identifiers — and then Read only the files the Grep surfaces. Each Read is motivated by what the last Grep told you. You never touch files irrelevant to the question. That's incremental exploration, which is the next lecture in detail. Next slide: a quick preview of 4.14.
 -->
 
 ---
@@ -2379,7 +2912,7 @@ Never read-everything-upfront. The pattern that works on one file also works on 
 </CalloutBox>
 
 <!--
-Speaking of which — quick preview. Build codebase understanding incrementally. Grep, then Read, then follow imports with another Grep, then Read what that surfaces. Never read-everything-upfront. The pattern that works on one file also works on one million. That's 4.14. This lecture is the toolkit; the next one is the workflow.
+Speaking of which — quick preview. Build codebase understanding incrementally. Grep, then Read, then follow imports with another Grep, then Read what that surfaces. Never read-everything-upfront. The pattern that works on one file also works on one million. That's 4.14. This lecture is the toolkit; the next one is the workflow. Next slide: the classic distractor pair.
 -->
 
 ---
@@ -2394,7 +2927,7 @@ Check the verb and the target. <em>Path names</em> or <em>file contents</em>? Te
 </CalloutBox>
 
 <!--
-Here's the exam move. "Find all .test.tsx files" — Glob. Not Grep. If the question is about a filename pattern, and an answer reaches for Grep, that answer is wrong. "Find all callers of process_refund" — Grep. Not Glob. Glob can't see inside files. Treating Grep as a file finder or Glob as a content search is the classic Task 2.5 distractor. Know the four jobs, check the verb and the target in the question — is it about path names or about file contents? — and match it to the right tool. Ten seconds. Not ten minutes. That's how fast this decision should be on exam day.
+Here's the exam move. "Find all .test.tsx files" — Glob. Not Grep. If the question is about a filename pattern, and an answer reaches for Grep, that answer is wrong. "Find all callers of process_refund" — Grep. Not Glob. Glob can't see inside files. Treating Grep as a file finder or Glob as a content search is the classic Task 2.5 distractor. Know the four jobs, check the verb and the target in the question — is it about path names or about file contents? — and match it to the right tool. Ten seconds. Not ten minutes. That's how fast this decision should be on exam day. Next slide: the Scenario 4 continuity reminder.
 -->
 
 ---
@@ -2406,7 +2939,7 @@ Here's the exam move. "Find all .test.tsx files" — Glob. Not Grep. If the ques
 />
 
 <!--
-Scenario 4 — developer productivity — is built on this tool selection. Every Scenario 4 question about exploring or modifying a codebase is testing whether you pick the right built-in for the job. If you walk in with Grep-for-content, Glob-for-paths, Read-for-whole, Edit-for-surgical, Edit-fallback-to-Write — that's most of what you need for the Domain 2 questions Scenario 4 throws at you.
+Scenario 4 — developer productivity — is built on this tool selection. Every Scenario 4 question about exploring or modifying a codebase is testing whether you pick the right built-in for the job. If you walk in with Grep-for-content, Glob-for-paths, Read-for-whole, Edit-for-surgical, Edit-fallback-to-Write — that's most of what you need for the Domain 2 questions Scenario 4 throws at you. Next slide closes us out with a look ahead to 4.14.
 -->
 
 ---
@@ -2454,7 +2987,48 @@ Next up, Lecture 4.14 — the incremental exploration pattern that ties all four
 </style>
 
 <!--
-Last lecture of Domain 2. The pattern that ties the built-in tools together into a workflow. Grep, Read, follow imports. Never read-everything-upfront. Eight minutes, and then we close the section.
+Last lecture of Domain 2. The pattern that ties the built-in tools together into a workflow. Grep, Read, follow imports. Never read-everything-upfront. Eight minutes — and then we close the section.
+-->
+
+---
+
+<script setup>
+const lectureFitsTiles414 = [
+  { label: 'After 4.13 toolkit', detail: '4.13 gave you the four built-ins -- Grep, Glob, Read, Edit -- and what each does.' },
+  { label: 'Toolkit becomes technique', detail: 'This lecture chains them into a workflow. The pattern is incremental: Grep, Read, follow imports.' },
+  { label: 'Bridges to Section 5', detail: 'The same incremental thinking shows up at the agent level in Domain 3 -- next section.' },
+]
+</script>
+
+<LectureContext
+  eyebrow="How this lecture fits in"
+  title="Here's where 4.14 sits in the course"
+  :tiles="lectureFitsTiles414"
+/>
+
+<!--
+Here's where 4.14 sits. Lecture 4.13 gave you the four built-in tools — Grep, Glob, Read, Edit — and what each one does. This lecture chains them into a workflow. Toolkit became technique. And it's the last brick before Section 5 — Claude Code Configuration and Workflows — where the same incremental thinking shows up at the agent level. Next slide: the four outcomes.
+-->
+
+---
+
+<script setup>
+const learnBullets414 = [
+  { label: 'Context-wall trap', detail: 'Why reading everything upfront kills agents before they learn anything.' },
+  { label: 'Four-step pattern', detail: 'Grep, Read, Grep, Read -- each step motivated by the last.' },
+  { label: 'Concrete trace', detail: 'process_refund in four calls vs reading seventy files.' },
+  { label: 'Explore subagent', detail: 'The escape hatch when the trace gets verbose.' },
+]
+</script>
+
+<BulletReveal
+  eyebrow="What you'll learn"
+  title="By the end of this lecture you'll know..."
+  :bullets="learnBullets414"
+/>
+
+<!--
+Four outcomes. The context-wall trap that kills agents that try to read everything upfront. The four-step Grep-Read pattern that actually works. The concrete process_refund trace showing how four tool calls beat reading seventy files. And the Explore-subagent escape hatch when the trace gets verbose. Let's start with the trap.
 -->
 
 ---
@@ -2462,13 +3036,13 @@ Last lecture of Domain 2. The pattern that ties the built-in tools together into
 <BigQuote quote="Read every file upfront — you hit the context wall before you learn anything." />
 
 <!--
-Here's the trap. "Read every file upfront: you hit the context wall before you learn anything." That's the opening move that kills agents — loading the whole codebase into context in the hope of understanding it, and running out of tokens before you've traced a single call path. Doesn't work on ten files. Definitely doesn't work on ten thousand. The fix isn't a bigger context window. It's a better workflow.
+Here's the trap. "Read every file upfront: you hit the context wall before you learn anything." That's the opening move that kills agents — loading the whole codebase into context in the hope of understanding it, and running out of tokens before you've traced a single call path. Doesn't work on ten files. Definitely doesn't work on ten thousand. The fix isn't a bigger context window. It's a better workflow. Next slide: the four-step pattern that is that workflow.
 -->
 
 ---
 
 <script setup>
-const flow_steps = [
+const flowSteps414 = [
   { label: 'Grep entry points', sublabel: 'Function names, identifiers, error strings' },
   { label: 'Read matching files', sublabel: 'Only what the Grep surfaced' },
   { label: 'Grep again', sublabel: 'For imports or calls found in the reads' },
@@ -2478,11 +3052,11 @@ const flow_steps = [
 
 <FlowDiagram
   title="The right flow"
-  :steps="flow_steps"
+  :steps="flowSteps414"
 />
 
 <!--
-Here's the pattern. Four steps. Step one — Grep for entry points. Function names, identifiers, error strings — whatever anchors the question you're trying to answer. Step two — Read the files the Grep surfaced. Step three — Grep again, for imports or calls you found in those reads. Step four — Read what that second Grep surfaces. Repeat until the question is answered. Each Grep is motivated by the last Read. Each Read is motivated by the last Grep. You never touch files the trace doesn't implicate.
+Here's the pattern. Four steps. Step one — Grep for entry points. Function names, identifiers, error strings — whatever anchors the question you're trying to answer. Step two — Read the files the Grep surfaced. Step three — Grep again, for imports or calls you found in those reads. Step four — Read what that second Grep surfaces. Repeat until the question is answered. Each Grep is motivated by the last Read. Each Read is motivated by the last Grep. You never touch files the trace doesn't implicate. Next slide: why this scales.
 -->
 
 ---
@@ -2494,13 +3068,13 @@ Here's the pattern. Four steps. Step one — Grep for entry points. Function nam
 />
 
 <!--
-Incrementality isn't just a code convention — it's a context strategy. You never exhaust tokens on files irrelevant to the question. The question drives the files you touch, not the filesystem. That's the reframe. You're not exploring the codebase; you're answering a specific question, and the files you need are the ones your trace walks through. The pattern that works on one file works on a million. The shape is the same.
+Incrementality isn't just a code convention — it's a context strategy. You never exhaust tokens on files irrelevant to the question. The question drives the files you touch, not the filesystem. That's the reframe. You're not exploring the codebase; you're answering a specific question, and the files you need are the ones your trace walks through. The pattern that works on one file works on a million. The shape is the same. Next slide: a concrete trace.
 -->
 
 ---
 
 <script setup>
-const trace_steps = [
+const traceSteps414 = [
   { title: 'Grep process_refund', body: 'Returns three callers: HTTP handler, CLI command, MCP tool impl.' },
   { title: 'Read the HTTP handler', body: 'See it imports a refund function from a wrapper module.' },
   { title: 'Grep the wrapper module', body: 'Finds the refund function and one helper.' },
@@ -2510,11 +3084,11 @@ const trace_steps = [
 
 <StepSequence
   title="Trace example: process_refund"
-  :steps="trace_steps"
+  :steps="traceSteps414"
 />
 
 <!--
-Concrete walkthrough. Trace process_refund across a hypothetical codebase. Step one — Grep process_refund. Returns three callers: an HTTP handler, a CLI command, an MCP tool implementation. Step two — Read the HTTP handler. You see it imports a refund function from a wrapper module. Step three — Grep that wrapper module's exports. Finds the refund function and one helper. Step four — Read the MCP tool impl to see how it maps to the business logic. Now you understand the refund path — how the HTTP call flows to the wrapper to the business logic, and how the MCP tool uses the same underlying function. Four tool calls. You never touched the seventy other files in the project.
+Concrete walkthrough. Trace process_refund across a hypothetical codebase. Step one — Grep process_refund. Returns three callers: an HTTP handler, a CLI command, an MCP tool implementation. Step two — Read the HTTP handler. You see it imports a refund function from a wrapper module. Step three — Grep that wrapper module's exports. Finds the refund function and one helper. Step four — Read the MCP tool impl to see how it maps to the business logic. Now you understand the refund path — how the HTTP call flows to the wrapper to the business logic, and how the MCP tool uses the same underlying function. Four tool calls. You never touched the seventy other files in the project. Next slide: the escape hatch for big traces.
 -->
 
 ---
@@ -2528,7 +3102,7 @@ Preserves your main context from file-reading noise. Task 3.4, covered in depth 
 </CalloutBox>
 
 <!--
-One more tool in the toolkit. If the exploration is going to be verbose — dozens of files, long trails — delegate it to an Explore subagent. The subagent does the Grep-Read loop in its own context, then returns a summary to the main conversation. This preserves your main context from getting cluttered with file-reading noise. Task 3.4 covers Explore in depth, and we'll come back to it in Section 5 when we handle Domain 3. For now, know it exists as the escape hatch for big traces.
+One more tool in the toolkit. If the exploration is going to be verbose — dozens of files, long trails — delegate it to an Explore subagent. The subagent does the Grep-Read loop in its own context, then returns a summary to the main conversation. This preserves your main context from getting cluttered with file-reading noise. Task 3.4 covers Explore in depth, and we'll come back to it in Section 5 when we handle Domain 3. For now, know it exists as the escape hatch for big traces. Next slide: the two anti-patterns that bracket the workflow.
 -->
 
 ---
@@ -2552,7 +3126,7 @@ If you can't name WHY you're running the next Grep -- stop and think.`
 />
 
 <!--
-Two anti-patterns. Left side — read all files upfront. Context wall, no understanding. Right side — blind Grep with no plan. You Grep random strings, read what pops out, Grep again without any thread — burning calls without a trace. The fix for both: each Grep is motivated by the last Read. Every step is connected to the previous one. If you can't name why you're running the next Grep, stop and think.
+Two anti-patterns. Left side — read all files upfront. Context wall, no understanding. Right side — blind Grep with no plan. You Grep random strings, read what pops out, Grep again without any thread — burning calls without a trace. The fix for both: each Grep is motivated by the last Read. Every step is connected to the previous one. If you can't name why you're running the next Grep, stop and think. Next slide: the exam framing.
 -->
 
 ---
@@ -2566,7 +3140,7 @@ Scenario 4 often shows a developer asking "trace this function" or "understand t
 </CalloutBox>
 
 <!--
-Here's the exam move. Scenario 4 frequently asks "a developer wants to trace this function" or "how should Claude approach understanding this unfamiliar module?" The correct pattern is always incremental — Grep, Read, follow imports, repeat. "Load all files upfront" and "read the whole module" are the distractor classics. They sound thorough. They're the wrong answer. Remember 1.1's "almost-right is the whole trap" — loading everything looks thorough, but thorough isn't the same as right.
+Here's the exam move. Scenario 4 frequently asks "a developer wants to trace this function" or "how should Claude approach understanding this unfamiliar module?" The correct pattern is always incremental — Grep, Read, follow imports, repeat. "Load all files upfront" and "read the whole module" are the distractor classics. They sound thorough. They're the wrong answer. Remember 1.1's "almost-right is the whole trap" — loading everything looks thorough, but thorough isn't the same as right. Next slide: the one-sentence Domain 2 recap.
 -->
 
 ---
@@ -2578,7 +3152,7 @@ Here's the exam move. Scenario 4 frequently asks "a developer wants to trace thi
 />
 
 <!--
-Section recap. Domain 2 in one sentence — tool descriptions, structured errors, scoped tool access, and incremental exploration. Eighteen percent of your exam. If you can name the four parts of a great tool description — purpose, inputs, examples, boundaries — the three fields of an MCP error response — errorCategory, isRetryable, description — the four error categories — transient, validation, business, permission — the tool-count ceiling of four to five, the three tool_choice modes, and the Grep-Read incremental pattern — you've covered the section. Know those cold.
+Section recap. Domain 2 in one sentence — tool descriptions, structured errors, scoped tool access, and incremental exploration. Eighteen percent of your exam. If you can name the four parts of a great tool description — purpose, inputs, examples, boundaries — the three fields of an MCP error response — errorCategory, isRetryable, description — the four error categories — transient, validation, business, permission — the tool-count ceiling of four to five, the three tool_choice modes, and the Grep-Read incremental pattern — you've covered the section. Know those cold. Next slide closes us out with a look ahead to Section 5.
 -->
 
 ---
@@ -2587,7 +3161,7 @@ Section recap. Domain 2 in one sentence — tool descriptions, structured errors
   <div class="di-close__inner">
     <div class="di-close__eyebrow">Section closes · Next section</div>
     <h1 class="di-close__title">Domain 3 — <span class="di-close__accent">Claude Code Configuration &amp; Workflows</span></h1>
-    <div class="di-close__subtitle">Twenty percent of your exam. Next up.</div>
+    <div class="di-close__subtitle">20% of your exam. Section 5 opens with the CLAUDE.md hierarchy.</div>
   </div>
 </div>
 
@@ -2601,5 +3175,5 @@ Section recap. Domain 2 in one sentence — tool descriptions, structured errors
 </style>
 
 <!--
-That closes Section 4 and Domain 2. Next section — Domain 3 — Claude Code Configuration and Workflows. Twenty percent. See you there.
+That closes Section 4 and Domain 2. Next section — Domain 3 — Claude Code Configuration and Workflows. Twenty percent of your exam. Section 5 opens with 5.1, the CLAUDE.md configuration hierarchy — the same incremental thinking, applied to how Claude Code reads its own config. See you there.
 -->
