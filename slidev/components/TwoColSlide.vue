@@ -8,6 +8,7 @@ import SlideFooter from './SlideFooter.vue'
 const props = defineProps({
   eyebrow: { type: String, default: '' },
   title: { type: String, required: true },
+  titleSecondLine: { type: String, default: '' },
   leftLabel: { type: String, required: true },
   rightLabel: { type: String, required: true },
   variant: {
@@ -47,7 +48,9 @@ const palette = computed(() => {
     <Eyebrow v-if="eyebrow">
       {{ eyebrow }}
     </Eyebrow>
-    <SlideTitle>{{ title }}</SlideTitle>
+    <SlideTitle>
+      {{ title }}<template v-if="titleSecondLine"><br>{{ titleSecondLine }}</template>
+    </SlideTitle>
 
     <div class="tc">
       <v-clicks>

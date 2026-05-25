@@ -570,10 +570,159 @@ These are fundamentally different things and they belong in different places.
 
 ---
 
-<!-- SLIDE 5 — Correct usage -->
+<!-- SLIDE 5 — System Parameter = System Prompt (NEW round-2 definition slide) -->
+
+<Frame>
+  <Eyebrow>Two Terms</Eyebrow>
+  <SlideTitle>System Parameter = System Prompt</SlideTitle>
+
+  <div class="def-grid">
+    <v-clicks>
+      <section class="def-tile def-tile--field">
+        <div class="def-tile__label">system parameter <span class="def-tile__sub">(the field)</span></div>
+        <p class="def-tile__lead"><strong>The API field.</strong></p>
+        <p class="def-tile__code"><code>system="..."</code></p>
+        <p class="def-tile__note">Top-level argument to <code>messages.create()</code><br>Outside the <code>messages</code> array</p>
+      </section>
+      <section class="def-tile def-tile--contents">
+        <div class="def-tile__label">system prompt <span class="def-tile__sub">(the contents)</span></div>
+        <p class="def-tile__lead"><strong>The contents.</strong></p>
+        <p class="def-tile__quote">"You are Aria, a helpful customer support agent for SkyLine Airlines..."</p>
+        <p class="def-tile__note">Persona, rules, standing brief<br>Claude reads it before every conversation</p>
+      </section>
+      <div class="def-eq def-eq--stacked">
+        <span class="def-eq__row"><strong>System Parameter</strong> <span class="def-eq__op">=</span> Where the System Prompt Lives</span>
+        <span class="def-eq__row"><strong>System Prompt</strong> <span class="def-eq__op">=</span> What's in the System Parameter in the Claude API</span>
+      </div>
+    </v-clicks>
+  </div>
+
+  <SlideFooter label="API Bootcamp" :num="5" :total="12" />
+</Frame>
+
+<style scoped>
+.def-grid {
+  margin-top: 48px;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 28px;
+  min-height: 0;
+}
+.def-tile {
+  border: 1px solid var(--paper-200);
+  border-radius: 18px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--paper-0);
+  min-width: 0;
+}
+.def-tile--field { border-left: 6px solid var(--teal-500); background: var(--teal-50); }
+.def-tile--contents { border-left: 6px solid var(--sprout-500); background: var(--sprout-50); }
+.def-tile__label {
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--forest-800);
+}
+.def-tile__sub {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: var(--forest-500);
+  margin-left: 8px;
+}
+.def-tile__lead {
+  font-family: var(--font-body);
+  font-size: 22px;
+  margin: 0;
+  color: var(--forest-800);
+}
+.def-tile__code {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  margin: 0;
+  color: var(--forest-700);
+}
+.def-tile__code code {
+  background: var(--paper-0);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--paper-200);
+}
+.def-tile__quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--forest-800);
+}
+.def-tile__note {
+  font-family: var(--font-body);
+  font-size: 24px;
+  line-height: 1.45;
+  margin: 0;
+  color: var(--forest-500);
+}
+.def-eq {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 22px 32px;
+  border-radius: 16px;
+  background: var(--mint-100);
+  border: 1px solid var(--mint-300);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--forest-800);
+}
+.def-eq--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 24px;
+}
+.def-eq__row {
+  display: block;
+}
+.def-eq__op {
+  color: var(--sprout-600);
+  font-weight: 700;
+  margin: 0 6px;
+}
+.def-eq__sep {
+  color: var(--paper-300);
+  font-size: 32px;
+}
+</style>
+
+<!--
+Before we go further, lock in two terms — system parameter and system prompt. Getting these right pays off for the rest of the course.
+
+The system parameter is the API field — a top-level argument to messages dot create. It sits outside the messages array.
+
+The system prompt is the text you put on that field — the persona, the rules, the standing brief Claude reads before any conversation begins.
+
+Said simply: the system parameter is where the system prompt lives. And the system prompt is what's inside the system parameter in the Claude API. Parameter holds prompt. Two terms, locked in.
+-->
+
+---
+
+<!-- SLIDE 6 — Correct usage -->
 
 <script setup>
-// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 3.
+// 3 chunks, 2 clicks. Aligned with [click] markers in script SLIDE 6.
 const correctChunks = [
   `import anthropic
 client = anthropic.Anthropic()`,
@@ -600,8 +749,8 @@ print(response.content[0].text)`,
   lang="python"
   :code-chunks="correctChunks"
   footer-label="API Bootcamp"
-  :footer-num="5"
-  :footer-total="11"
+  :footer-num="6"
+  :footer-total="12"
 />
 
 <!--
@@ -616,11 +765,14 @@ You never repeat the system prompt in the messages array.
 
 ---
 
-<!-- SLIDE 6 — Wrong way -->
+<!-- SLIDE 7 — Wrong way (blank chunk 0 per round-2 feedback) -->
 
 <script setup>
-// 2 chunks, 1 click. Aligned with [click] marker in script SLIDE 4.
+// 3 chunks, 2 clicks. Chunk 0 is a single-line comment so the slide enters
+// with only the title + that intro line visible — the code reveals on click.
+// Aligned with [click] markers in script SLIDE 7.
 const wrongChunks = [
+  `# Wrong-way pattern: the persona is jammed into the first user message`,
   `# WRONG: Embedding instructions inside the first user message
 response = client.messages.create(
     model="claude-sonnet-4-6",
@@ -646,14 +798,16 @@ Hi, I need to change my seat on flight SK442."""
   lang="python"
   :code-chunks="wrongChunks"
   footer-label="API Bootcamp"
-  :footer-num="6"
-  :footer-total="11"
+  :footer-num="7"
+  :footer-total="12"
 />
 
 <!--
-Now let's look at the pattern that breaks things.
+Now let's look at the pattern that breaks things — same persona, but the instructions are jammed into the first user message instead of the system parameter. Two halves to walk through.
 
-This works for exactly one turn. When the conversation continues, you have a problem.
+First half: messages.create with no system parameter at all.
+
+Second half: the user message content carries persona + scope + actual ask, all together. Works for one turn; fails when the conversation continues.
 
 The instructions are now buried in the history as a user message. They're not guaranteed to influence future turns the same way a real system prompt would.
 
@@ -664,7 +818,7 @@ A system prompt, by contrast, always comes through — it's never truncated from
 
 ---
 
-<!-- SLIDE 7 — Building the Multi-Turn Chat Function -->
+<!-- SLIDE 8 — Building the Multi-Turn Chat Function -->
 
 <script setup>
 // 5 chunks, 4 clicks. Aligned with [click] markers in script SLIDE 7.
@@ -700,8 +854,8 @@ const chatChunks22 = [
   lang="python"
   :code-chunks="chatChunks22"
   footer-label="API Bootcamp"
-  :footer-num="7"
-  :footer-total="11"
+  :footer-num="8"
+  :footer-total="12"
 />
 
 <!--
@@ -742,8 +896,8 @@ const chatCallsChunks22 = [
   lang="python"
   :code-chunks="chatCallsChunks22"
   footer-label="API Bootcamp"
-  :footer-num="8"
-  :footer-total="11"
+  :footer-num="9"
+  :footer-total="12"
 />
 
 <!--
@@ -762,12 +916,13 @@ Turn three — the user asks for a hotel, Aria redirects. The system prompt's sc
 
 <TwoColSlide
   variant="compare"
-  title="When to Use the System Parameter vs. User Messages"
+  title="When to Use the System Parameter"
+  title-second-line="vs. User Messages"
   leftLabel="Use the System Parameter"
   rightLabel="Use messages Content"
   footer-label="API Bootcamp"
-  :footer-num="9"
-  :footer-total="11"
+  :footer-num="10"
+  :footer-total="12"
 >
   <template #left>
     <p><em>Anything that must be true for every turn.</em></p>
@@ -812,11 +967,12 @@ The rule of thumb: if it needs to be true for every single exchange, it belongs 
       <p>Putting persona or role instructions in the first user message and assuming they'll persist through the conversation.</p>
     </CalloutBox>
     <CalloutBox variant="do" title="Exam Signal">
-      <p>A scenario where a bot "forgets" its persona or breaks its rules after several turns. The root cause is almost always instructions placed in a user message rather than the system parameter.</p>
+      <p>A scenario where a bot "forgets" its persona or breaks its rules after several turns.</p>
+      <p>The root cause is almost always instructions placed in a user message rather than the system parameter.</p>
     </CalloutBox>
     </v-clicks>
   </div>
-  <SlideFooter label="API Bootcamp" :num="10" :total="11" />
+  <SlideFooter label="API Bootcamp" :num="11" :total="12" />
 </Frame>
 
 <!--
@@ -845,8 +1001,8 @@ const takeaways22 = [
   title="What to Remember"
   :bullets="takeaways22"
   footer-label="API Bootcamp"
-  :footer-num="11"
-  :footer-total="11"
+  :footer-num="12"
+  :footer-total="12"
 />
 
 <!--

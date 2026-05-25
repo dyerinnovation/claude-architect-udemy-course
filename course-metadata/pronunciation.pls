@@ -35,6 +35,29 @@
   <lexeme><grapheme>CCA</grapheme><alias>see see ay</alias></lexeme>
   <lexeme><grapheme>CCA-F</grapheme><alias>see see ay eff</alias></lexeme>
 
+  <!-- API / APIs aliasing — round-3 (2026-05-25).
+
+       Round-2 hypothesis was WRONG: I thought the comma form A,P,I was
+       misbinding. I escalated to "letter A, letter P, letter I" — which
+       ElevenLabs applied verbatim, so the user heard "letter ay, letter
+       pee, letter eye" on every API mention. ROLLED BACK.
+
+       Actual round-2 root cause was a PLS-application failure: the dict on
+       ElevenLabs wasn't binding API for that specific render (stale upload,
+       version mismatch, or merge-cache miss). The comma alias `A, P, I`
+       itself is correct and has been since round-5.
+
+       Going-forward rule: when API (or any letter-acronym) regresses, FIRST
+       verify the PLS uploaded + the cached dict ID is current. Do NOT
+       escalate the alias text — verbose forms get vocalized literally.
+
+       Plural-of-letter-acronym gotcha: `<alias>A, P, I, s</alias>` reads
+       as four separate utterances with an awkward standalone "ess" at the
+       end. Use the word "eyes" instead so the plural ess blends naturally
+       into the natural plural sound ("ay, pee, eyes"). -->
+  <lexeme><grapheme>API</grapheme><alias>A, P, I</alias></lexeme>
+  <lexeme><grapheme>APIs</grapheme><alias>A, P, eyes</alias></lexeme>
+
   <!-- Claude API field names — strip underscores so TTS reads naturally -->
   <lexeme><grapheme>stop_reason</grapheme><alias>stop reason</alias></lexeme>
   <lexeme><grapheme>stop_sequence</grapheme><alias>stop sequence</alias></lexeme>
